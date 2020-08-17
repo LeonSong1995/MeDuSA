@@ -29,8 +29,9 @@
 #' @export
 #'
 #' @examples
-#' ct.es = Estimate(bulk = bulk,sce = sce,gene = gene,select.ct = select.ct,data_type = 'count')
-#'
+#' library(MLM)
+#' ct.es = Estimate(bulk = example.bulk,sce = example.sce,gene = example.gene,data_type = 'count')
+#' cor(ct.es$ct.pro[,colnames(ct.real)],ct.real)
 #'
 Estimate = function(bulk,sce,gene,data_type, select.ct = NULL, RanSplit=NULL, ct.cell.size = NULL,BatchCorrect=F,Filter=T,SF=1e+3,DoParallel=FALSE, ncpu=NULL, verbose=FALSE,iter_max=1000){
 
@@ -43,23 +44,30 @@ Estimate = function(bulk,sce,gene,data_type, select.ct = NULL, RanSplit=NULL, ct
 	if(!("SingleCellExperiment" %in% class(sce))){
 		stop('Please input correct single-cell data: "SingleCellExperiment"(https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html).')
 	}
+	if(!is.null(RanSplit)){
+		if (is.na(match(RanSplit,colnames(SingleCellExperiment::colData(sce))))){stop('Do not know how to split randomp components, please check your MetaData: colData(sce).')}
+	}
+	if(!'sampleID' %in% colnames(SingleCellExperiment::colData(sce))){
+		stop('Please input sampleID, check your MetaData: colData(sce).')
+	}
+	if(!'cellType' %in% colnames(SingleCellExperiment::colData(sce))){
+		stop('Please input cellType, check your MetaData: colData(sce).')
+	}
+	if(length(unique(SingleCellExperiment::colData(sce)$cellType))==1){
+		stop('MLM can not work with only one cell type inputted.')
+	}
 
-	sce = sce[,sce$cellType %in% select.ct]
+	if(!is.null(select.ct)){
+		if(is.na(table(sce$cellType %in% select.ct)['TRUE'])){
+			stop('No cell types selected. Please check the select.ct!')
+		}else{
+			sce = sce[,sce$cellType %in% select.ct]
+		}
+	}
+
 	MetaData = SingleCellExperiment::colData(sce)
 	exprsData = assay(sce)
 
-	if(!is.null(RanSplit)){
-		if (is.na(match(RanSplit,colnames(MetaData)))){stop('Do not know how to split randomp components, please check your MetaData: colData(sce).')}
-	}
-	if(!'sampleID' %in% colnames(MetaData)){
-		stop('Please input sampleID, check your MetaData: colData(sce).')
-	}
-	if(!'cellType' %in% colnames(MetaData)){
-		stop('Please input cellType, check your MetaData: colData(sce).')
-	}
-	if(length(unique(MetaData$cellType))==1){
-		stop('MLM can not work with only one cell type inputted.')
-	}
 
 	# Checking the signature genes input
 	commonGene = intersect(rownames(exprsData),rownames(bulk))

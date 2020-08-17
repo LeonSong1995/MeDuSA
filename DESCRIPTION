@@ -1,0 +1,15 @@
+Package: MLM
+Type: Package
+Title: What the Package Does (Title Case)
+Version: 0.1.0
+Author: LiyangSong
+Maintainer: LiyangSong <liyang.song@ifar.ac.cn>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Depends: Rcpp (>= 1.0.3),parallel,SingleCellExperiment,sva,nnls,doParallel
+Imports: Rcpp (>= 1.0.3),parallel,SingleCellExperiment,sva,nnls,doParallel
+LinkingTo: Rcpp,RcppEigen
+RoxygenNote: 7.1.1

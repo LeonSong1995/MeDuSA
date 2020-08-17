@@ -1,0 +1,257 @@
+# Functions to perform bulk RNA-seq deconvolution analysis with lienar mixed model
+#
+# Author: Liyang Song <liyang.song@ifar.ac.cn>
+# Advisor: Jian Yang, Xiwei Sun
+# Copy right: Liyang Song
+#############################################################################################################
+#' Bulk RNA-seq deconvolution analysis with lienar mixed model
+#'
+#' @param bulk: matrix of bulk tissue expression;
+#' @param sce: object of SingleCellExperiment, single-cell reference data;
+#' @param gene: vector of signature genes;
+#' @param data_type: character, type of the inputed single-cell reference data (count/tpm/rpkm);
+#' @param select.ct: vector of cell types included, default as \code{NULL}. If \code{NULL}, include all cell types in \code{x};
+#' @param RanSplit: character, label for how to seperate random components. Default as \code{NULL}. If \code{NULL}, all cells will be fitted as one random component;
+#' @param ct.cell.size: vector of cell sizes with labeled cell type names. Default as NULL. If NULL, then estimate cell size from data;
+#' @param BatchCorrect: bool, whether to remove the batch effect between bulk data and single-cell reference data or not. Default as FALSE;
+#' @param Filter: bool, whether to remove outlier cells in single-cell reference data or not. Default as TRUE;
+#' @param SF: numeric, scaling factor.Default as 1e+3;
+#' @param DoParallel: bool, whether to perform analysis parallelly or not.Default as FALSE;
+#' @param ncpu: numeric, the number of cpus used. Default as NULL. If NULL, then maximum detected cpus - 1 will be used ;
+#' @param verbose: bool, whether to show running information or not during deconvolution analysis. Default as FALSE;
+#' @param iter_max: numeric, maximum iteration number.Default as 1e+3.
+#'
+#' @return a list with elements:
+#'   *ct.pro: matrix of cell type proportions estimated by mixed linear model (sample x cell type);
+#'   *ct.pro.p: matrix of p value (χ²(df=1)) for the cell type proportions estimated by mixed linear model (sample x cell type);
+#'   *cellSize: vector of cell sizes with labeled cell type names.
+#'
+#' @export
+#'
+#' @examples
+#' es = Estimate(bulk = bulk,sce = sce,gene = gene,select.ct = select.ct,data_type = 'count')
+#'
+#'
+Estimate = function(bulk,sce,gene,data_type, select.ct = NULL, RanSplit=NULL, ct.cell.size = NULL,BatchCorrect=F,Filter=T,SF=1e+3,DoParallel=FALSE, ncpu=NULL, verbose=FALSE,iter_max=1000){
+
+	message("Thanks for using MLM to perform bulk deconvolution analysis.\n")
+
+  # Checking the correct format of the reference single-cell data input
+	if (!(data_type %in% c('count','tpm','rpkm'))){
+		stop('Please input correct data_type: cout/tpm/rpkm.')
+	}
+	if(!("SingleCellExperiment" %in% class(sce))){
+		stop('Please input correct single-cell data: "SingleCellExperiment"(https://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html).')
+	}
+
+	sce = sce[,sce$cellType %in% select.ct]
+	MetaData = SingleCellExperiment::colData(sce)
+	exprsData = assay(sce)
+
+	if(!is.null(RanSplit)){
+		if (is.na(match(RanSplit,colnames(MetaData)))){stop('Do not know how to split randomp components, please check your MetaData: colData(sce).')}
+	}
+	if(!'sampleID' %in% colnames(MetaData)){
+		stop('Please input sampleID, check your MetaData: colData(sce).')
+	}
+	if(!'cellType' %in% colnames(MetaData)){
+		stop('Please input cellType, check your MetaData: colData(sce).')
+	}
+	if(length(unique(MetaData$cellType))==1){
+		stop('Model can not work with only one cell type inputed.')
+	}
+
+	# Checking the signature gene input
+	commonGene = intersect(rownames(exprsData),rownames(bulk))
+	gene = intersect(commonGene,gene)
+	if(length(gene)<10){
+		stop('Too few signature genes (signature genes < 10).')
+	}
+
+	bulk = as.matrix(bulk)
+	MetaData$cellType = as.vector(MetaData$cellType)
+	MetaData$sampleID = as.vector(MetaData$sampleID)
+
+	# Preparing for the basic running information (fixed/random components,cell size...)
+	message("Data preparing...")
+	Info = basis(bulk = bulk, exprsData = exprsData, MetaData=MetaData, ct.cell.size = ct.cell.size,
+				data_type=data_type,gene=gene,BatchCorrect = BatchCorrect,Filter=Filter,SF=SF)
+
+
+	base = Info$base
+	bulk = Info$bulk
+	data_cellType = Info$data_cellType
+	cellSize = Info$cellSize
+	type_n = length(data_cellType)
+
+	# Preparing for the random components
+	rancmp = sapply(seq(1,type_n), function(i){
+						Z_new = data_cellType
+						Z_new[i] = NULL
+						Rest =  matrix(unlist(Z_new),nrow = length(gene))
+						cellName = unlist(lapply(Z_new,colnames))
+						colnames(Rest) = cellName
+						Rest
+					})
+
+
+	ct_name = colnames(base)
+	bk_name = colnames(bulk)
+
+	# Checking the cpus
+	if (DoParallel){
+	  # File for output warning information
+		path = paste(getwd(),'RunLog',sep = '/')
+		dir.create(path)
+		filename = paste(path,paste(Sys.getpid(),'logger',sep='_'),sep='/')
+
+		if(is.null(ncpu) | (detectCores()-1)<ncpu ){
+			ncpu = detectCores()-1
+		}
+		message(paste0("Bulk deconvolution with ",ncpu,' cpus...'))
+		cl = makeCluster(ncpu)
+		registerDoParallel(cl)
+
+		# Run REML parallelly
+		estimate = parSapply(cl,1:ncol(bulk),function(sid){
+						r = RunReml(sid,base=base,bulk=bulk,rancmp=rancmp,MetaData=MetaData, RanSplit=RanSplit, iter_max,ct_name, bk_name,verbose,filename,DoParallel)
+						b = pmax(r['b',],0)
+						p = r['p',]
+						return(c(b,p))
+					})
+		stopCluster(cl)
+		cat("Deconvolution finished.",file=filename,append=T)
+
+	}else{
+		message("Bulk Deconvolution with 1 cpu...")
+	  # Run REML
+		estimate = sapply(1:ncol(bulk),function(sid){
+						r = RunReml(sid,base=base,bulk=bulk,rancmp=rancmp,MetaData=MetaData, RanSplit=RanSplit, iter_max,ct_name, bk_name,verbose,filename,DoParallel)
+						b = pmax(r['b',],0)
+						p = r['p',]
+						return(c(b,p))
+					})
+	}
+
+
+	b = t(estimate[seq(1:type_n),])
+	p = t(estimate[-seq(1:type_n),])
+	colnames(b) = colnames(p) = ct_name
+	rownames(b) = rownames(p) = bk_name
+
+	# Adjusting for the cell size when count matrix inputed
+	if(data_type=='count'){
+		b = sweep(b,2,cellSize[colnames(b)],'/')
+		b = sweep(b,1,rowSums(b),'/')
+	}else{
+		warning("The estimated cell type proportions are not comparable among different cell types!")
+	}
+	return(list('ct.pro'=b,'p'=p,'cellSize'= cellSize))
+
+}
+
+
+
+
+#' Run residual maximum likelihood (REML) to fit the linear mixed model.
+#'
+#' @param sid: numeric, id of the inputed samples;
+#' @param base: matrix of the fixed components (gene x cell type);
+#' @param bulk: matrix of the bulk RNA-seq samples (gene x sample);
+#' @param rancmp: matrix of the random components (gene x cell);
+#' @param MetaData: data frame of the summary information of bulk RNA-seq samples. Include sampleID, cellTyp;
+#' @param RanSplit: character, label for how to seperate random components. Default as \code{NULL}. If \code{NULL}, all cells will be fitted as one random component;
+#' @param iter_max: numeric, maximum iteration number.Default as 1e+3;
+#' @param ct_name: vector of cell type names;
+#' @param bk_name: vector of bulk RNA-seq sample names;
+#' @param verbose: bool, whether to show running information or not during deconvolution analysis. Default as FALSE;
+#' @param filename: path, save the warning information during REML analysis;
+#' @param DoParallel:  bool, whether to perform analysis parallelly.
+#'
+#' @return a list with elements:
+#'   *b: matrix of cell type proportions estimated by mixed linear model (sample x cell type);
+#'   *p: matrix of p value (χ²(df=1)) for the cell type proportions estimated by mixed linear model (sample x cell type);
+#'
+#' @export
+#'
+#'
+RunReml = function(sid,base, bulk, rancmp, MetaData, RanSplit, iter_max,ct_name, bk_name, verbose,filename=NULL,DoParallel){
+  x = as.matrix(base)
+  y = bulk[,sid]
+  type_n = ncol(x)
+
+  result = sapply(seq(1,type_n),function(id){
+    logger = paste(paste('sample',bk_name[sid],sep = '_'),ct_name[id],sep = '_')
+    fixcmp = x[,id]
+    if (!is.null(RanSplit)){
+      # Spliting random components based on the inputed RanSplit
+      sepInfo = MetaData[intersect(colnames(rancmp[[id]]),rownames(MetaData)),RanSplit]
+      Z = sapply(unique(sepInfo),function(sid){
+        rancmp[[id]][,sepInfo %in% sid]
+      })
+    }else{
+      Z = list(rancmp[[id]])
+    }
+    mlmfit = reml(X = fixcmp,y = y,Z = Z,maxiter = iter_max)
+    #mlmfit[1] : effect size for the fixed component;
+    #mlmfit[2] : χ²(df=1) vale for the fixed component;
+    #mlmfit[3] : flag for reml convergence (0:not converge, 1: converge);
+    #mlmfit[4] : flag for V matrix (0:not reversible, 1: reversible);
+    #mlmfit[5] : flag for  X^t * V^-1 * X matrix (0:not reversible, 1: reversible);
+    #mlmfit[6] : flag for iteration (0:not reach to maximum iteration , 1:reach to maximum iteration).
+	if (DoParallel){
+		if(mlmfit[3]){
+
+		  b = mlmfit[1]
+		  P_value=1-pchisq(mlmfit[2],1)
+
+		  if(!mlmfit[6]){
+
+			cat(paste(logger,"Log-likelihood not converged. Results are not reliable. You can specify the parameter max_iter to allow for more iterations.\n",sep = ':'),file=filename,append=T)
+		  }else if (verbose){
+			cat(paste(logger,'REML converged and estimation finished.\n',sep = ':'),file=filename,append=T)
+		  }
+		}else{
+		  lmfit = as.vector(summary(lm(y~base+0))$coefficients[id,c('Estimate','Pr(>|t|)')])
+		  b = lmfit[1]
+		  P_value = lmfit[2]
+
+		  if(!mlmfit[4]){
+			cat(paste(logger,"V matrix is not positive. Switch to multiple linear regression!\n",sep = ':'),file=filename,append=T)
+		  }
+		  if(!mlmfit[5]){
+			cat(paste(logger,"X^t * V^-1 * X matrix is not invertible. Switch to multiple linear regression!\n",sep = ':'),file=filename,append=T)
+		  }
+		}
+	}else{
+		if(mlmfit[3]){
+
+		  b = mlmfit[1]
+		  P_value=1-pchisq(mlmfit[2],1)
+
+		  if(!mlmfit[6]){
+
+			warning(paste(logger,"Log-likelihood not converged. Results are not reliable. You can specify the parameter max_iter to allow for more iterations.",sep = ':'))
+		  }else if (verbose){
+			message(paste(logger,'REML converged and estimation finished.',sep = ':'))
+		  }
+		}else{
+		  lmfit = as.vector(summary(lm(y~base+0))$coefficients[id,c('Estimate','Pr(>|t|)')])
+		  b = lmfit[1]
+		  P_value = lmfit[2]
+
+		  if(!mlmfit[4]){
+			warning(paste(logger,"V matrix is not positive. Switch to multiple linear regression!",sep = ':'))
+		  }
+		  if(!mlmfit[5]){
+			warning(paste(logger,"X^t * V^-1 * X matrix is not invertible. Switch to multiple linear regression!",sep = ':'))
+		  }
+		}
+	}
+
+    return(c('b'=b,'p'=P_value))
+  })
+
+  colnames(result) = colnames(x)
+  return(result)
+}

@@ -1,13 +1,12 @@
 # Base function
 # Author: Liyang Song <liyang.song@ifar.ac.cn>
 # Advisor: Jian Yang, Xiwei Sun
-# Copy right: Liyang Song
+# Copyright: Liyang Song
+
 #############################################################################################
 
-#'Basic function of liner mixed model:
-#'  *Construct fixed/random components and cell size;
-#'  *Perform batch effect correction;
-#'  *Remove outlier cells.
+#'Basic function of the linear mixed model:
+#'  *prepare the fixed and random component.
 #'
 #' @param exprsData: matrix of the single-cell data (gene x cell);
 #' @param MetaData: data frame of the summary information of bulk RNA-seq samples. Include sampleID, cellTyp;
@@ -25,6 +24,8 @@
 #'   *bulk: matrix of bulk RNA-Seq data  (gene x sample);
 #'   *cellSize: vector of cell sizes with labeled cell type names.
 #' @export
+#'
+#'
 basis = function(exprsData,MetaData,bulk,ct.cell.size,data_type, Filter, BatchCorrect, SF, gene){
 
 	cell_name = colnames(exprsData)
@@ -76,7 +77,7 @@ basis = function(exprsData,MetaData,bulk,ct.cell.size,data_type, Filter, BatchCo
 		return(y)
 	})
 
-	# Adding a extrme small positive number (1e-200) tp avoid dividing 0.
+	# Adding an extremely small positive number (1e-200) to avoid infinity.
 	data_cellType = sapply(unique(ct.id), function(id){
 		y = countmat[, ct.id %in% id]
 		y = sweep(y,2,colSums(y)+1e-200,'/')*SF
@@ -112,7 +113,7 @@ basis = function(exprsData,MetaData,bulk,ct.cell.size,data_type, Filter, BatchCo
 }
 
 
-#' Function for remove outlier cells.
+#' Function to remove outliers in single-cell RNA-seq data.
 #'
 #' @param exprsData: matrix of the single-cell data (gene x cell).
 #'
@@ -129,7 +130,7 @@ cellFilter<-function(exprsData){
 }
 
 
-#' Function for correcting batch effect between bulk RNA-Seq samples and reference single-cell data.
+#' Function to correct the batch effect between bulk RNA-seq samples and reference single-cell data.
 #'
 #' @param exprsData: matrix of the single-cell data (gene x cell);
 #' @param MetaData: data frame of the summary information of bulk RNA-seq samples. Include sampleID, cellTyp;
@@ -140,6 +141,8 @@ cellFilter<-function(exprsData){
 #'
 #' @return matrix of the corrected bulk RNA-Seq samples (gene x sample).
 #' @export
+#'
+#'
 BatchCorrection = function(exprsData,MetaData,bulk,basis,SF,gene){
 
 	exprsData = sweep(exprsData,2,colSums(exprsData)+1e-200,'/')*SF
@@ -160,7 +163,7 @@ BatchCorrection = function(exprsData,MetaData,bulk,basis,SF,gene){
 
 	cell_select = 1e+3 * round(sweep(PesudoFraction,1,rowSums(PesudoFraction),'/'),3)
 
-	#Constructing single-cell data based artifical bulk RNA-Seq data by the nnls estimaed cell type proportions...
+	#Constructing single-cell data-based artificial bulk RNA-Seq data by the nnls estimated cell-type proportions...
 	PesudoSample = apply(cell_select,1,function(psid){
 						Pesudo = sapply(unique(ct.id),function(id){
 									s = psid[id]

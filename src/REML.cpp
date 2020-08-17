@@ -27,7 +27,9 @@ NumericVector reml(Eigen::VectorXd &X, Eigen::VectorXd &y, std::vector<Eigen::Ma
 	if (flag_converge)
 	{
 		converge = 1;
+		// effect size of the fixed component
 		b = (1 / tX_VI_X) * tX_VI_y;
+		// χ²(df=1) of the fixed component
 		chi = (b*b) / (1 / tX_VI_X);  
 	}
 	
@@ -253,7 +255,7 @@ void reml_iteration(eigenVector &X,eigenVector &y, vector<eigenMatrix> &Z, eigen
 		
 		lgL = -0.5 * (logdet_Xt_Vi_X + logdet + (y.transpose() * Py)(0, 0));
 
-		// cout << varcmp.sum() << endl;
+		cout << lgL << endl;
 		dlogL = lgL - prev_lgL;
 
 		//converge

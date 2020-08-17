@@ -1,15 +1,15 @@
 /*
- * R_C++ interface function to fit the mixed liner model
+ * R_C++ interface function to fit the linear mixed model
  * Author: Liyang Song <liyang.song@ifar.ac.cn>
  * Advisor: Jian Yang, Xiwei Sun
- * Copy right: Liyang Song
- * Reference Code : GCTA (JianYang,2010)
+ * Copyright: Liyang Song
+ * Reference code: GCTA (JianYang,2010)
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  
- *@param X: vector of the fixed component
- *@param y: vector of the observed value
- *@param Z: list matrix of the random component
- *@param maxiter: maximum iterations
+ *@param X: vector of the fixed component;
+ *@param y: vector of the observed value;
+ *@param Z: list matrix of the random component;
+ *@param maxiter: maximum iterations.
  
  *@example: (in R)
 	 y <- abs(rnorm(100,0,1))

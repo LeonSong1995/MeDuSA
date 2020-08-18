@@ -12,13 +12,13 @@
 #' @param data_type: character, type of the inputed single-cell reference data (count/tpm/rpkm);
 #' @param select.ct: vector of cell types included, default as \code{NULL}. If \code{NULL}, include all cell types in \code{x};
 #' @param RanSplit: character, the label for how to separate random components. Default as \code{NULL}. If \code{NULL}, all cells will be fitted as one random component;
-#' @param ct.cell.size: vector of cell sizes with labeled cell type names. Default is NULL. If NULL, then estimate cell size from data;
-#' @param BatchCorrect: bool, whether to remove the batch effect between bulk data and single-cell reference data or not. Default is FALSE;
-#' @param Filter: bool, whether to remove outlier cells in single-cell reference data or not. Default is TRUE;
+#' @param ct.cell.size: vector of cell sizes with labeled cell type names. Default as NULL. If NULL, then estimate cell size from data;
+#' @param BatchCorrect: bool, whether to remove the batch effect between bulk data and single-cell reference data or not. Default as FALSE;
+#' @param Filter: bool, whether to remove outlier cells in single-cell reference data or not. Default as TRUE;
 #' @param SF: numeric, scaling factor.Default as 1e+3;
-#' @param DoParallel: bool, whether to perform analysis parallelly or not. Default is FALSE;
-#' @param ncpu: numeric, the number of CPUs used. Default is NULL. If NULL, then maximum detected CPUs - 1 will be used ;
-#' @param verbose: bool, whether to show running information or not during deconvolution analysis. Default is FALSE;
+#' @param DoParallel: bool, whether to perform analysis parallelly or not. Default as FALSE;
+#' @param ncpu: numeric, the number of CPUs used. Default as NULL. If NULL, then maximum detected CPUs - 1 will be used ;
+#' @param verbose: bool, whether to show running information or not during deconvolution analysis. Default as FALSE;
 #' @param iter_max: numeric, maximum iteration number.Default as 1e+3.
 #'
 #' @return a list with elements:
@@ -56,7 +56,6 @@ Estimate = function(bulk,sce,gene,data_type, select.ct = NULL, RanSplit=NULL, ct
 	if(length(unique(SingleCellExperiment::colData(sce)$cellType))==1){
 		stop('MLM can not work with only one cell type inputted.')
 	}
-
 	if(!is.null(select.ct)){
 		if(is.na(table(sce$cellType %in% select.ct)['TRUE'])){
 			stop('No cell types selected. Please check the select.ct!')
@@ -149,7 +148,7 @@ Estimate = function(bulk,sce,gene,data_type, select.ct = NULL, RanSplit=NULL, ct
 	}else{
 		warning("The estimated cell type proportions are not comparable among different cell types!")
 	}
-	return(list('ct.pro'=b,'p'=p,'cellSize'= cellSize))
+	return(list('ct.pro'=b,'ct.pro.p'=p,'cellSize'= cellSize))
 
 }
 
@@ -167,13 +166,13 @@ Estimate = function(bulk,sce,gene,data_type, select.ct = NULL, RanSplit=NULL, ct
 #' @param iter_max: numeric, maximum iteration number.Default as 1e+3;
 #' @param ct_name: vector of cell type names;
 #' @param bk_name: vector of bulk RNA-seq sample names;
-#' @param verbose: bool, whether to show running information or not during deconvolution analysis. Default is FALSE;
+#' @param verbose: bool, whether to show running information or not during deconvolution analysis;
 #' @param filename: path, save the warning information during REML analysis;
 #' @param DoParallel:  bool, whether to perform analysis parallelly.
 #'
 #' @return a list with elements:
 #'   *b: matrix of cell-type proportions estimated by mixed linear model (sample x cell type);
-#'   *p: matrix of p value (χ²(df=1)) for the cell type proportions estimated by mixed linear model (sample x cell type);
+#'   *p: matrix of p value (χ²(df=1)) for the cell type proportions estimated by mixed linear model (sample x cell type).
 #'
 #' @export
 #'

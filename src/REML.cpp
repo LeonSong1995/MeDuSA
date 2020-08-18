@@ -203,12 +203,7 @@ double y_center(eigenVector &y,int n)
 void constrain_varcmp(eigenVector &y,eigenVector &varcmp,int n, int rindx)
 {
 	double constr_scale = 1e-6;
-	for (int i = 0; i < rindx; i++) {
-		if (varcmp[i] < 0) {
-			varcmp[i] = constr_scale * y_center(y,n);
-		}
-	}
-	
+	for (int i = 0; i < rindx; i++) {if (varcmp[i] < 0) varcmp[i] = constr_scale * y_center(y,n);}	
 }
 
 
@@ -255,7 +250,7 @@ void reml_iteration(eigenVector &X,eigenVector &y, vector<eigenMatrix> &Z, eigen
 		
 		lgL = -0.5 * (logdet_Xt_Vi_X + logdet + (y.transpose() * Py)(0, 0));
 
-		cout << lgL << endl;
+		//cout << lgL << endl;
 		dlogL = lgL - prev_lgL;
 
 		//converge

@@ -4,7 +4,7 @@
 **Date: 2020-8-18**
 
 ## Description
-Package implementing the ***mixed linear model (MLM)*** to estimate cell-type proportions in bulk gene expression data.
+A package implementing the ***mixed linear model (MLM)*** to estimate cell-type proportions in bulk gene expression data.
 It is based on reference gene expression from single-cell RNA-Seq data. 
 
 

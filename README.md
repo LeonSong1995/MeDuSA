@@ -4,9 +4,7 @@
 **Date: 2020-8-18**
 
 ## Description
-A package implementing the ***mixed linear model (MLM)*** to estimate cell-type proportions in bulk gene expression data.
-It is based on reference gene expression from single-cell RNA-Seq data. 
-
+A package utlizes ***mixed linear model (MLM)*** to estimate cell-type proportions in bulk gene expression data, based on gene expression references from single-cell RNA-Seq datasets.
 
 
 ## Installation
@@ -105,7 +103,6 @@ out = Estimate(bulk = example.bulk,sce = example.sce,gene = example.gene,data_ty
 ```
 
 ## Contact
-If you have any technical or other issue during the useage, please contact <liyang.song@ifar.ac.cn>.
-
+If you have any technical or other issues during the useage, please contact liyang.song@ifar.ac.cn.
 
 

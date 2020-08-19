@@ -65,7 +65,7 @@ Estimate = function(bulk,sce,gene,data_type, select.ct = NULL, RanSplit=NULL, ct
 	}
 
 	MetaData = SingleCellExperiment::colData(sce)
-	exprsData = assay(sce)
+	exprsData = assay(sce,data_type)
 
 
 	# Checking the signature genes input

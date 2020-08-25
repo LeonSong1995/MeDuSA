@@ -56,7 +56,7 @@ out$ct.pro
 out$ct.pro.p
 out$cellSize
 #compare the estimated cell-type proportions with real cell-type proportions
-cor(ct.es$ct.pro[,colnames(ct.real)],ct.real)
+cor(out$ct.pro[,colnames(ct.real)],ct.real)
 #If everything goes well, you will get: 
           alpha        beta       delta       gamma
 alpha  0.8920135 -0.80780295 -0.01491614 -0.41623008

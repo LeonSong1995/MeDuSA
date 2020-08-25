@@ -206,7 +206,7 @@ RunReml = function(sid,base, bulk, rancmp, MetaData, RanSplit, iter_max,ct_name,
 		if(mlmfit[3]){
 
 		  b = mlmfit[1]
-		  P_value=1-pchisq(mlmfit[2],1)
+		  P_value = mlmfit[2]
 
 		  if(!mlmfit[6]){
 
@@ -215,9 +215,9 @@ RunReml = function(sid,base, bulk, rancmp, MetaData, RanSplit, iter_max,ct_name,
 			cat(paste(logger,'REML converged and estimation finished.\n',sep = ':'),file=filename,append=T)
 		  }
 		}else{
-		  lmfit = as.vector(summary(lm(y~base+0))$coefficients[id,c('Estimate','Pr(>|t|)')])
-		  b = lmfit[1]
-		  P_value = lmfit[2]
+		  # lmfit = as.vector(summary(lm(y~base+0))$coefficients[id,c('Estimate','Pr(>|t|)')])
+		  b = solve(t(base) %*% base) %*% (t(base) %*% y)
+		  P_value = (b/sqrt(diag(solve(t(base) %*% base))))^2
 
 		  if(!mlmfit[4]){
 			cat(paste(logger,"The V matrix is not positive. Switch to multiple linear regression!\n",sep = ':'),file=filename,append=T)
@@ -230,7 +230,7 @@ RunReml = function(sid,base, bulk, rancmp, MetaData, RanSplit, iter_max,ct_name,
 		if(mlmfit[3]){
 
 		  b = mlmfit[1]
-		  P_value=1-pchisq(mlmfit[2],1)
+		  P_value = mlmfit[2]
 
 		  if(!mlmfit[6]){
 
@@ -239,9 +239,9 @@ RunReml = function(sid,base, bulk, rancmp, MetaData, RanSplit, iter_max,ct_name,
 			message(paste(logger,'REML converged and estimation finished.',sep = ':'))
 		  }
 		}else{
-		  lmfit = as.vector(summary(lm(y~base+0))$coefficients[id,c('Estimate','Pr(>|t|)')])
-		  b = lmfit[1]
-		  P_value = lmfit[2]
+		  # lmfit = as.vector(summary(lm(y~base+0))$coefficients[id,c('Estimate','Pr(>|t|)')])
+		  b = solve(t(base) %*% base) %*% (t(base) %*% y)
+		  P_value = (b/sqrt(diag(solve(t(base) %*% base))))^2
 
 		  if(!mlmfit[4]){
 			warning(paste(logger,"The V matrix is not positive. Switch to multiple linear regression!",sep = ':'))

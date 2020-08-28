@@ -37,6 +37,9 @@ NumericVector reml(Eigen::VectorXd &X, Eigen::VectorXd &y, std::vector<Eigen::Ma
 	if(flag_inv_P) inv_p = 1;
 	if(flag_not_itermax) not_itermax =1;
 	
+	
+	L_history.clear();
+	
 	NumericVector out = NumericVector::create(b,chi,converge, inv_vi, inv_p, not_itermax);
 	return (out);
 
@@ -134,7 +137,7 @@ bool inverse_H(eigenMatrix &H)
 
 
 
-bool ai_reml(eigenVector &y,eigenMatrix &P, eigenVector &Py,eigenVector &prev_varcmp, eigenVector &varcmp, int n, int rindx)
+bool ai_reml(eigenVector &y,eigenMatrix &P, eigenVector &Py,eigenVector &prev_varcmp, eigenVector &varcmp, int n, int rindx,double step)
 {
 	
 	Py = P * y;
@@ -170,7 +173,7 @@ bool ai_reml(eigenVector &y,eigenMatrix &P, eigenVector &Py,eigenVector &prev_va
 	}
 	eigenVector delta(rindx);
 	delta = Hi * R;
-	varcmp = prev_varcmp + 0.316 *delta;
+	varcmp = prev_varcmp + step *delta;
 	return true;
 }
 
@@ -210,12 +213,14 @@ void constrain_varcmp(eigenVector &y,eigenVector &varcmp,int n, int rindx)
 
 void reml_iteration(eigenVector &X,eigenVector &y, vector<eigenMatrix> &Z, eigenVector &varcmp, int n, int rindx,int maxiter)
 {
-	double logdet = 0.0, logdet_Xt_Vi_X = 0.0, prev_lgL = -1e20, lgL = -1e20, dlogL = 1000.0;
+	double logdet = 0.0, logdet_Xt_Vi_X = 0.0, prev_lgL = -1e20, lgL = -1e20, dlogL = 1000.0, step = 0.316;
+	int L_size;
 	
 	eigenVector prev_varcmp(rindx);
 	prev_varcmp.setConstant(y_center(y, n) / n);
 
 	_A = calcu_A(Z,n, rindx);
+	L_history.push_back(lgL);
 
 	for (int iter = 0; iter <= maxiter; iter++)
 	{
@@ -242,15 +247,30 @@ void reml_iteration(eigenVector &X,eigenVector &y, vector<eigenMatrix> &Z, eigen
 		else 
 		{
 			if (flag_EM) em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
-			else if (!ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx)) flag_EM = true;
+			else if (!ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step)) flag_EM = true;
 
 		}
 		
 		constrain_varcmp(y,varcmp,n, rindx);
 		
 		lgL = -0.5 * (logdet_Xt_Vi_X + logdet + (y.transpose() * Py)(0, 0));
-
-		//cout << lgL << endl;
+		
+		
+		//change step size
+		if (iter > 500){
+			L_size = L_history.size();
+			for(int i=0;i<L_size;i++)
+			{
+				if(lgL - L_history[i]<1e-30 || lgL - L_history[i]< -1e-30){
+					step = step*0.8;
+					break;
+				}
+			}
+			L_history.push_back(lgL);
+		}
+		
+		
+		// cout << lgL << endl;
 		dlogL = lgL - prev_lgL;
 
 		//converge

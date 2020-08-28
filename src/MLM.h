@@ -56,6 +56,9 @@ bool flag_inv_Vi = true;
 bool flag_inv_P = true;
 bool flag_not_itermax = true;
 bool flag_EM = false;
+vector<double>L_history;
+
+
 
 //REML function
 vector<eigenMatrix> calcu_A(vector<eigenMatrix> &Z, int n, int rindx);

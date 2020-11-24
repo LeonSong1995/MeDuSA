@@ -2,7 +2,10 @@
 **Author: Liyang Song <songliyang@westlake.edu.cn>**    
 **Advisor: Jian Yang and Xiwei Sun**    
 **Date: 2020-10-18**  
-<span style="color: red"> Some green text </span>
+```diff
++ this will be highlighted in red
+
+```
 
 ## Description
 A package utlizes ***mixed linear model (MLM)*** to estimate cell-type proportions in bulk gene expression data, based on gene expression references from single-cell RNA-Seq datasets.

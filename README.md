@@ -1,7 +1,8 @@
 # MLM
-**Author: Liyang Song <liyang.song@ifar.ac.cn>**    
+**Author: Liyang Song <songliyang@westlake.edu.cn>**    
 **Advisor: Jian Yang and Xiwei Sun**    
-**Date: 2020-8-18**
+**Date: 2020-10-18**  
+<span style="color: red"> Some green text </span>
 
 ## Description
 A package utlizes ***mixed linear model (MLM)*** to estimate cell-type proportions in bulk gene expression data, based on gene expression references from single-cell RNA-Seq datasets.
@@ -103,6 +104,6 @@ out = Estimate(bulk = example.bulk,sce = example.sce,gene = example.gene,data_ty
 ```
 
 ## Contact
-If you have any technical or other issues during the useage, please contact liyang.song@ifar.ac.cn.
+If you have any technical or other issues during the useage, please contact <songliyang@westlake.edu.cn>.
 
 

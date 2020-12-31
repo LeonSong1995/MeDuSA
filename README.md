@@ -35,7 +35,7 @@ The function for **cell-type level** deconvolution in this package is `CTdcv`. I
 1. Bulk RNA-Seq data. Matrix of the gene expression (count/rpkm/tpm) from the samples for which to estimate cell-type
 proportions;  
 2. Single-cell RNA-Seq data. [Seurat](https://satijalab.org/seurat/) object (count/rpkm/tpm) of the reference single-cell RNA-Seq data;  
-3. Signature genes. We summarized signature genes for human 64 cell-types. 
+3. Signature genes. We summarized signature genes for human 64 cell-types.  
 **Note**: When inputting rpkm/tpm matrix (without cell size inputted), MLM can only estimate relative cell-type proportions which are not comparable among different cell-types.  
 
 The function for **single-cell level** deconvolution in this package is `SCdcv`. It needs:  

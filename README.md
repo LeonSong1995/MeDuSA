@@ -13,7 +13,7 @@ A package utlizes ***mixed linear model (MLM)*** to estimate cell-type proportio
 ## Installation
 ```R
 install.packages("devtools")
-devtools::install_github("LeonSong1995/MLM", build_vignettes=TRUE)
+devtools::install_github("LeonSong1995/MLM", build_vignettes=F)
 
 # MLM depends on packages of "Seurat"" and "sva"
 # If you did not install these two packages,please install and library them before using MLM:

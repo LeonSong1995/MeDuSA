@@ -27,8 +27,7 @@
 #'
 #' @examples
 #' library(MLM)
-#' ct.es = Estimate(bulk = example.bulk,sce = example.sce,gene = example.gene,data_type = 'count')
-#' cor(ct.es$ct.pro[,colnames(ct.real)],ct.real)
+#' ct.es = CTdcv(bulk = example.bulk,sce = example.sce,gene = example.gene,data_type = 'count')
 #'
 CTdcv = function(bulk,sce,gene=NULL,data_type, select.ct = NULL, RanSplit=NULL, ct.cell.size = NULL,BatchCorrect=F,Filter=T,SF=1e+3,ncpu=NULL,iter_max=1000){
 
@@ -197,20 +196,6 @@ RunReml = function(sid,base, bulk, rancmp, MetaData, RanSplit, iter_max, bk_name
 
 
 ####################################################################################################
-#' @param bulk A matrix containing bulk RNA-Seq data. Each row corresponds to a certain gene and each column to a certain sample.
-#' @param sce A 'Seurat' object containing the single-cell RNA-Seq data. Meta data of the 'Seurat' object must includes 'cellType' and 'sampleID'.
-#' @param gene A character vector of the gene names to use as signature for the deconvolution. We summarized signature genes for the 64 human cell-types. please see 'sg'.
-#' @param data_type A character of the type of the single-cell RNA-Seq data, including 'count', 'tpm', 'rpkm','fpkm', and 'cpm'.
-#' @param select.ct A character vector of the names of the target cell-types. The default value is NULL. With default value, all cell-types in the single-cell data will be used.
-#' @param RanSplit A character (or character vector) to split the random components. The default value is NULL. With default value, all cells, excepting those in target the cell-type, will be fitted as one random component.
-#' @param ct.cell.size A character vector of the cell-size (total mRNA amount) of the selected cell-types. The default value is NULL.
-#' @param BatchCorrect A Boolean variable to determine whether to run 'ComBat' to correct batch effects between single-cell RNA-Seq and bulk RNA-Seq or not. The default value is FALSE.
-#' @param Filter A Boolean variable to determine whether to filter the outlier in single-cell data or not. The default value is FALSE.
-#' @param SF Scaling factor. The default value is 1e+3.
-#' @param ncpu The number of CPU cores to be used.
-#' @param iter_max The maximum iterations of REML.
-
-
 #' Single-cell level deconvolution
 #' @param bulk A matrix containing bulk RNA-Seq data. Each row corresponds to a certain gene and each column to a certain sample.
 #' @param sce A 'Seurat' object containing the single-cell RNA-Seq data. Meta data of the 'Seurat' object must includes 'cellType' and 'space'.
@@ -225,10 +210,13 @@ RunReml = function(sid,base, bulk, rancmp, MetaData, RanSplit, iter_max, bk_name
 #' @param maxgene A numeric variable to determine the maximum number of genes to be selected. The default value is 1e+3.
 #' @param nbin A numeric variable to determine the number of cell-clusters. The default value is 0.2.
 #'
-#' @return
+#' @return A list with cell_density-cell_name matrix:
+#'
 #' @export
 #'
 #' @examples
+#' library(MLM)
+#' SCdcv(bulk = example.bulk,sce = example.sce,select.ct = 'alpha')
 SCdcv = function(bulk,sce,select.ct,ncpu=NULL,smoothing=TRUE,gene=NULL,op=0.2,maxgene=1000,nbin=0.1,SF=1e+3){
 
   print("Thanks for using MLM to perform bulk deconvolution analysis.")

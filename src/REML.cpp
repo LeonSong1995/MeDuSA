@@ -3,47 +3,156 @@
 
 
 //[[Rcpp::export]]
-NumericVector reml(Eigen::VectorXd &X, Eigen::VectorXd &y, std::vector<Eigen::MatrixXd> &Z, int maxiter)
+Eigen::MatrixXd ecor(Eigen::MatrixXd mat)
+{
+	Eigen::MatrixXd centered = mat.rowwise() - mat.colwise().mean();
+	Eigen::MatrixXd cov = (centered.adjoint() * centered) / double(mat.rows() - 1);
+	return (cov);
+}
+
+
+
+//[[Rcpp::export]]
+std::vector<Eigen::MatrixXd> reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Eigen::VectorXd &y, std::vector<Eigen::MatrixXd> &Z, int maxiter)
 {
 	flag_converge = true;
 	int rindx = (1+Z.size());
 	int n = X.rows();
 	Eigen::VectorXd varcmp(rindx);
-	reml_iteration(X, y, Z, varcmp,n, rindx,maxiter);
-	
-	double tX_VI_X;
-	double tX_VI_y;
+	// int test =1;
+	varcmp = reml_iteration(start, X, y, Z, varcmp,n, rindx,maxiter);
+
+	eigenMatrix tX_VI_X;
+	eigenMatrix tX_VI_y;
 	tX_VI_X = X.transpose() * Vi * X;
 	tX_VI_y = X.transpose() * Vi * y;
 
-	double b = -2000; 
-	double chi = -2000;
-	
-	int converge = 0;
-	int inv_vi = 0;
-	int inv_p = 0;
-	int not_itermax = 0;
-	
+	eigenMatrix b;
+	eigenMatrix sd;
+
+	// int converge = 0;
+	// int inv_vi = 0;
+	// int inv_p = 0;
+	// int not_itermax = 0;
+
 	if (flag_converge)
 	{
-		converge = 1;
-		// effect size of the fixed component
-		b = (1 / tX_VI_X) * tX_VI_y;
-		// χ²(df=1) of the fixed component
-		chi = (b*b) / (1 / tX_VI_X);  
+		// converge = 1;
+
+		b = tX_VI_X.inverse() * tX_VI_y;
+		sd = tX_VI_X.inverse();
 	}
-	
-	if(flag_inv_Vi) inv_vi = 1;
-	if(flag_inv_P) inv_p = 1;
-	if(flag_not_itermax) not_itermax =1;
-	
-	
+
+	// if(flag_inv_Vi) inv_vi = 1;
+	// if(flag_inv_P) inv_p = 1;
+	// if(flag_not_itermax) not_itermax =1;
+
+
 	L_history.clear();
-	
-	NumericVector out = NumericVector::create(b,chi,converge, inv_vi, inv_p, not_itermax);
-	return (out);
+
+
+	std::vector<Eigen::MatrixXd> r;
+	r.resize(3);
+	r[0] = b;
+	r[1] = sd;
+	r[2] = varcmp;
+
+
+
+	// NumericVector out = NumericVector::create(b);
+	return (r);
 
 }
+
+
+
+
+
+//[[Rcpp::export]]
+std::vector<Eigen::MatrixXd>  reml2(Eigen::VectorXd start, Eigen::MatrixXd &X, Eigen::VectorXd &y, std::vector<Eigen::MatrixXd> &Z, int maxiter)
+{
+	flag_converge = true;
+	int rindx = (1+Z.size());
+	int n = X.rows();
+	Eigen::VectorXd varcmp(rindx);
+	// int test = 1;
+	varcmp = reml_iteration(start, X, y, Z, varcmp,n, rindx,maxiter);
+
+	eigenMatrix tX_VI_X;
+	tX_VI_X = X.transpose() * Vi * X;
+
+
+	eigenMatrix Q;
+	eigenMatrix temp;
+	eigenVector flattened;
+	eigenVector flattened_Xita;
+	std::vector<Eigen::VectorXd> e;
+	std::vector<Eigen::VectorXd> xita;
+	e.resize(rindx-1);
+	xita.resize(rindx-1);
+
+	//AUP
+	// eigenMatrix MRH;
+	// double k;
+	// MRH = y.transpose() * Q * Z[i];
+	// cout << (MRH * MRH.transpose())[0,0] << endl;
+	// k = (MRH * MRH.transpose())[0,0];
+	// k = sqrt((varcmp[i]*(Z[i].cols()-1))/(MRH * MRH.transpose()));
+	// e[i]  = (k * Z[i].transpose() * Q * y)/ sqrt(Z[i].cols());
+
+	eigenMatrix v_tZ_Q;
+
+	if (flag_converge)
+	{
+		Q = Vi - Vi * X * tX_VI_X.inverse()  * X.transpose() *Vi;
+		for (int i=0; i<(rindx-1);i++)
+		{
+			v_tZ_Q = varcmp[i] * Z[i].transpose() * Q;
+			//BLUP
+			e[i] = (v_tZ_Q * y)/Z[i].cols();
+			//BLUP variance
+			temp = varcmp[i] *v_tZ_Q * Z[i];
+			xita[i] = temp.diagonal().array().sqrt() / Z[i].cols();
+		}
+
+
+		// concatenate vector
+		int len = 0;
+		for (auto const &v : e) len += v.size();
+
+		flattened.resize(len); flattened_Xita.resize(len);
+
+		int offset = 0;
+		int size;
+		for (int i=0; i<(rindx-1);i++)
+		{
+			size = e[i].size();
+			flattened.middleRows(offset,size) = e[i];
+			flattened_Xita.middleRows(offset,size) = xita[i];
+			offset += size;
+		}
+	}else{
+		flattened.resize(1); flattened_Xita.resize(1);
+		flattened << 0; flattened_Xita << 0;
+	}
+
+	L_history.clear();
+
+	eigenMatrix res(2,flattened.size());
+	res.row(0) = flattened;
+	res.row(1) = flattened_Xita;
+
+	std::vector<Eigen::MatrixXd> r;
+	r.resize(2);
+	r[0] = res;
+	r[1] = varcmp;
+
+
+	return(r);
+
+}
+
+
 
 
 vector<eigenMatrix> calcu_A(vector<eigenMatrix> &Z, int n, int rindx)
@@ -52,7 +161,7 @@ vector<eigenMatrix> calcu_A(vector<eigenMatrix> &Z, int n, int rindx)
 	_A.resize(rindx);
 	for (int i=0; i<(rindx-1);i++)
 	{
-		_A[i] = (Z[i] * Z[i].transpose()) / Z[i].cols();
+		_A[i] = (Z[i] * Z[i].transpose())/Z[i].cols();
 	}
 	_A[rindx-1] = eigenMatrix::Identity(n, n);
 	return _A;
@@ -87,7 +196,7 @@ bool calcu_Vi(eigenMatrix &Vi, eigenVector &prev_varcmp, double &logdet,int n, i
 }
 
 
-bool calcu_P(eigenVector &X,eigenMatrix &Vi, eigenMatrix &P, double &logdet_Xt_Vi_X)
+bool calcu_P(eigenMatrix &X,eigenMatrix &Vi, eigenMatrix &P, double &logdet_Xt_Vi_X)
 {
 	eigenMatrix Vi_X;
 	eigenMatrix Xt_Vi_X_i;
@@ -111,7 +220,7 @@ void calcu_tr_PA(eigenMatrix &P, eigenVector &tr_PA,int n,int rindx)
 	{
 		double d_buf = 0.0;
 		memset(d_bufs, 0, n * sizeof(double));
-		#pragma omp parallel for
+
 		for (int k = 0; k < n; k++) {
 			for (int l = 0; l < n; l++) d_bufs[k] += P(k, l)*(_A[i])(k, l);
 		}
@@ -139,11 +248,10 @@ bool inverse_H(eigenMatrix &H)
 
 bool ai_reml(eigenVector &y,eigenMatrix &P, eigenVector &Py,eigenVector &prev_varcmp, eigenVector &varcmp, int n, int rindx,double step)
 {
-	
+
 	Py = P * y;
 	eigenMatrix APy(n, rindx);
 
-	#pragma omp parallel for
 	for (int i = 0; i < rindx; i++) {
 		(APy.col(i)) = (_A[i]) * Py;
 	}
@@ -151,7 +259,7 @@ bool ai_reml(eigenVector &y,eigenMatrix &P, eigenVector &Py,eigenVector &prev_va
 	// Calculate Hi
 	eigenVector R(rindx);
 	eigenMatrix Hi(rindx, rindx);
-	#pragma omp parallel for
+
 	for (int i = 0; i < rindx; i++) {
 		R(i) = (Py.transpose()*(APy.col(i)))(0, 0);
 		eigenVector cvec = P * (APy.col(i));
@@ -185,7 +293,7 @@ void em_reml(eigenVector &y,eigenMatrix &P, eigenVector &Py, eigenVector &prev_v
 	Py = P * y;
 
 	eigenVector R(rindx);
-	#pragma omp parallel for
+
 	for (int i = 0; i < rindx; i++)
 	{
 		R(i) = (Py.transpose()*(_A[i]) * Py)(0, 0);
@@ -194,7 +302,7 @@ void em_reml(eigenVector &y,eigenMatrix &P, eigenVector &Py, eigenVector &prev_v
 }
 
 
-double y_center(eigenVector &y,int n) 
+double y_center(eigenVector &y,int n)
 {
 	eigenVector _y_center(n);
 	_y_center.setConstant(y.mean());
@@ -206,18 +314,18 @@ double y_center(eigenVector &y,int n)
 void constrain_varcmp(eigenVector &y,eigenVector &varcmp,int n, int rindx)
 {
 	double constr_scale = 1e-6;
-	for (int i = 0; i < rindx; i++) {if (varcmp[i] < 0) varcmp[i] = constr_scale * y_center(y,n);}	
+	for (int i = 0; i < rindx; i++) {if (varcmp[i] < 0) varcmp[i] = constr_scale * y_center(y,n);}
 }
 
 
 
-void reml_iteration(eigenVector &X,eigenVector &y, vector<eigenMatrix> &Z, eigenVector &varcmp, int n, int rindx,int maxiter)
+VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, vector<eigenMatrix> &Z, eigenVector &varcmp, int n, int rindx,int maxiter)
 {
 	double logdet = 0.0, logdet_Xt_Vi_X = 0.0, prev_lgL = -1e20, lgL = -1e20, dlogL = 1000.0, step = 0.316;
 	int L_size;
-	
+
 	eigenVector prev_varcmp(rindx);
-	prev_varcmp.setConstant(y_center(y, n) / n);
+	prev_varcmp = start;
 
 	_A = calcu_A(Z,n, rindx);
 	L_history.push_back(lgL);
@@ -229,37 +337,37 @@ void reml_iteration(eigenVector &X,eigenVector &y, vector<eigenMatrix> &Z, eigen
 			cout << "REML ERROR!:V matrix is not positive. Switch to multiple linear regression!" << endl;
 			flag_converge = false;
 			flag_inv_Vi = false;
-			break;
+			return varcmp;
 		}
 		if (!calcu_P(X,Vi, P, logdet_Xt_Vi_X))
 		{
 			cout << "REML ERROR!: the X^t * V^-1 * X matrix is not invertible,please check the Signature Genes. Switch to multiple linear regression!" << endl;
 			flag_converge = false;
 			flag_inv_P = false;
-			break;
+			return varcmp;
 		}
-		
+
 		//initialized with EM-REML
-		if (iter == 0) 
+		if (iter == 0)
 		{
 			em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
 		}
-		else 
+		else
 		{
 			if (flag_EM) em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
 			else if (!ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step)) flag_EM = true;
 
 		}
-		
+
 		constrain_varcmp(y,varcmp,n, rindx);
-		
+
 		lgL = -0.5 * (logdet_Xt_Vi_X + logdet + (y.transpose() * Py)(0, 0));
-		
-		
+
+
 		//change step size
-		if (iter > 500){
+		if (iter > 300){
 			L_size = L_history.size();
-			for(int i=0;i<L_size;i++)
+			for(int i=0;i<L_size-1;i++)
 			{
 				if(lgL - L_history[i]<1e-30 || lgL - L_history[i]< -1e-30){
 					step = step*0.8;
@@ -268,8 +376,8 @@ void reml_iteration(eigenVector &X,eigenVector &y, vector<eigenMatrix> &Z, eigen
 			}
 			L_history.push_back(lgL);
 		}
-		
-		
+
+
 		// cout << lgL << endl;
 		dlogL = lgL - prev_lgL;
 
@@ -281,19 +389,21 @@ void reml_iteration(eigenVector &X,eigenVector &y, vector<eigenMatrix> &Z, eigen
 			flag_inv_Vi = true;
 			flag_inv_P = true;
 			flag_not_itermax = true;
-			break;
+			return varcmp;
 		}
-		
-		//max iter 
+
+		//max iter
 		if(iter == maxiter)
 		{
 			calcu_Vi(Vi, prev_varcmp, logdet,n, rindx);
 			cout << "Warning: Log-likelihood not converged. Results are not reliable.\nYou can specify the parameter max_iter to allow for more iterations." << endl;
 			flag_not_itermax = false;
-			
+
 		}
-		
+
 		prev_varcmp = varcmp;
 		prev_lgL = lgL;
 	}
+
+	return varcmp;
 }

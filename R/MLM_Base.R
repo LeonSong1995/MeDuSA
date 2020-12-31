@@ -5,27 +5,7 @@
 
 #############################################################################################
 
-#'Basic function of the linear mixed model:
-#'  *prepare the fixed and random component.
-#'
-#' @param exprsData: matrix of the single-cell data (gene x cell);
-#' @param MetaData: data frame of the summary information of bulk RNA-seq samples. Include sampleID, cellTyp;
-#' @param bulk: matrix of the bulk RNA-Seq data (gene x cell);
-#' @param ct.cell.size: vector of cell sizes with labeled cell type names. Default as NULL. If NULL, then estimate cell size from data;
-#' @param data_type: character, type of the inputed single-cell reference data (count/tpm/rpkm);
-#' @param Filter: bool, whether to remove outlier cells in single-cell reference data or not;
-#' @param BatchCorrect:  bool, whether to remove the batch effect between bulk data and single-cell reference data or not;
-#' @param SF: numeric, scaling factor;
-#' @param gene: vector of signature genes.
-#'
-#' @return a list with elements:
-#'   *base: matrix of fixed components (gene x cell type);
-#'   *data_cellType:  list matrix of single-cell data (cell type x gene x cell);
-#'   *bulk: matrix of bulk RNA-Seq data  (gene x sample);
-#'   *cellSize: vector of cell sizes with labeled cell type names.
-#' @export
-#'
-#'
+#' @keywords internal
 basis = function(exprsData,MetaData,bulk,ct.cell.size,data_type, Filter, BatchCorrect, SF, gene){
 
 	cell_name = colnames(exprsData)
@@ -45,7 +25,8 @@ basis = function(exprsData,MetaData,bulk,ct.cell.size,data_type, Filter, BatchCo
 	  apply(y,1,mean)
 	})
 	}
-
+	# GeneIM = Impute(exprsData,MetaData,gene,SF)
+	
 
 	mean.id = do.call('rbind',strsplit(unique(ct_sample.id), split = '%'))
 
@@ -76,7 +57,9 @@ basis = function(exprsData,MetaData,bulk,ct.cell.size,data_type, Filter, BatchCo
 		y = (y / (sum(y)+1e-200))*SF
 		return(y)
 	})
-
+	# base = sapply(GeneIM,rowMeans)
+	# rownames(base) = gene
+	
 	# Adding an extremely small positive number (1e-200) to avoid infinity.
 	data_cellType = sapply(unique(ct.id), function(id){
 		y = countmat[, ct.id %in% id]
@@ -86,7 +69,12 @@ basis = function(exprsData,MetaData,bulk,ct.cell.size,data_type, Filter, BatchCo
 		}
 		return(y[gene, ])
 	 })
-
+	
+	# data_cellType = sapply(GeneIM,function(ct){
+		# A = cellFilter(ct)
+		# rownames(A) = gene
+		# return(A)
+	# })
 
 	if(is.null(ncol(bulk))){
 		bulk = ((bulk/(sum(bulk)+1e-200))*SF)[gene]
@@ -113,14 +101,7 @@ basis = function(exprsData,MetaData,bulk,ct.cell.size,data_type, Filter, BatchCo
 }
 
 
-#' Function to remove outliers in single-cell RNA-seq data.
-#'
-#' @param exprsData: matrix of the single-cell data (gene x cell).
-#'
-#' @return matrix of the filtered single-cell data (gene x cell).
-#' @export
-#'
-#'
+#' @keywords internal
 cellFilter<-function(exprsData){
   d <- as.matrix(dist(log(t(exprsData+1))))
   diag(d) <- 1e+10
@@ -130,19 +111,7 @@ cellFilter<-function(exprsData){
 }
 
 
-#' Function to correct the batch effect between bulk RNA-seq samples and reference single-cell data.
-#'
-#' @param exprsData: matrix of the single-cell data (gene x cell);
-#' @param MetaData: data frame of the summary information of bulk RNA-seq samples. Include sampleID, cellTyp;
-#' @param bulk: matrix of the bulk RNA-Seq data (gene x cell);
-#' @param basis: matrix of fixed components (gene x cell type);
-#' @param SF: numeric, scaling factor;
-#' @param gene: vector of signature genes.
-#'
-#' @return matrix of the corrected bulk RNA-Seq samples (gene x sample).
-#' @export
-#'
-#'
+#' @keywords internal
 BatchCorrection = function(exprsData,MetaData,bulk,basis,SF,gene){
 
 	exprsData = sweep(exprsData,2,colSums(exprsData)+1e-200,'/')*SF

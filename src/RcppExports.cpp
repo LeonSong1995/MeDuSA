@@ -6,23 +6,52 @@
 
 using namespace Rcpp;
 
-// reml
-NumericVector reml(Eigen::VectorXd& X, Eigen::VectorXd& y, std::vector<Eigen::MatrixXd>& Z, int maxiter);
-RcppExport SEXP _MLM_reml(SEXP XSEXP, SEXP ySEXP, SEXP ZSEXP, SEXP maxiterSEXP) {
+// ecor
+Eigen::MatrixXd ecor(Eigen::MatrixXd mat);
+RcppExport SEXP _MLM_ecor(SEXP matSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::VectorXd& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type mat(matSEXP);
+    rcpp_result_gen = Rcpp::wrap(ecor(mat));
+    return rcpp_result_gen;
+END_RCPP
+}
+// reml
+std::vector<Eigen::MatrixXd> reml(Eigen::VectorXd start, Eigen::MatrixXd& X, Eigen::VectorXd& y, std::vector<Eigen::MatrixXd>& Z, int maxiter);
+RcppExport SEXP _MLM_reml(SEXP startSEXP, SEXP XSEXP, SEXP ySEXP, SEXP ZSEXP, SEXP maxiterSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type start(startSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd& >::type X(XSEXP);
     Rcpp::traits::input_parameter< Eigen::VectorXd& >::type y(ySEXP);
     Rcpp::traits::input_parameter< std::vector<Eigen::MatrixXd>& >::type Z(ZSEXP);
     Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
-    rcpp_result_gen = Rcpp::wrap(reml(X, y, Z, maxiter));
+    rcpp_result_gen = Rcpp::wrap(reml(start, X, y, Z, maxiter));
+    return rcpp_result_gen;
+END_RCPP
+}
+// reml2
+std::vector<Eigen::MatrixXd> reml2(Eigen::VectorXd start, Eigen::MatrixXd& X, Eigen::VectorXd& y, std::vector<Eigen::MatrixXd>& Z, int maxiter);
+RcppExport SEXP _MLM_reml2(SEXP startSEXP, SEXP XSEXP, SEXP ySEXP, SEXP ZSEXP, SEXP maxiterSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type start(startSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< std::vector<Eigen::MatrixXd>& >::type Z(ZSEXP);
+    Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
+    rcpp_result_gen = Rcpp::wrap(reml2(start, X, y, Z, maxiter));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_MLM_reml", (DL_FUNC) &_MLM_reml, 4},
+    {"_MLM_ecor", (DL_FUNC) &_MLM_ecor, 1},
+    {"_MLM_reml", (DL_FUNC) &_MLM_reml, 5},
+    {"_MLM_reml2", (DL_FUNC) &_MLM_reml2, 5},
     {NULL, NULL, 0}
 };
 

@@ -1,7 +1,7 @@
 # MLM
 **Author: Liyang Song <songliyang@westlake.edu.cn>**    
-**Advisor: Jian Yang and Xiwei Sun**    
-**Date: 2020-10-18**  
+**Adviser: Jian Yang and Xiwei Sun**    
+
 ```diff
 -WARNING! This method has not been peer reviewed and published, and this is not the final stable version!
 ```

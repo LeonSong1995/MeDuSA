@@ -59,7 +59,7 @@ library(MLM)
 out.ct = CTdcv(bulk = example.bulk,sce = example.sce,gene = example.gene,data_type = 'count')
 
 #for single-cell level deconvolution 
-out.sc = SCdcv(bulk = example.bulk,sce = example.sce)
+out.sc = SCdcv(bulk = example.bulk,sce = example.sce,select.ct = 'beta')
 
 ```
 

@@ -17,8 +17,7 @@ devtools::install_github("LeonSong1995/MCTD", build_vignettes=F)
 ## Usage
 The function for **Cell-Trajectory** deconvolution in this package is `MCTD`. It needs:  
 1. Bulk RNA-seq data.  A matrix of bulk RNA-seq data. Each row corresponds to a specific gene and each column corresponds to a particular sample.
-2. Single-cell RNA-seq data. A "Seurat" obejct of the scRNA-seq data. [Seurat](https://satijalab.org/seurat/). 
-
+2. Single-cell RNA-seq data. A [Seurat](https://satijalab.org/seurat/) obejct of the scRNA-seq data. 
 
 ## Example
 MLM attached test data to show how to use: 

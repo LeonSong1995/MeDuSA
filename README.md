@@ -43,11 +43,13 @@ CellAbundance = MCTD(bulk=bulk,sce=sce,selectCellType='Epithelium',ncpu=6)$abund
 help(MCTD)
 ```
 
-## Warning
-
+## Errors
+The following errors mean that the mixed model can not converge on your data. When you see them, you may need to check the signature genes or the reference scRNA-seq data.
+`REML ERROR!:V matrix is not positive.`
+`REML ERROR!: the X^t * V^-1 * X matrix is not invertible,please check the Signature Genes.`
 
 
 ## Contact
-If you have any technical or other issues for MCTD, please contact us <songliyang@westlake.edu.cn>.
+If you have any questions for MCTD, please create an issue here or contact us <songliyang@westlake.edu.cn>.
 
 

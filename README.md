@@ -29,7 +29,7 @@ data(cellType)
 data(cellTrjaectory)
 data(bulk)
 
-##You need to package them into the 'Seurat' obejct:
+##You need to format them into the 'Seurat' obejct:
 sce = CreateSeuratObject(ref)
 sce$cellType = cellType
 sce$cellTrjaectory = rep(0,ncol(sce))

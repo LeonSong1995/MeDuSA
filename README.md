@@ -6,51 +6,49 @@
 MCTD is a fine-resolution deconvolution method used to predict cell abundance along a predefined cell trajectory in the given bulk RNA-seq data.
 
 
-
 ## Installation
 ```R
 install.packages("devtools")
+##R version need > 4.00
 devtools::install_github("LeonSong1995/MCTD", build_vignettes=F)
 ```
 
 
-
 ## Usage
-
-The function for **cell-type level** deconvolution in this package is `CTdcv`. It needs:  
-1. Bulk RNA-Seq data. Matrix of the gene expression (count/rpkm/tpm) from the samples for which to estimate cell-type
-proportions;  
-2. Single-cell RNA-Seq data. [Seurat](https://satijalab.org/seurat/) object (count/rpkm/tpm) of the reference single-cell RNA-Seq data;  
-3. Signature genes. We summarized signature genes for human 64 cell-types.  
-**Note**: When inputting rpkm/tpm matrix (without cell size inputted), MLM can only estimate relative cell-type proportions which are not comparable among different cell-types.  
-
-The function for **single-cell level** deconvolution in this package is `SCdcv`. It needs:  
-1. Bulk RNA-Seq data. Matrix of the gene expression (count/rpkm/tpm) from the samples for which to estimate cell-type
-proportions;  
-2. Single-cell RNA-Seq data. [Seurat](https://satijalab.org/seurat/) object (count/rpkm/tpm) of the reference single-cell RNA-Seq data;  
-
+The function for **Cell-Trajectory** deconvolution in this package is `MCTD`. It needs:  
+1. Bulk RNA-seq data.  A matrix of bulk RNA-seq data. Each row corresponds to a specific gene and each column corresponds to a particular sample.
+2. Single-cell RNA-seq data. A "Seurat" obejct of the scRNA-seq data. [Seurat](https://satijalab.org/seurat/). 
 
 
 ## Example
-MLM attached example data to show how to use: 
+MLM attached test data to show how to use: 
 ```R
-library(MLM)
-#When you load MLM, you will get these attached example data:
-#1.example.bulk: human pancreas bulk gene expression data (18 samples, count-matrix);
-#2.example.sce: human pancreas scRNA-Seq data (Seurat object, count-matrix);
-#3.example.gene: human pancreas signatue genes (284 genes);
+library(MCTD)
+##When you load MCTD, you will get these attached test data:
+data(ref)
+data(cellType)
+data(cellTrjaectory)
+data(bulk)
 
-#basic usage:
-#for cell-type level deconvolution
-out.ct = CTdcv(bulk = example.bulk,sce = example.sce,gene = example.gene,data_type = 'count')
+##You need to package them into the 'Seurat' obejct:
+sce = CreateSeuratObject(ref)
+sce$cellType = cellType
+sce$cellTrjaectory = rep(0,ncol(sce))
+sce$cellTrjaectory[rownames(Trajectory)]=Trajectory
 
-#for single-cell level deconvolution 
-out.sc = SCdcv(bulk = example.bulk,sce = example.sce,select.ct = 'beta')
+## Now, you can run cell-trajectory deconvolution.
+##Run MCTD (with 6 CPU cores)
+CellAbundance = MCTD(bulk=bulk,sce=sce,selectCellType='Epithelium',ncpu=6)$abundance
 
+##Details for the parameters in MCTD can be found via: 
+help(MCTD)
 ```
+
+## Warning
+
 
 
 ## Contact
-If you have any technical or other issues during the useage, please contact <songliyang@westlake.edu.cn>.
+If you have any technical or other issues for MCTD, please contact us <songliyang@westlake.edu.cn>.
 
 

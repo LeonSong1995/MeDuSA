@@ -1,13 +1,10 @@
-# MLM
+# MCTD: Mixed model-based Cell Trajectory Deconvolution. 
 **Author: Liyang Song <songliyang@westlake.edu.cn>**    
-**Adviser: Jian Yang and Xiwei Sun**    
 
-```diff
--WARNING! This method has not been peer reviewed and published, and this is not the final stable version!
-```
 
 ## Description
-A package utlizes ***mixed linear model (MLM)*** to estimate cell-type proportions in bulk gene expression data, based on gene expression references from single-cell RNA-Seq datasets.
+MCTD is a fine-resolution method used to predict cell abundance along a predefined cell trajectory.![image](https://user-images.githubusercontent.com/49676857/119589100-b58d1200-be04-11eb-900b-572428bb1f61.png)
+
 
 
 ## Installation

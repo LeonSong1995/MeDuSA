@@ -3,7 +3,7 @@
 
 
 ## Description
-MCTD is a fine-resolution method used to predict cell abundance along a predefined cell trajectory.
+MCTD is a fine-resolution deconvolution method used to predict cell abundance along a predefined cell trajectory in the given bulk RNA-seq data.
 
 
 

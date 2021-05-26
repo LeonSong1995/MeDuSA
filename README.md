@@ -39,7 +39,7 @@ sce$cellTrjaectory[rownames(Trajectory)]=Trajectory
 ##Run MCTD (with 6 CPU cores)
 CellAbundance = MCTD(bulk=bulk,sce=sce,selectCellType='Epithelium',ncpu=6)$abundance
 
-##Details for the parameters in MCTD can be found via: 
+##Detailed tutorials for the MCTD can be found via: 
 help(MCTD)
 ```
 

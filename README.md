@@ -20,7 +20,7 @@ The function for **Cell-Trajectory** deconvolution in this package is `MCTD`. It
 2. Single-cell RNA-seq data. A [Seurat](https://satijalab.org/seurat/) obejct of the scRNA-seq data. 
 
 ## Example
-MLM attached test data to show how to use: 
+MCTD provides test data to show how to use.
 ```R
 library(MCTD)
 ##When you load MCTD, you will get these attached test data:

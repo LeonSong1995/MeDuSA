@@ -11,17 +11,6 @@ MCTD is a fine-resolution deconvolution method used to predict cell abundance al
 ```R
 install.packages("devtools")
 devtools::install_github("LeonSong1995/MLM", build_vignettes=F)
-
-# MLM depends on packages of "Seurat"" and "sva"
-# If you did not install these two packages,please install and library them before using MLM:
-if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-
-BiocManager::install("Seurat")
-BiocManager::install("sva")
-
-library(Seurat)
-library(sva)
 ```
 
 

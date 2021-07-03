@@ -9,7 +9,10 @@ MCTD is a fine-resolution deconvolution method used to predict cell abundance al
 ## Installation
 ```R
 install.packages("devtools")
-##R version need > 4.00
+##Please install the "Seurat" first. 
+install.packages("Seurat")
+
+##R version need > 3.00
 devtools::install_github("LeonSong1995/MCTD", build_vignettes=F)
 ```
 

@@ -16,7 +16,7 @@ Depends:
     parallel,
     stats,
     R (>= 3.0.0)
-Imports: Rcpp (>= 1.0.3),RcppEigen,foreach,Seurat,mgcv,parallel,stats
+Imports: Rcpp (>= 1.0.3),RcppEigen,foreach,mgcv,parallel,stats
 LinkingTo: Rcpp,RcppEigen
 RoxygenNote: 7.1.1
 Suggests: 

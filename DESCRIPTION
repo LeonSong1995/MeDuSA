@@ -11,12 +11,11 @@ LazyData: true
 Depends: 
     Rcpp (>= 1.0.3),
     foreach,
-    Seurat,
     mgcv,
     RcppEigen,
     parallel,
     stats,
-    R (>= 4.0.0)
+    R (>= 3.0.0)
 Imports: Rcpp (>= 1.0.3),RcppEigen,foreach,Seurat,mgcv,parallel,stats
 LinkingTo: Rcpp,RcppEigen
 RoxygenNote: 7.1.1

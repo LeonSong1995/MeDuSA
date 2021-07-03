@@ -34,7 +34,7 @@ geneAsso = function(space,exprsData,TJB,maxgene,cov=NULL,mode,k,ncpu){
   if(!is.null(cov)){U = cov}
   
   #RUN GAM
-  ncpu = min(ncpu,parallel::detectCores())
+  ncpu = min(ncpu,detectCores())
   cl = parallel::makeCluster(ncpu)
   parallel::clusterExport(cl=cl, varlist=c("U","exprsData","space","k"),
                           envir=environment())
@@ -45,8 +45,8 @@ geneAsso = function(space,exprsData,TJB,maxgene,cov=NULL,mode,k,ncpu){
   `%dopar2%` = foreach::`%dopar%`
   geneNumber = NULL
   fitF= foreach::foreach(geneNumber = 1:nrow(exprsData), .options.snow = opts) %dopar2% {
-    gam_mod=mgcv::gam(exprsData[geneNumber,] ~ U+s(space,k=k),family = mode)
-    gam_mod=summary(gam_mod)$chi.sq
+    gam_mod=mgcv::gam(exprsData[geneNumber,] ~ U+s(space,k=k,bs='cr',fx=TRUE),family = mode,method='GCV.Cp')
+    gam_mod=mgcv::anova.gam(gam_mod)$chi.sq
     gam_mod
   }
   parallel::stopCluster(cl)

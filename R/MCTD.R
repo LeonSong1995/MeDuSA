@@ -5,6 +5,7 @@
 #############################################################################################################
 #' @title MCTD: Mixed model-based Cell Trajectory Deconvolution.
 #' @description This is the main function of the "MCTD" method. \code{MCTD} is used to predict cell-abundance along a predefined cell trajectory in the given bulk RNA-seq data. \code{MCTD} is well suitable for biological scenarios in which the underlying mechanisms are associated with continuous transitions of cellular states.
+#'
 #' @param bulk  A matrix of bulk RNA-Seq data. Each row corresponds to a specific gene and each column corresponds to a particular sample.
 #' @param sce  A \code{Seurat} object of the single-cell RNA-Seq data (see \code{\link{Seurat}}). Meta data of the 'sce' need include 'cellType' and 'cellTrjaectory'.
 #' @param selectCellType A character of the names of the target cell-type.
@@ -19,6 +20,7 @@
 #' @param gcov A matrix (or vector) of fixed covariates in gene selection,such as donors, genders and extra.The default value is \emph{NULL}.
 #' @param Xc  A matrix (or vector) of fixed covariates in deconvolution.The default value is \emph{NULL}. With default, \code{MCTD} will include expression profiles of other cell-types as the deconvolution covariates.
 #' @param maxiter The maximum iterations of REML.The default value is \emph{1e+4}.
+#' @param smoothMethod  A character variable to specify the method used to smooth the estimated cell abundance. Default by the "LOESS".
 #'
 #' @return \code{MCTD} returns: \itemize{
 #' \item\code{abundance}: A matrix of cell-abundance. Each row corresponds to a median trajectory point of the cell-bins and each column corresponds to a certain sample.
@@ -51,7 +53,7 @@
 #' ##Run MCTD (with 6 CPU cores)
 #' CellAbundance = MCTD(bulk=bulk,sce=sce,selectCellType='Epithelium',ncpu=6)$abundance
 
-MCTD = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,gene=NULL,nbins=10,resolution=50,knots=10,maxgene=200,mode='gaussian',gcov=NULL,Xc=NULL,maxiter=1e+4){
+MCTD = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,smoothMethod='loess',gene=NULL,nbins=10,resolution=50,knots=10,maxgene=200,mode='gaussian',gcov=NULL,Xc=NULL,maxiter=1e+4){
 
 	#Checking the format of the input parameters
 	message("Thanks for using MTD to perform cell-trjaectory deconvolution analysis.")
@@ -77,14 +79,17 @@ MCTD = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,gene=NULL,nbins=10,re
 	index = which(sce$cellType==selectCellType)
 	space = as.matrix(sce$cellTrjaectory[index])
 	space = as.matrix(space[order(space,decreasing = F),])
-	Ref = as.matrix(sce@assays$RNA@counts[,rownames(space)])
+	ref = as.matrix(sce@assays$RNA@counts[,rownames(space)])
 	bulk = bulk
 
 	#Select the genes
-	nbins = min(nbins,ncol(Ref))
+	nbins = min(nbins,ncol(ref))
 	if(is.null(gene)){
-	  g = geneSelect(exprsData = Ref,space=space,bulk=bulk, maxgene=maxgene,nbins=nbins,cov=gcov,mode=mode,k=knots,ncpu=ncpu)$g
-	}else{g=gene}
+	  g_chi = geneSelect(exprsData = ref,space=space,bulk=bulk, maxgene=maxgene,nbins=nbins,cov=gcov,mode=mode,k=knots,ncpu=ncpu)
+	  g = g_chi$g
+	  chi = g_chi$chi
+
+	}else{g=Reduce(intersect,list(gene,rownames(bulk),rownames(sce)))}
 
 	#Prepare the incidence matrix of fixed covariates.
 	Xc_input = Xc[g,]
@@ -99,7 +104,7 @@ MCTD = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,gene=NULL,nbins=10,re
 	rownames(Xc)=g
 
 	#Prepare the cell-trajectory bin and cell-bin expression profiles
-	resolution = min(resolution, ncol(Ref))
+	resolution = min(resolution, ncol(ref))
 	bin = cluster(space,nbins = resolution)
 	names(bin) = rownames(space)
 	CBP = t(aggregate(t(ref[g,names(bin)]),by=list(bin),FUN=mean)[,-1])
@@ -110,12 +115,19 @@ MCTD = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,gene=NULL,nbins=10,re
 
 	#Smooth
 	if(smooth==TRUE){
-	  abundance =apply(abundance,2,function(ab){predict(stats::loess(ab~bmed))})
+		if(smoothMethod=='loess'){
+			abundance =apply(abundance,2,function(ab){predict(stats::loess(ab~bmed))})
+		}else{
+			num = min(10,round(0.2*length(bmed),0))
+			neighbour=sapply(1:length(bmed),function(i){order(abs(bmed[i]-bmed),decreasing = F)[1:num]})
+			abundance = apply(abundance,2,function(x){sapply(1:ncol(neighbour),function(i){ mean(x[neighbour[,i]])})})
+		}
 	}
+
 	abundance = as.data.frame(abundance)
 	colnames(abundance) = colnames(bulk)
 	rownames(abundance) = bmed
-	return(list('abundance'=abundance,'gene'=g))
+	return(list('abundance'=abundance,'gene'=g,'MedianValueCellbin'=bmed))
 }
 
 

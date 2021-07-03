@@ -33,7 +33,7 @@ MCTD(
 
 \item{smooth}{A Boolean variable to determine whether to smooth the cell-abundance along the cell-trajectory or not. The default value is \emph{TRUE}. With default, the predicted cell abundance will be smoothed along the cell trajectory via the Loess (see \code{\link{loess}}).}
 
-\item{smoothMethod}{A character variable to specify the method used to smooth the estimated cell abundance. Default by the "LOESS".}
+\item{smoothMethod}{A character variable to specify the method used to smooth the estimated cell abundance. Default by the "loess".}
 
 \item{gene}{A character vector of the genes to use as signatures.The default value is \emph{NULL}. With default, \code{MCTD} will select genes via the generalized additive model (GAM,see \code{\link{mgcv}}).}
 

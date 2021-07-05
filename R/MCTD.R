@@ -20,7 +20,7 @@
 #' @param gcov A matrix (or vector) of fixed covariates in gene selection,such as donors, genders and extra.The default value is \emph{NULL}.
 #' @param Xc  A matrix (or vector) of fixed covariates in deconvolution.The default value is \emph{NULL}. With default, \code{MCTD} will include expression profiles of other cell-types as the deconvolution covariates.
 #' @param maxiter The maximum iterations of REML.The default value is \emph{1e+4}.
-#' @param smoothMethod  A character variable to specify the method used to smooth the estimated cell abundance. Default by the "LOESS".
+#' @param smoothMethod  A character variable to specify the method used to smooth the estimated cell abundance. Default by the "loess".
 #'
 #' @return \code{MCTD} returns: \itemize{
 #' \item\code{abundance}: A matrix of cell-abundance. Each row corresponds to a median trajectory point of the cell-bins and each column corresponds to a certain sample.
@@ -34,7 +34,7 @@
 #' \code{MCTD} contains three steps:\itemize{
 #' \item Gene selection: \code{MCTD} selects signature genes to distinguish cells along the cell-trajectory via the GAM.
 #' \item Deconvolution: \code{MCTD} infers the cell-abundance for each cell-bin via the mixed model.
-#' \item Smoothing: \code{MCTD} smooths the cell-abundance along the cell-trajectory via the loess.This step is performed if smooth = TRUE.}
+#' \item Smoothing: \code{MCTD} smooths the cell-abundance along the cell-trajectory via the "loess". This step is performed if smooth = TRUE.}
 #'
 #' @author Liyang Song <songliyang@westlake.edu.cn>
 #' @examples

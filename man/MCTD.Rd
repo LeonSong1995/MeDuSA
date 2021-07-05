@@ -70,7 +70,7 @@ With inputting cell trajectory and scRNA-seq as references, \code{MCTD} infers t
 \code{MCTD} contains three steps:\itemize{
 \item Gene selection: \code{MCTD} selects signature genes to distinguish cells along the cell-trajectory via the GAM.
 \item Deconvolution: \code{MCTD} infers the cell-abundance for each cell-bin via the mixed model.
-\item Smoothing: \code{MCTD} smooths the cell-abundance along the cell-trajectory via the loess.This step is performed if smooth = TRUE.}
+\item Smoothing: \code{MCTD} smooths the cell-abundance along the cell-trajectory via the "loess". This step is performed if smooth = TRUE.}
 }
 \examples{
 ##Load the test data

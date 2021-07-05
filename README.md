@@ -31,7 +31,7 @@ library(MCTD)
 ##When you load MCTD, you will get these attached test data:
 data(ref)
 data(cellType)
-data(cellTrjaectory)
+data(Trjaectory)
 data(bulk)
 
 ##You need to format them into the 'Seurat' obejct:

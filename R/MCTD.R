@@ -47,8 +47,8 @@
 #' ##Build the 'Seurat' obejct:
 #' sce = CreateSeuratObject(ref)
 #' sce$cellType = cellType
-#' sce$cellTrjaectory = rep(0,ncol(sce))
-#' sce$cellTrjaectory[rownames(Trajectory)]=Trajectory
+#' sce$cellTrajectory = rep(0,ncol(sce))
+#' sce$cellTrajectory[rownames(Trajectory)]=Trajectory
 #'
 #' ##Run MCTD (with 6 CPU cores)
 #' CellAbundance = MCTD(bulk=bulk,sce=sce,selectCellType='Epithelium',ncpu=6)$abundance
@@ -63,7 +63,7 @@ MCTD = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,smoothMethod='loess',
 	if(!'cellType' %in% colnames(sce@meta.data)){
 	  stop('Please input cellType, check your MetaData: Seurat_Obj@meta.data.')
 	}
-	if(!'cellTrjaectory' %in% colnames(sce@meta.data)){
+	if(!'cellTrajectory' %in% colnames(sce@meta.data)){
 	  stop('Please input cellTrjaectory, check your MetaData: Seurat_Obj@meta.data.')
 	}
 	if(!is.null(selectCellType)){
@@ -77,7 +77,7 @@ MCTD = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,smoothMethod='loess',
 
 	#Prepare the reference
 	index = which(sce$cellType==selectCellType)
-	space = as.matrix(sce$cellTrjaectory[index])
+	space = as.matrix(sce$cellTrajectory[index])
 	space = as.matrix(space[order(space,decreasing = F),])
 	ref = as.matrix(sce@assays$RNA@counts[,rownames(space)])
 	bulk = bulk

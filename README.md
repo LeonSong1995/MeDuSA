@@ -1,4 +1,5 @@
-# MCTD: Mixed model-based Cell Trajectory Deconvolution. 
+# MeDuSA: mixed model-based deconvolution of cell-state abundance.
+
 **Author: Liyang Song <songliyang@westlake.edu.cn>**    
 
 

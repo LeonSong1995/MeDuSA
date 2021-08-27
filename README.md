@@ -28,14 +28,14 @@ The function for **cell-state abundance** deconvolution in this package is `MeDu
 ## Example
 MCTD provides test data to show how to use.
 ```R
+##Library the package
+library(MeDuSA)
+
 ##Load the test data
 data(ref)
 data(cellType)
 data(cellTrajectory)
 data(bulk)
-
-##Library the package
-library(MeDuSA)
 
 ##Build the seurat obejct:
 sce = CreateSeuratObject(ref)

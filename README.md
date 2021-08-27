@@ -56,6 +56,6 @@ The following errors mean that the mixed model can not converge on your data. Wh
 
 
 ## Contact
-If you have any questions for MCTD, please create an issue here or contact us <songliyang@westlake.edu.cn>.
+If you have any questions for MCTD, please create an issue here or contact us <songliyang@westlake.edu.cn>.   
 
 ![image](https://github.com/LeonSong1995/MCTD/blob/master/cover.png)

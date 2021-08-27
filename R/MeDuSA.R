@@ -93,7 +93,7 @@ MeDuSA = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,smoothMethod='loess
 	#Select the genes
 	nbins = min(nbins,ncol(ref))
 	if(is.null(gene)){
-	  g_chi = geneSelect(exprsData = ref,space=space,bulk=bulk, maxgene=maxgene,nbins=nbins,cov=gcov,mode=family,k=knots,ncpu=ncpu)
+	  g_chi = geneSelect(exprsData = ref,space=space,bulk=bulk, maxgene=maxgene,nbins=nbins,cov=gcov,family=family,k=knots,ncpu=ncpu)
 	  g = g_chi$g
 	  chi = g_chi$chi
 

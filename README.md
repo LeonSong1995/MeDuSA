@@ -47,7 +47,7 @@ sce$cellTrajectory[rownames(Trajectory)]=Trajectory
 CellStateAbundance = MeDuSA(bulk=bulk,sce=sce,selectCellType='Epithelium',ncpu=6)
 
 
-##Detailed tutorials for the MeDuSA can be found via: 
+##Documents: 
 help(MeDuSA)
 ```
 

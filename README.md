@@ -1,4 +1,5 @@
 # MeDuSA: mixed model-based deconvolution of cell-state abundance.
+![image](https://github.com/LeonSong1995/MCTD/blob/master/cover.png)
 
 **Author: Liyang Song <songliyang@westlake.edu.cn>**    
 

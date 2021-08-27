@@ -36,7 +36,7 @@ geneAsso = function(space,exprsData,TJB,maxgene,cov=NULL,family,k,ncpu){
   #RUN GAM
   ncpu = min(ncpu,detectCores())
   cl = parallel::makeCluster(ncpu)
-  parallel::clusterExport(cl=cl, varlist=c("U","exprsData","space","k","family"),
+  parallel::clusterExport(cl=cl, varlist=c("U","exprsData","space","k"),
                           envir=environment())
   doSNOW::registerDoSNOW(cl)
   pb = utils::txtProgressBar(min = 1, max = nrow(exprsData), style = 3)
@@ -50,6 +50,24 @@ geneAsso = function(space,exprsData,TJB,maxgene,cov=NULL,family,k,ncpu){
     gam_mod
   }
   parallel::stopCluster(cl)
+
+  # # *Run with polynomial regression###
+  # ncpu = min(ncpu,detectCores())
+  # cl = parallel::makeCluster(ncpu)
+  # X=poly(space,k)
+  # parallel::clusterExport(cl=cl, varlist=c("X","exprsData","U"),
+  #                         envir=environment())
+  # doSNOW::registerDoSNOW(cl)
+  # pb = utils::txtProgressBar(min = 1, max = nrow(exprsData), style = 3)
+  # progress = function(n) setTxtProgressBar(pb, n)
+  # opts = list(progress = progress)
+  # `%dopar2%` = foreach::`%dopar%`
+  # geneNumber = NULL
+  # fitF = foreach::foreach(geneNumber = 1:nrow(exprsData), .options.snow = opts) %dopar2% {
+  #   unlist(summary(aov(lm(exprsData[geneNumber,]~X+U))))['F value1']
+  # }
+  # parallel::stopCluster(cl)
+
   fitF  = unlist(fitF)
   names(fitF) = genes_to_take
   res = data.frame(colnames(groupRef)[apply(groupRef,1,which.max)],fitF)
@@ -92,7 +110,7 @@ geneSelect = function(exprsData,space,bulk,maxgene,nbins=10,cov=NULL,family='gau
   TJB = cluster(space, nbins)
   
   #Choose genes with the generalized nonlinear additive model 
-  gw = geneAsso(space=space,exprsData=exprsData,TJB=TJB,maxgene=maxgene,cov=cov,family,k=k,ncpu=ncpu)
+  gw = geneAsso(space=space,exprsData=exprsData,TJB=TJB,maxgene=maxgene,cov=cov,family=family,k=k,ncpu=ncpu)
   g = gw$bestGenes
   chi = gw$Chi
 

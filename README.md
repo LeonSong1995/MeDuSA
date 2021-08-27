@@ -34,7 +34,7 @@ library(MeDuSA)
 ##Load the test data
 data(ref)
 data(cellType)
-data(cellTrajectory)
+data(Trajectory)
 data(bulk)
 
 ##Build the seurat obejct:

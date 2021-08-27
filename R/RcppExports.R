@@ -2,6 +2,6 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 reml <- function(start, X, y, Z, maxiter) {
-    .Call(`_MCTD_reml`, start, X, y, Z, maxiter)
+    .Call(`_MeDuSA_reml`, start, X, y, Z, maxiter)
 }
 

@@ -21,7 +21,7 @@ VariableGenes = function(gene,ratio){
 
 #' @keywords internal
 #Select genes via GAM
-geneAsso = function(space,exprsData,TJB,maxgene,cov=NULL,mode,k,ncpu){  
+geneAsso = function(space,exprsData,TJB,maxgene,cov=NULL,family,k,ncpu){  
   
   #TJB-level profile
   groupRef = t(aggregate(t(exprsData),by=list(TJB),FUN=mean)[,-1])
@@ -45,7 +45,7 @@ geneAsso = function(space,exprsData,TJB,maxgene,cov=NULL,mode,k,ncpu){
   `%dopar2%` = foreach::`%dopar%`
   geneNumber = NULL
   fitF= foreach::foreach(geneNumber = 1:nrow(exprsData), .options.snow = opts) %dopar2% {
-    gam_mod=mgcv::gam(exprsData[geneNumber,] ~ U+s(space,k=k,bs='cr',fx=TRUE),family = mode,method='GCV.Cp')
+    gam_mod=mgcv::gam(exprsData[geneNumber,] ~ U+s(space,k=k,bs='cr',fx=FALSE),family = family,method='GCV.Cp')
     gam_mod=mgcv::anova.gam(gam_mod)$chi.sq
     gam_mod
   }
@@ -95,7 +95,7 @@ geneAsso = function(space,exprsData,TJB,maxgene,cov=NULL,mode,k,ncpu){
 
 
 #' @keywords internal
-geneSelect = function(exprsData,space,bulk,maxgene,nbins=10,cov=NULL,mode='gaussian',k=10,ncpu){
+geneSelect = function(exprsData,space,bulk,maxgene,nbins=10,cov=NULL,family='gaussian',k=10,ncpu){
   
  message('\n',paste0(paste0('Select genes with ',ncpu)),' cores.')
   #Choose genes both expressed in scRNA-seq and bulk RNA-seq
@@ -110,7 +110,7 @@ geneSelect = function(exprsData,space,bulk,maxgene,nbins=10,cov=NULL,mode='gauss
   TJB = cluster(space, nbins)
   
   #Choose genes with the generalized nonlinear additive model 
-  gw = geneAsso(space=space,exprsData=exprsData,TJB=TJB,maxgene=maxgene,cov=cov,mode,k=k,ncpu=ncpu)
+  gw = geneAsso(space=space,exprsData=exprsData,TJB=TJB,maxgene=maxgene,cov=cov,family,k=k,ncpu=ncpu)
   g = gw$bestGenes
   chi = gw$Chi
 

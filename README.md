@@ -4,7 +4,7 @@
 
 
 ## Description
-MCTD is a fine-resolution deconvolution method used to predict cell abundance along a predefined cell trajectory in the given bulk RNA-seq data.
+MeDuSA is a fine-resolution cellular deconvolution method, with the aim to use reference scRNA-seq data to predict cell abundance distributed along a cell-state trajectory in a bulk RNA-seq data. MeDuSA is well suitable for biological scenarios in which the underlying mechanisms are associated with continuous transitions of cell-states.![image](https://user-images.githubusercontent.com/49676857/131081292-fa60a8b5-6268-4d98-8684-396ade74803d.png)
 
 
 ## Installation
@@ -16,37 +16,39 @@ install.packages("Seurat")
 library(Seurat)
 
 ##R version need > 3.5.0
-devtools::install_github("LeonSong1995/MCTD", build_vignettes=F)
+devtools::install_github("LeonSong1995/MeDuSA", build_vignettes=F)
 ```
 
 
 ## Usage
-The function for **Cell-Trajectory** deconvolution in this package is `MCTD`. It needs:  
+The function for **cell-state abundance** deconvolution in this package is `MeDuSA`, which needs:  
 1. Bulk RNA-seq data.  A matrix of bulk RNA-seq data. Each row corresponds to a specific gene and each column corresponds to a particular sample.
-2. Single-cell RNA-seq data. A [Seurat](https://satijalab.org/seurat/) obejct of the scRNA-seq data. 
+2. Single-cell RNA-seq data. A [seurat](https://satijalab.org/seurat/) obejct of the reference scRNA-seq data. 
 
 ## Example
 MCTD provides test data to show how to use.
 ```R
-library(MCTD)
-##When you load MCTD, you will get these attached test data:
+##Load the test data
 data(ref)
 data(cellType)
-data(Trajectory)
+data(cellTrajectory)
 data(bulk)
 
-##You need to format them into the 'Seurat' obejct:
+##Library the package
+library(MeDuSA)
+
+##Build the seurat obejct:
 sce = CreateSeuratObject(ref)
 sce$cellType = cellType
-sce$cellTrjaectory = rep(0,ncol(sce))
-sce$cellTrjaectory[rownames(Trajectory)]=Trajectory
+sce$cellTrajectory = rep(0,ncol(sce))
+sce$cellTrajectory[rownames(Trajectory)]=Trajectory
 
-## Now, you can run cell-trajectory deconvolution.
-##Run MCTD (with 6 CPU cores)
-CellAbundance = MCTD(bulk=bulk,sce=sce,selectCellType='Epithelium',ncpu=6)$abundance
+##Run MeDuSA (with 6 CPU cores)
+CellStateAbundance = MeDuSA(bulk=bulk,sce=sce,selectCellType='Epithelium',ncpu=6)
 
-##Detailed tutorials for the MCTD can be found via: 
-help(MCTD)
+
+##Detailed tutorials for the MeDuSA can be found via: 
+help(MeDuSA)
 ```
 
 ## Errors
@@ -56,6 +58,4 @@ The following errors mean that the mixed model can not converge on your data. Wh
 
 
 ## Contact
-If you have any questions for MCTD, please create an issue here or contact us <songliyang@westlake.edu.cn>.   
-
-![image](https://github.com/LeonSong1995/MCTD/blob/master/cover.png)
+If you have any questions for MeDuSA, please create an issue here or contact the author <songliyang@westlake.edu.cn>.   

@@ -37,7 +37,7 @@ data(cellType)
 data(Trajectory)
 data(bulk)
 
-##Build the seurat obejct:
+##Build the seurat obejct
 sce = CreateSeuratObject(ref)
 sce$cellType = cellType
 sce$cellTrajectory = rep(0,ncol(sce))
@@ -47,7 +47,7 @@ sce$cellTrajectory[rownames(Trajectory)]=Trajectory
 CellStateAbundance = MeDuSA(bulk=bulk,sce=sce,selectCellType='Epithelium',ncpu=6)
 
 
-##Documents: 
+##Documents
 help(MeDuSA)
 ```
 

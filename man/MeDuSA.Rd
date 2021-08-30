@@ -2,7 +2,7 @@
 % Please edit documentation in R/MeDuSA.R
 \name{MeDuSA}
 \alias{MeDuSA}
-\title{MeDuSA: mixed model-based deconvolution of cell-state abundance。}
+\title{MeDuSA: mixed model-based deconvolution of cell-state abundance.}
 \usage{
 MeDuSA(
   bulk,
@@ -79,7 +79,7 @@ where cell trajectory specifies each cell as a point in a pseudo-time vector, de
 ##Library the package
 library(MeDuSA)
 
-##Load the test data
+##Load the test data:
 data(ref)
 data(cellType)
 data(cellTrajectory)
@@ -91,7 +91,7 @@ sce$cellType = cellType
 sce$cellTrajectory = rep(0,ncol(sce))
 sce$cellTrajectory[rownames(Trajectory)]=Trajectory
 
-##Run MeDuSA (with 6 CPU cores)
+##Run MeDuSA (with 6 CPU cores):
 CellStateAbundance = MeDuSA(bulk=bulk,sce=sce,selectCellType='Epithelium',ncpu=6)
 }
 \author{

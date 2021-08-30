@@ -3,7 +3,7 @@
 
 
 #############################################################################################################
-#' @title MeDuSA: mixed model-based deconvolution of cell-state abundance。
+#' @title MeDuSA: mixed model-based deconvolution of cell-state abundance.
 #' @description \code{MeDuSA} is a fine-resolution cellular deconvolution method, with the aim to use reference scRNA-seq data to predict cell abundance distributed along a cell-state trajectory in a bulk RNA-seq data. MeDuSA is well suitable for biological scenarios in which the underlying mechanisms are associated with continuous transitions of cell-states.
 #'
 #' @param bulk A matrix of bulk RNA-Seq data. Each row corresponds to a specific gene and each column corresponds to a particular sample.
@@ -43,7 +43,7 @@
 #' ##Library the package
 #' library(MeDuSA)
 #'
-#' ##Load the test data
+#' ##Load the test data:
 #' data(ref)
 #' data(cellType)
 #' data(cellTrajectory)
@@ -55,7 +55,7 @@
 #' sce$cellTrajectory = rep(0,ncol(sce))
 #' sce$cellTrajectory[rownames(Trajectory)]=Trajectory
 #'
-#' ##Run MeDuSA (with 6 CPU cores)
+#' ##Run MeDuSA (with 6 CPU cores):
 #' CellStateAbundance = MeDuSA(bulk=bulk,sce=sce,selectCellType='Epithelium',ncpu=6)
 
 MeDuSA = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,smoothMethod='loess',gene=NULL,nbins=10,resolution=50,knots=10,maxgene=200,family='gaussian',gcov=NULL,Xc=NULL,maxiter=1e+4,adj=FALSE){

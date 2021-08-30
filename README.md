@@ -45,7 +45,9 @@ sce$cellTrajectory[rownames(Trajectory)]=Trajectory
 
 ##Run MeDuSA (with 6 CPU cores)
 CellStateAbundance = MeDuSA(bulk=bulk,sce=sce,selectCellType='Epithelium',ncpu=6)
-
+Abundance = CellStateAbundance$abundance
+SignatureGene = CellStateAbundance$gene
+PseudoTime = CellStateAbundance$PesudoTimeCellbin
 
 ##Documents
 help(MeDuSA)

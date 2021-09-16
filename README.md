@@ -26,7 +26,7 @@ The function for **cell-state abundance** deconvolution in this package is `MeDu
 2. Single-cell RNA-seq data. A [seurat](https://satijalab.org/seurat/) obejct of the reference scRNA-seq data. 
 
 ## Example
-MCTD provides test data to show how to use.
+MeDuSA package provides test data to show how to use.
 ```R
 ##Library the package
 library(MeDuSA)

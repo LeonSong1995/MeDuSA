@@ -31,7 +31,7 @@ MeDuSA package provides test data to show how to use.
 ##Library the package
 library(MeDuSA)
 
-##Load the test data
+##Load the attached test data
 data(ref)
 data(cellType)
 data(Trajectory)

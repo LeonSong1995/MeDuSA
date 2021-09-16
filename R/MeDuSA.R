@@ -61,7 +61,7 @@
 MeDuSA = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,smoothMethod='loess',gene=NULL,nbins=10,resolution=50,knots=10,maxgene=200,family='gaussian',gcov=NULL,Xc=NULL,maxiter=1e+4,adj=FALSE){
 
 	#Checking the format of the input parameters
-	message("Thanks for using MeDuSA to perform cell-state abundance deconvolution analysis.")
+	message("Thanks for using MeDuSA to perform cell-state abundance deconvolution analyses.")
 	if(!("Seurat" %in% class(sce))){
 	  stop('Please input Seurat Object.')
 	}
@@ -73,10 +73,10 @@ MeDuSA = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,smoothMethod='loess
 	}
 	if(!is.null(selectCellType)){
 	  if(is.na(table(sce$cellType %in% selectCellType)['TRUE'])){
-	    stop('No cell types selected. Please check the selectCellType')
+	    stop('Do you forget to specify the cell type? Please check the selectCellType.')
 	  }
 	}else{
-	  stop('No cell types selected. Please check the selectCellType')
+	  stop('Do you forget to specify the cell type? Please check the selectCellType.')
 	}
 
 
@@ -101,21 +101,27 @@ MeDuSA = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,smoothMethod='loess
 
 
 	#Prepare the incidence matrix of fixed covariates.
-	Xc_input = Xc[commGene,]
+	Xc_input = Xc[intersect(commGene,rownames(Xc)),]
 	Xc = as.matrix(rep(1,length(commGene)))
 	if(!is.null(Xc_input)){Xc = cbind(Xc,Xc_input)}
 
 	#Include expression profiles of other cells as fixed covariates.
 	if(length(index)<ncol(sce)){
-		refALL = as.matrix(sce@assays$RNA@counts[,-index])
+		refALL = as.matrix(sce@assays$RNA@counts[commGene,-index])
 		Xc = cbind(Xc,rowMeans(refALL[commGene,]))
 	}
 
-	#adjust the bulk data by covariates
+	#adjust the bulk RNA-seq data by covariates
 	if(adj==TRUE){
+		Xc = as.matrix(Xc[,-1])
 		rownames(Xc)=commGene
-		bulk_adj = sapply(1:ncol(bulk),function(i){residuals(lm(bulk[commGene,i]~Xc[commGene,]))})
-		rownames(bulk_adj) = commGene
+		bulk_adj = sapply(1:ncol(bulk),function(i){
+			coef = lm(bulk[g,i]~Xc[g,]+0)$coefficients
+			#normalize the covariates coefficients
+			coef = coef/sum(coef)
+			bulk[g,i] = bulk[g,i]-(as.matrix(Xc[g,]) %*% as.vector(coef))
+		})
+		rownames(bulk_adj) = g
 		colnames(bulk_adj) = colnames(bulk)
 		bulk = bulk_adj
 	}
@@ -125,6 +131,8 @@ MeDuSA = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,smoothMethod='loess
 	names(bin) = rownames(space)
 	CBP = t(aggregate(t(ref[g,names(bin)]),by=list(bin),FUN=mean)[,-1])
 	bmed = aggregate(space,by=list(bin),FUN=median)[,-1]
+
+
 	ref = list(as.matrix(ref[g,]))
 
 	#Run deconvolution with the mixed model

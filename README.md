@@ -63,7 +63,8 @@ The following errors mean that the MeDuSA model can not converge on your data. W
 If you have any questions for MeDuSA, please create an issue here or contact the author <songliyang@westlake.edu.cn>.   
 
 
-###
+
+##  Premission Testing
 a simple test for the editting permission for cooperator
 
 

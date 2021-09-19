@@ -65,7 +65,7 @@ If you have any questions for MeDuSA, please create an issue here or contact the
 
 
 ##  Premission Testing
-a simple test for the editting permission for cooperator
+a simple test for the editting permission. (by LeonWestlake)
 
 
 

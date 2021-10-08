@@ -26,13 +26,9 @@ std::vector<Eigen::MatrixXd> reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Eig
 	// int inv_p = 0;
 	// int not_itermax = 0;
 
-	if (flag_converge)
-	{
-		// converge = 1;
 
-		b = tX_VI_X.inverse() * tX_VI_y;
-		sd = tX_VI_X.inverse();
-	}
+        b = tX_VI_X.inverse() * tX_VI_y;
+        sd = tX_VI_X.inverse();
 
 	// if(flag_inv_Vi) inv_vi = 1;
 	// if(flag_inv_P) inv_p = 1;
@@ -350,7 +346,7 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
 			L_size = L_history.size();
 			for(int i=0;i<L_size-1;i++)
 			{
-				if(lgL - L_history[i]<1e-30 || lgL - L_history[i]< -1e-30){
+				if(lgL - L_history[i]<1e-10 || lgL - L_history[i]< -1e-10){
 					step = step*0.8;
 					break;
 				}

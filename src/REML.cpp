@@ -290,7 +290,7 @@ double y_center(eigenVector &y,int n)
 
 void constrain_varcmp(eigenVector &y,eigenVector &varcmp,int n, int rindx)
 {
-	double constr_scale = 1e-6;
+	double constr_scale = 1e-10;
 	for (int i = 0; i < rindx; i++) {if (varcmp[i] < 0) varcmp[i] = constr_scale * y_center(y,n);}
 }
 

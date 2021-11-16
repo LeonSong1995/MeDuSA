@@ -43,7 +43,7 @@ sce$cellType = cellType
 sce$cellTrajectory = rep(0,ncol(sce))
 sce$cellTrajectory[rownames(Trajectory)]=Trajectory
 
-##Run MeDuSA (with 6 CPU cores)
+##Run MeDuSA (run with 6 courses):
 CellStateAbundance = MeDuSA(bulk=bulk,sce=sce,selectCellType='Epithelium',ncpu=6)
 Abundance = CellStateAbundance$abundance
 SignatureGene = CellStateAbundance$gene

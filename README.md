@@ -61,11 +61,3 @@ The following errors mean that the MeDuSA model can not converge on your data. W
 
 ## Contact
 If you have any questions for MeDuSA, please create an issue here or contact the author <songliyang@westlake.edu.cn>.   
-
-
-
-##  Permission Testing
-a simple test for the editting permission. (by LeonWestlake)
-
-
-

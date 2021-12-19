@@ -46,7 +46,7 @@ sce$cell_trajectory[rownames(Trajectory)]=Trajectory
 #Run MeDuSA (2 cpu):
 csab = MeDuSA(bulk=bulk,sce=sce,select.ct='Epithelium',ncpu=2)
 
-##Documents
+#Documents
 help(MeDuSA)
 ```
 

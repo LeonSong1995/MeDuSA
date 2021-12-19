@@ -28,26 +28,23 @@ The function for **cell-state abundance** deconvolution in this package is `MeDu
 ## Example
 MeDuSA package provides test data to show how to use.
 ```R
-##Library the package
+#Library the package
 library(MeDuSA)
 
-##Load the attached test data
+#Load the test data:
 data(ref)
 data(cellType)
-data(Trajectory)
+data(cellTrajectory)
 data(bulk)
 
-##Build the seurat obejct
+#Build the 'Seurat' obejct:
 sce = CreateSeuratObject(ref)
-sce$cellType = cellType
-sce$cellTrajectory = rep(0,ncol(sce))
-sce$cellTrajectory[rownames(Trajectory)]=Trajectory
+sce$cell_type = cellType
+sce$cell_trajectory = rep(0,ncol(sce))
+sce$cell_trajectory[rownames(Trajectory)]=Trajectory
 
-##Run MeDuSA (run with 6 courses):
-CellStateAbundance = MeDuSA(bulk=bulk,sce=sce,selectCellType='Epithelium',ncpu=6)
-Abundance = CellStateAbundance$abundance
-SignatureGene = CellStateAbundance$gene
-PseudoTime = CellStateAbundance$PesudoTimeCellbin
+#Run MeDuSA (2 cpu):
+csab = MeDuSA(bulk=bulk,sce=sce,select.ct='Epithelium',ncpu=2)
 
 ##Documents
 help(MeDuSA)

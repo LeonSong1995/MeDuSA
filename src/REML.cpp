@@ -20,117 +20,22 @@ std::vector<Eigen::MatrixXd> reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Eig
 
 	eigenMatrix b;
 	eigenMatrix sd;
-
-	// int converge = 0;
-	// int inv_vi = 0;
-	// int inv_p = 0;
-	// int not_itermax = 0;
-
-
         b = tX_VI_X.inverse() * tX_VI_y;
         sd = tX_VI_X.inverse();
 
-	// if(flag_inv_Vi) inv_vi = 1;
-	// if(flag_inv_P) inv_p = 1;
-	// if(flag_not_itermax) not_itermax =1;
-
-
 	L_history.clear();
-
-
+	
 	std::vector<Eigen::MatrixXd> r;
 	r.resize(4);
 	r[0] = b;
 	r[1] = sd;
 	r[2] = varcmp;
 	r[3] = Vi;
-
-
-
+	
 	// NumericVector out = NumericVector::create(b);
 	return (r);
 
 }
-
-
-
-
-
-// random effects estiamtion
-// std::vector<Eigen::MatrixXd>  reml2(Eigen::VectorXd start, Eigen::MatrixXd &X, Eigen::VectorXd &y, std::vector<Eigen::MatrixXd> &Z, int maxiter)
-// {
-// 	flag_converge = true;
-// 	int rindx = (1+Z.size());
-// 	int n = X.rows();
-// 	Eigen::VectorXd varcmp(rindx);
-// 	// int test = 1;
-// 	varcmp = reml_iteration(start, X, y, Z, varcmp,n, rindx,maxiter);
-
-// 	eigenMatrix tX_VI_X;
-// 	tX_VI_X = X.transpose() * Vi * X;
-
-
-// 	eigenMatrix Q;
-// 	eigenMatrix temp;
-// 	eigenVector flattened;
-// 	eigenVector flattened_Xita;
-// 	std::vector<Eigen::VectorXd> e;
-// 	std::vector<Eigen::VectorXd> xita;
-// 	e.resize(rindx-1);
-// 	xita.resize(rindx-1);
-
-// 	eigenMatrix v_tZ_Q;
-
-// 	if (flag_converge)
-// 	{
-// 		Q = Vi - Vi * X * tX_VI_X.inverse()  * X.transpose() *Vi;
-// 		for (int i=0; i<(rindx-1);i++)
-// 		{
-// 			v_tZ_Q = varcmp[i] * Z[i].transpose() * Q;
-// 			//BLUP
-// 			e[i] = (v_tZ_Q * y)/Z[i].cols();
-// 			//BLUP se
-// 			temp = varcmp[i] *v_tZ_Q * Z[i];
-// 			xita[i] = temp.diagonal().array().sqrt() / Z[i].cols();
-// 		}
-
-// 		int len = 0;
-// 		for (auto const &v : e) len += v.size();
-
-// 		flattened.resize(len); flattened_Xita.resize(len);
-
-// 		int offset = 0;
-// 		int size;
-// 		for (int i=0; i<(rindx-1);i++)
-// 		{
-// 			size = e[i].size();
-// 			flattened.middleRows(offset,size) = e[i];
-// 			flattened_Xita.middleRows(offset,size) = xita[i];
-// 			offset += size;
-// 		}
-// 	}else{
-// 		flattened.resize(1); flattened_Xita.resize(1);
-// 		flattened << 0; flattened_Xita << 0;
-// 	}
-
-// 	L_history.clear();
-
-// 	eigenMatrix res(2,flattened.size());
-// 	res.row(0) = flattened;
-// 	res.row(1) = flattened_Xita;
-
-// 	std::vector<Eigen::MatrixXd> r;
-// 	r.resize(2);
-// 	r[0] = res;
-// 	r[1] = varcmp;
-	
-
-// 	return(r);
-
-// }
-
-
-
 
 vector<eigenMatrix> calcu_A(vector<eigenMatrix> &Z, int n, int rindx)
 {

@@ -1,7 +1,5 @@
 # MeDuSA: mixed model-based deconvolution of cell-state abundance.
 # Author: Liyang Song <songliyang@westlake.edu.cn>
-
-
 #############################################################################################################
 #' @title MeDuSA: mixed model-based deconvolution of cell-state abundance.
 #' @description \code{MeDuSA} is a fine-resolution cellular deconvolution method, with the aim to use reference scRNA-seq data to predict cell abundance distributed along a cell-state trajectory in a bulk RNA-seq data. MeDuSA is well suitable for biological scenarios in which the underlying mechanisms are associated with continuous transitions of cell-states.
@@ -11,28 +9,19 @@
 #' @param selectCellType A character variable of the target cell type.
 #' @param ncpu The number of CPUs to be used.
 #' @param smooth A Boolean variable to determine whether to smooth the predicted cell-state abundance along the cell trajectory or not. The default value is TRUE. With default, the predicted cell-state abundance is smoothed using the Loess or averaging with its neighbors.
+#' @param smoothMethod A character vector of signature genes. The default value is NULL. With default, \code{MeDuSA} selects signature genes to distinguish cells within different cell-states using the generalized additive model (GAM, see \code{\link{mgcv}}).
 #' @param gene A character vector of signature genes. The default value is NULL. With default, \code{MeDuSA} selects signature genes to distinguish cells within different cell-states using the generalized additive model (GAM, see \code{\link{mgcv}}).
-#' @param nbins A numeric variable to determine the number of gene bins along the cell trajectory, which is used to ensure the selected genes were uniformly scattered along the given trajectory. The default value is 10.
+#' @param nbins A numeric variable to determine the number of bins along the cell trajectory, which is used to ensure the selected genes were uniformly scattered along the given trajectory. The default value is 10.
 #' @param resolution A numeric variable to determine the number of cell bins along the cell trajectory (i.e., the resolution of the deconvolution analysis). The default value is 50.
 #' @param knots A numeric variable to specify the numbers of knots of GAM. The default value is 10.
-#' @param maxgene A numeric variable to determine the maximum number of genes to be selected. The default value is 200.
-#' @param adj A Boolean variable to determine whether to correct covariates in predicting cell-state abundance or not.
-#' @param gcov A matrix (or vector) of covariates in the GAM (i.e., covariates for selecting signature genes). The default value is NULL.
-#' @param Xc  A matrix (or vector) of fixed covariates in the linear mixed model (i.e., covariates for predicting cell-state abundance). The default value is NULL. With default, MeDuSA includes expression profiles of other cell types as fixed covariates.
-#' @param maxiter The maximum iteration numbers of AI-REML. The default value is 1e+4.
-#' @param smoothMethod  A character variable to specify the smoothing approach, including “loess” and “average”.
-#' @param family A character variable to specify the distribution of GAM. See \code{\link{family.mgcv}} for a full list of what is available.
 #' @param start A vector for the initial value of the REML iteration. Default by c(1e-5,1e-2).
+#' @param maxgene A numeric variable to determine the maximum number of genes to be selected. The default value is 200.
+#' @param family A character variable to specify the distribution of GAM. See \code{\link{family.mgcv}} for a full list of what is available.
+#' @param gcov A matrix (or vector) of covariates in the GAM (i.e., covariates for selecting signature genes). The default value is NULL.
+#' @param Xc A matrix (or vector) of fixed covariates in the linear mixed model (i.e., covariates for predicting cell-state abundance). The default value is NULL.
+#' @param maxiter The maximum iteration numbers of AI-REML. The default value is 1e+4.
+#' @param adj A Boolean variable to determine whether to correct covariates in predicting cell-state abundance or not.
 #'
-#' @details MeDuSA is a fine-resolution cellular deconvolution method that aims to use reference scRNA-seq data to predict cell abundance distributed along a cell-state trajectory in a bulk RNA-seq data set,
-#' where cell trajectory specifies each cell as a point in a pseudo-time vector, determining the pattern of a dynamic process experienced by the cells.
-#' \code{MeDuSA} comprises three steps:\itemize{
-#' \item Select signature genes: \code{MeDuSA} associates genes with the cell trajectory using the generalized additive model (GAM). The association strength is scored using the Wald chi-squared value. MeDuSA then selects genes with the highest chi-squared values as signature genes.
-#' \item Predicate cell-state abundance: \code{MeDuSA} predicts cell-state abundance for each cell bin using the linear mixed model (LMM).
-#' \item Smooth cell-state abundance: \code{MeDuSA} smooths the predicted cell-state abundance by performing loess regression or averaging cells-state abundance with its neighbors.
-#' }
-
-
 #' @return \code{MeDuSA} returns: \itemize{
 #' \item\code{abundance}: A matrix of cell-state abundance. Each row corresponds to a cell bin and each column corresponds to a sample.
 #' \item\code{gene}:A vector of the selected signature genes.
@@ -151,7 +140,7 @@ MeDuSA = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,smoothMethod='loess
 		if(smoothMethod=='loess'){
 			abundance =apply(abundance,2,function(ab){predict(stats::loess(ab~bmed))})
 		}else{
-			num = round(length(bmed)*0.2)
+			num = max(5,round(length(bmed)*0.2))
 			neighbour=sapply(1:length(bmed),function(i){order(abs(bmed[i]-bmed),decreasing = F)[1:num]})
 			abundance = apply(abundance,2,function(x){sapply(1:ncol(neighbour),function(i){
 				mean(x[neighbour[,i]])

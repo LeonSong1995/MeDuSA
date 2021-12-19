@@ -77,8 +77,7 @@ MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gen
 	commGene = intersect(rownames(bulk),rownames(sce))
 	bulk = bulk[commGene,]
 	ref = ref[commGene,]
-
-
+	
 	#Select the genes
 	nbins = min(nbins,ncol(ref))
 	if(is.null(gene)){
@@ -87,7 +86,6 @@ MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gen
 	  chi = g_chi$chi
 
 	}else{g=Reduce(intersect,list(gene,rownames(bulk),rownames(sce)))}
-
 
 	#Prepare the incidence matrix of fixed covariates.
 	Xc_input = Xc[intersect(commGene,rownames(Xc)),]

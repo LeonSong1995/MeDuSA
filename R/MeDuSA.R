@@ -19,15 +19,16 @@
 #' @param adj A Boolean variable to determine whether to correct covariates in predicting cell-state abundance or not.
 #' @param gcov A matrix (or vector) of covariates in the GAM (i.e., covariates for selecting signature genes). The default value is NULL.
 #' @param Xc  A matrix (or vector) of fixed covariates in the linear mixed model (i.e., covariates for predicting cell-state abundance). The default value is NULL. With default, MeDuSA includes expression profiles of other cell types as fixed covariates.
-#' @param maxiter The maximum iterations of AI-REML. The default value is 1e+4.
+#' @param maxiter The maximum iteration numbers of AI-REML. The default value is 1e+4.
 #' @param smoothMethod  A character variable to specify the smoothing approach, including “loess” and “average”.
 #' @param family A character variable to specify the distribution of GAM. See \code{\link{family.mgcv}} for a full list of what is available.
-
+#' @param start A vector for the initial value of the REML iteration. Default by c(1e-5,1e-2).
+#'
 #' @details MeDuSA is a fine-resolution cellular deconvolution method that aims to use reference scRNA-seq data to predict cell abundance distributed along a cell-state trajectory in a bulk RNA-seq data set,
 #' where cell trajectory specifies each cell as a point in a pseudo-time vector, determining the pattern of a dynamic process experienced by the cells.
 #' \code{MeDuSA} comprises three steps:\itemize{
 #' \item Select signature genes: \code{MeDuSA} associates genes with the cell trajectory using the generalized additive model (GAM). The association strength is scored using the Wald chi-squared value. MeDuSA then selects genes with the highest chi-squared values as signature genes.
-#' \item Predicate cell-state abundance: \code{MeDuSA} predicts cell-state abundance for each cell bin using the linear mixed model.
+#' \item Predicate cell-state abundance: \code{MeDuSA} predicts cell-state abundance for each cell bin using the linear mixed model (LMM).
 #' \item Smooth cell-state abundance: \code{MeDuSA} smooths the predicted cell-state abundance by performing loess regression or averaging cells-state abundance with its neighbors.
 #' }
 
@@ -55,10 +56,10 @@
 #' sce$cellTrajectory = rep(0,ncol(sce))
 #' sce$cellTrajectory[rownames(Trajectory)]=Trajectory
 #'
-#' ##Run MeDuSA (with 6 CPU cores):
+#' ##Run MeDuSA (run with 6 courses):
 #' CellStateAbundance = MeDuSA(bulk=bulk,sce=sce,selectCellType='Epithelium',ncpu=6)
 
-MeDuSA = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,smoothMethod='loess',gene=NULL,nbins=10,resolution=50,knots=10,maxgene=200,family='gaussian',gcov=NULL,Xc=NULL,maxiter=1e+4,adj=FALSE){
+MeDuSA = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,smoothMethod='loess',gene=NULL,nbins=10,resolution=50,knots=10,start=c(1e-5,1e-2),maxgene=200,family='gaussian',gcov=NULL,Xc=NULL,maxiter=1e+4,adj=FALSE){
 
 	#Checking the format of the input parameters
 	message("Thanks for using MeDuSA to perform cell-state abundance deconvolution analyses.")
@@ -116,9 +117,11 @@ MeDuSA = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,smoothMethod='loess
 		Xc = as.matrix(Xc[,-1])
 		rownames(Xc)=commGene
 		bulk_adj = sapply(1:ncol(bulk),function(i){
-			coef = lm(bulk[g,i]~Xc[g,]+0)$coefficients
+			Xcov = rowMeans(as.matrix(Xc[g,]))
+			coef = lm(bulk[g,i]~Xcov+0)$coefficients
 			#normalize the covariates coefficients
-			coef = coef/sum(coef)
+      coef[coef<0] = 0
+			coef = coef/sum(coef+1e-100)
 			bulk[g,i] = bulk[g,i]-(as.matrix(Xc[g,]) %*% as.vector(coef))
 		})
 		rownames(bulk_adj) = g
@@ -133,19 +136,26 @@ MeDuSA = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,smoothMethod='loess
 	bmed = aggregate(space,by=list(bin),FUN=median)[,-1]
 
 
+	# ref = sweep(ref,2,colSums(ref),'/')*1e+3
+
 	ref = list(as.matrix(ref[g,]))
 
-	#Run deconvolution with the mixed model
-	abundance = Decov(ncpu = ncpu,bulk=bulk,g=g,ref=ref,CBP=CBP,maxiter=maxiter)
+	#Run deconvolution with the MLM
+	abundance = Decov(ncpu = ncpu,bulk=bulk,g=g,ref=ref,CBP=CBP,start=start,maxiter=maxiter)
+
+	##for the data not converged
+	abundance[,is.na(colSums(abundance))]=0
 
 	#Smooth
 	if(smooth==TRUE){
 		if(smoothMethod=='loess'){
 			abundance =apply(abundance,2,function(ab){predict(stats::loess(ab~bmed))})
 		}else{
-			num = 5
+			num = round(length(bmed)*0.2)
 			neighbour=sapply(1:length(bmed),function(i){order(abs(bmed[i]-bmed),decreasing = F)[1:num]})
-			abundance = apply(abundance,2,function(x){sapply(1:ncol(neighbour),function(i){ mean(x[neighbour[,i]])})})
+			abundance = apply(abundance,2,function(x){sapply(1:ncol(neighbour),function(i){
+				mean(x[neighbour[,i]])
+			})})
 		}
 	}
 
@@ -161,11 +171,11 @@ MeDuSA = function(bulk,sce,selectCellType,ncpu=1,smooth=TRUE,smoothMethod='loess
 
 #' @keywords internal
 #Mixed model deconvolution
-Decov = function(ncpu,bulk,g,ref,CBP,maxiter=1e+4){
+Decov = function(ncpu,bulk,g,ref,CBP,start,maxiter=1e+4){
   ncpu =ncpu
   message('\n',paste0(paste0('Run deconvolution with ',ncpu)),' cores.')
   cl = parallel::makeCluster(ncpu)
-  parallel::clusterExport(cl=cl, varlist=c("bulk","g","reml","ref","CBP","maxiter"),
+  parallel::clusterExport(cl=cl, varlist=c("bulk","g","reml","ref","CBP","maxiter","start"),
                           envir=environment())
   doSNOW::registerDoSNOW(cl)
   pb = utils::txtProgressBar(min = 1, max = ncol(bulk), style = 3)
@@ -177,11 +187,13 @@ Decov = function(ncpu,bulk,g,ref,CBP,maxiter=1e+4){
   abundance = foreach::foreach(geneNumber = colnames(bulk), .options.snow = opts) %dopar2% {
     b = bulk[g,geneNumber]
     fixcmp = rep(1,length(g))
-    vi = reml(start = rep(var(b),length(ref)+1),X = as.matrix(fixcmp),y = as.matrix(b),Z = ref,maxiter = maxiter)[[4]]
+    vi = reml(start = start,X = as.matrix(fixcmp),y = as.matrix(b),Z = ref,maxiter = maxiter)[[4]]
     r = apply(CBP,2,function(x){solve(t(x) %*% vi %*% x) %*% (t(x) %*% vi %*% b)})
   }
   parallel::stopCluster(cl)
   abundance = do.call(cbind,abundance)
   return(abundance)
 }
+
+
 

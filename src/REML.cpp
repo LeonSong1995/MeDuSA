@@ -253,7 +253,7 @@ bool ai_reml(eigenVector &y,eigenMatrix &P, eigenVector &Py,eigenVector &prev_va
 	// Calculate variance component
 	if (!inverse_H(Hi))
 	{
-		cout << "the information matrix is not invertible.Transfer to EM-REML(slow)" << endl;
+		cout << "Transfer to EM-REML(slow)" << endl;
 		return false;
 	}
 	eigenVector delta(rindx);

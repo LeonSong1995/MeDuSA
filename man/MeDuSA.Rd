@@ -7,7 +7,7 @@
 MeDuSA(
   bulk,
   sce,
-  selectCellType,
+  select.ct,
   ncpu = 1,
   smooth = TRUE,
   smoothMethod = "loess",
@@ -15,6 +15,7 @@ MeDuSA(
   nbins = 10,
   resolution = 50,
   knots = 10,
+  start = c(1e-05, 0.01),
   maxgene = 200,
   family = "gaussian",
   gcov = NULL,
@@ -24,56 +25,49 @@ MeDuSA(
 )
 }
 \arguments{
-\item{bulk}{A matrix of bulk RNA-Seq data. Each row corresponds to a specific gene and each column corresponds to a particular sample.}
+\item{bulk}{A matrix of bulk RNA-seq data. Each row corresponds to a specific gene and each column corresponds to a particular sample.}
 
-\item{sce}{A \code{seurat} object of the single-cell RNA-Seq data (see \code{\link{seurat}}). Meta data of this seurat object need include 'cellType' and 'cellTrajectory'.}
+\item{sce}{A \code{seurat} object of the  reference scRNA-seq data (see \code{\link{seurat}}). Meta-data of the seurat object (sce@meta.data) need include two columns named as cell_type and cell_trajectory.}
 
-\item{selectCellType}{A character variable of the target cell type.}
+\item{select.ct}{A character variable of the target cell type.}
 
-\item{ncpu}{The number of CPUs to be used.}
+\item{ncpu}{The number of CPU(s) to be used.}
 
-\item{smooth}{A Boolean variable to determine whether to smooth the predicted cell-state abundance along the cell trajectory or not. The default value is TRUE. With default, the predicted cell-state abundance is smoothed using the Loess or averaging with its neighbors.}
+\item{smooth}{A Boolean variable to determine whether to smooth the predicted cell-state abundance or not. The default value is TRUE.}
 
-\item{smoothMethod}{A character variable to specify the smoothing approach, including “loess” and “average”.}
+\item{smoothMethod}{A character variable to determine the smoothing method. The default method is \code{\link{loess}}.}
 
-\item{gene}{A character vector of signature genes. The default value is NULL. With default, \code{MeDuSA} selects signature genes to distinguish cells within different cell-states using the generalized additive model (GAM, see \code{\link{mgcv}}).}
+\item{gene}{A character vector of signature genes. The default value is NULL. With default, \code{MeDuSA} selects signature genes using the generalized additive model (see \code{\link{mgcv}}).}
 
-\item{nbins}{A numeric variable to determine the number of gene bins along the cell trajectory, which is used to ensure the selected genes were uniformly scattered along the given trajectory. The default value is 10.}
+\item{nbins}{A numeric variable to determine the number of bins along the cell trajectory, which is used to ensure the selected genes were uniformly scattered along the given trajectory. The default value is 10.}
 
 \item{resolution}{A numeric variable to determine the number of cell bins along the cell trajectory (i.e., the resolution of the deconvolution analysis). The default value is 50.}
 
-\item{knots}{A numeric variable to specify the numbers of knots of GAM. The default value is 10.}
+\item{knots}{A numeric variable to specify the number of knots. The default value is 10.}
 
-\item{maxgene}{A numeric variable to determine the maximum number of genes to be selected. The default value is 200.}
+\item{start}{A numeric vector for the initial value of the REML. Default by c(1e-5,1e-2).}
+
+\item{maxgene}{A numeric variable to determine the number of signature genes. The default value is 200.}
 
 \item{family}{A character variable to specify the distribution of GAM. See \code{\link{family.mgcv}} for a full list of what is available.}
 
-\item{gcov}{A matrix (or vector) of covariates in the GAM (i.e., covariates for selecting signature genes). The default value is NULL.}
+\item{gcov}{A matrix (vector) of covariates in the GAM. The default value is NULL.}
 
-\item{Xc}{A matrix (or vector) of fixed covariates in the linear mixed model (i.e., covariates for predicting cell-state abundance). The default value is NULL. With default, MeDuSA includes expression profiles of other cell types as fixed covariates.}
+\item{Xc}{A matrix (vector) of fixed covariates in the linear mixed model (i.e., covariates for predicting cell-state abundance). The default value is NULL.}
 
-\item{maxiter}{The maximum iterations of AI-REML. The default value is 1e+4.}
+\item{maxiter}{The iteration number of REML. Default by 1e+4.}
 
-\item{adj}{A Boolean variable to determine whether to correct covariates in predicting cell-state abundance or not.}
+\item{adj}{A Boolean variable to determine whether to include covariates when predicting the cell-state abundance.}
 }
 \value{
 \code{MeDuSA} returns: \itemize{
-\item\code{abundance}: A matrix of cell-state abundance. Each row corresponds to a cell bin and each column corresponds to a sample.
-\item\code{gene}:A vector of the selected signature genes.
-\item\code{PesudoTimeCellbin}:A vector of the pseudo-time for each cell bin.
+\item\code{abundance}: A numeric matrix of cell-state abundance. Each row corresponds to a cell bin and each column corresponds to a sample.
+\item\code{gene}: A character vector of the selected signature genes.
+\item\code{PesudoTimeCellbin}: A numeric vector of the pseudo-time for each cell bin.
 }
 }
 \description{
-\code{MeDuSA} is a fine-resolution cellular deconvolution method, with the aim to use reference scRNA-seq data to predict cell abundance distributed along a cell-state trajectory in a bulk RNA-seq data. MeDuSA is well suitable for biological scenarios in which the underlying mechanisms are associated with continuous transitions of cell-states.
-}
-\details{
-MeDuSA is a fine-resolution cellular deconvolution method that aims to use reference scRNA-seq data to predict cell abundance distributed along a cell-state trajectory in a bulk RNA-seq data set,
-where cell trajectory specifies each cell as a point in a pseudo-time vector, determining the pattern of a dynamic process experienced by the cells.
-\code{MeDuSA} comprises three steps:\itemize{
-\item Select signature genes: \code{MeDuSA} associates genes with the cell trajectory using the generalized additive model (GAM). The association strength is scored using the Wald chi-squared value. MeDuSA then selects genes with the highest chi-squared values as signature genes.
-\item Predicate cell-state abundance: \code{MeDuSA} predicts cell-state abundance for each cell bin using the linear mixed model.
-\item Smooth cell-state abundance: \code{MeDuSA} smooths the predicted cell-state abundance by performing loess regression or averaging cells-state abundance with its neighbors.
-}
+\code{MeDuSA} is a fine-resolution cellular deconvolution method, with the aim to use reference scRNA-seq data to predict the cell-state abundance of bulk RNA-seq data.
 }
 \examples{
 ##Library the package
@@ -87,12 +81,12 @@ data(bulk)
 
 ##Build the 'Seurat' obejct:
 sce = CreateSeuratObject(ref)
-sce$cellType = cellType
-sce$cellTrajectory = rep(0,ncol(sce))
-sce$cellTrajectory[rownames(Trajectory)]=Trajectory
+sce$cell_type = cellType
+sce$cell_trajectory = rep(0,ncol(sce))
+sce$cell_trajectory[rownames(Trajectory)]=Trajectory
 
-##Run MeDuSA (with 6 CPU cores):
-CellStateAbundance = MeDuSA(bulk=bulk,sce=sce,selectCellType='Epithelium',ncpu=6)
+##Run MeDuSA (run with 6 courses):
+csab = MeDuSA(bulk=bulk,sce=sce,select.ct='Epithelium',ncpu=6)
 }
 \author{
 Liyang Song <songliyang@westlake.edu.cn>

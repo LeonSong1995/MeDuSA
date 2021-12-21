@@ -77,7 +77,8 @@ MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gen
 	commGene = intersect(rownames(bulk),rownames(sce))
 	bulk = bulk[commGene,]
 	ref = ref[commGene,]
-	
+
+
 	#Select the genes
 	nbins = min(nbins,ncol(ref))
 	if(is.null(gene)){
@@ -86,6 +87,7 @@ MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gen
 	  chi = g_chi$chi
 
 	}else{g=Reduce(intersect,list(gene,rownames(bulk),rownames(sce)))}
+
 
 	#Prepare the incidence matrix of fixed covariates.
 	Xc_input = Xc[intersect(commGene,rownames(Xc)),]
@@ -120,6 +122,10 @@ MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gen
 	names(bin) = rownames(space)
 	CBP = t(aggregate(t(ref[g,names(bin)]),by=list(bin),FUN=mean)[,-1])
 	bmed = aggregate(space,by=list(bin),FUN=median)[,-1]
+
+
+	# ref = sweep(ref,2,colSums(ref),'/')*1e+3
+
 	ref = list(as.matrix(ref[g,]))
 
 	#Run deconvolution with the MLM

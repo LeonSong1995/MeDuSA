@@ -108,7 +108,7 @@ MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gen
 			Xcov = rowMeans(as.matrix(Xc[g,]))
 			coef = lm(bulk[g,i]~Xcov+0)$coefficients
 			#normalize the covariates coefficients
-      coef[coef<0] = 0
+                        coef[coef<0] = 0
 			coef = coef/sum(coef+1e-100)
 			bulk[g,i] = bulk[g,i]-(as.matrix(Xc[g,]) %*% as.vector(coef))
 		})

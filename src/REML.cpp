@@ -307,14 +307,14 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
 		}
 
 		//initialized with EM-REML
-		if (iter == 0)
+		if (iter < 0)
 		{
 			em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
 		}
 		else
 		{
 			if (flag_EM) em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
-			else if (!ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step)) flag_EM = true;
+			else if (!ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step)) flag_EM = false;
 
 		}
 
@@ -337,7 +337,7 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
 		}
 
 
-		cout << lgL << endl;
+		//cout << lgL << endl;
 		dlogL = lgL - prev_lgL;
 
 		//converge

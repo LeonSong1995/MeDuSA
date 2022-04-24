@@ -3,15 +3,18 @@
 
 
 
+
+
 //[[Rcpp::export]]
-std::vector<Eigen::MatrixXd> reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Eigen::VectorXd &y, std::vector<Eigen::MatrixXd> &Z, int maxiter)
+std::vector<Eigen::MatrixXd>  reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Eigen::VectorXd &y, std::vector<Eigen::MatrixXd> &Z, int maxiter)
 {
 	flag_converge = true;
 	int rindx = (1+Z.size());
 	int n = X.rows();
 	Eigen::VectorXd varcmp(rindx);
-	// int test =1;
+	// int test = 1;
 	varcmp = reml_iteration(start, X, y, Z, varcmp,n, rindx,maxiter);
+
 
 	eigenMatrix tX_VI_X;
 	eigenMatrix tX_VI_y;
@@ -26,107 +29,87 @@ std::vector<Eigen::MatrixXd> reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Eig
 	// int inv_p = 0;
 	// int not_itermax = 0;
 
-	b = tX_VI_X.inverse() * tX_VI_y;
-	sd = tX_VI_X.inverse();
+	if (flag_converge)
+	{
+		// converge = 1;
 
-	// if(flag_inv_Vi) inv_vi = 1;
-	// if(flag_inv_P) inv_p = 1;
-	// if(flag_not_itermax) not_itermax =1;
+		b = tX_VI_X.inverse() * tX_VI_y;
+		sd = tX_VI_X.inverse();
+	}
+	eigenMatrix fix(2,b.size());
+	fix.row(0) = b;
+	fix.row(1) = sd;
 
+	eigenMatrix Q;
+	eigenMatrix temp;
+	eigenVector flattened;
+	eigenVector flattened_Xita;
+	std::vector<Eigen::VectorXd> e;
+	std::vector<Eigen::VectorXd> xita;
+	e.resize(rindx-1);
+	xita.resize(rindx-1);
+
+	//AUP
+	// eigenMatrix MRH;
+	// double k;
+	// MRH = y.transpose() * Q * Z[i];
+	// cout << (MRH * MRH.transpose())[0,0] << endl;
+	// k = (MRH * MRH.transpose())[0,0];
+	// k = sqrt((varcmp[i]*(Z[i].cols()-1))/(MRH * MRH.transpose()));
+	// e[i]  = (k * Z[i].transpose() * Q * y)/ sqrt(Z[i].cols());
+
+	eigenMatrix v_tZ_Q;
+
+	if (flag_converge)
+	{
+		Q = Vi - Vi * X * tX_VI_X.inverse()  * X.transpose() *Vi;
+		for (int i=0; i<(rindx-1);i++)
+		{
+			v_tZ_Q = varcmp[i] * Z[i].transpose() * Q;
+			//BLUP
+			e[i] = (v_tZ_Q * y)/Z[i].cols();
+			//BLUP se
+			temp = varcmp[i] *v_tZ_Q * Z[i];
+			xita[i] = temp.diagonal().array().sqrt() / Z[i].cols();
+		}
+
+
+		// concatenate vector
+		int len = 0;
+		for (auto const &v : e) len += v.size();
+
+		flattened.resize(len); flattened_Xita.resize(len);
+
+		int offset = 0;
+		int size;
+		for (int i=0; i<(rindx-1);i++)
+		{
+			size = e[i].size();
+			flattened.middleRows(offset,size) = e[i];
+			flattened_Xita.middleRows(offset,size) = xita[i];
+			offset += size;
+		}
+	}else{
+		flattened.resize(1); flattened_Xita.resize(1);
+		flattened << 0; flattened_Xita << 0;
+	}
 
 	L_history.clear();
 
+	eigenMatrix res(2,flattened.size());
+	res.row(0) = flattened;
+	res.row(1) = flattened_Xita;
 
 	std::vector<Eigen::MatrixXd> r;
 	r.resize(4);
-	r[0] = b;
-	r[1] = sd;
+	r[0] = fix;
+	r[1] = res;
 	r[2] = varcmp;
 	r[3] = Vi;
 
-
-
-	// NumericVector out = NumericVector::create(b);
-	return (r);
+	return(r);
 
 }
-
-
-
-
-
-// random effects estiamtion
-// std::vector<Eigen::MatrixXd>  reml2(Eigen::VectorXd start, Eigen::MatrixXd &X, Eigen::VectorXd &y, std::vector<Eigen::MatrixXd> &Z, int maxiter)
-// {
-// 	flag_converge = true;
-// 	int rindx = (1+Z.size());
-// 	int n = X.rows();
-// 	Eigen::VectorXd varcmp(rindx);
-// 	// int test = 1;
-// 	varcmp = reml_iteration(start, X, y, Z, varcmp,n, rindx,maxiter);
-
-// 	eigenMatrix tX_VI_X;
-// 	tX_VI_X = X.transpose() * Vi * X;
-
-
-// 	eigenMatrix Q;
-// 	eigenMatrix temp;
-// 	eigenVector flattened;
-// 	eigenVector flattened_Xita;
-// 	std::vector<Eigen::VectorXd> e;
-// 	std::vector<Eigen::VectorXd> xita;
-// 	e.resize(rindx-1);
-// 	xita.resize(rindx-1);
-
-// 	eigenMatrix v_tZ_Q;
-
-// 	if (flag_converge)
-// 	{
-// 		Q = Vi - Vi * X * tX_VI_X.inverse()  * X.transpose() *Vi;
-// 		for (int i=0; i<(rindx-1);i++)
-// 		{
-// 			v_tZ_Q = varcmp[i] * Z[i].transpose() * Q;
-// 			//BLUP
-// 			e[i] = (v_tZ_Q * y)/Z[i].cols();
-// 			//BLUP se
-// 			temp = varcmp[i] *v_tZ_Q * Z[i];
-// 			xita[i] = temp.diagonal().array().sqrt() / Z[i].cols();
-// 		}
-
-// 		int len = 0;
-// 		for (auto const &v : e) len += v.size();
-
-// 		flattened.resize(len); flattened_Xita.resize(len);
-
-// 		int offset = 0;
-// 		int size;
-// 		for (int i=0; i<(rindx-1);i++)
-// 		{
-// 			size = e[i].size();
-// 			flattened.middleRows(offset,size) = e[i];
-// 			flattened_Xita.middleRows(offset,size) = xita[i];
-// 			offset += size;
-// 		}
-// 	}else{
-// 		flattened.resize(1); flattened_Xita.resize(1);
-// 		flattened << 0; flattened_Xita << 0;
-// 	}
-
-// 	L_history.clear();
-
-// 	eigenMatrix res(2,flattened.size());
-// 	res.row(0) = flattened;
-// 	res.row(1) = flattened_Xita;
-
-// 	std::vector<Eigen::MatrixXd> r;
-// 	r.resize(2);
-// 	r[0] = res;
-// 	r[1] = varcmp;
-	
-
-// 	return(r);
-
-// }
 
 
 
@@ -196,7 +179,7 @@ void calcu_tr_PA(eigenMatrix &P, eigenVector &tr_PA,int n,int rindx)
 	{
 		double d_buf = 0.0;
 		memset(d_bufs, 0, n * sizeof(double));
-
+		#pragma omp parallel for
 		for (int k = 0; k < n; k++) {
 			for (int l = 0; l < n; l++) d_bufs[k] += P(k, l)*(_A[i])(k, l);
 		}
@@ -227,7 +210,7 @@ bool ai_reml(eigenVector &y,eigenMatrix &P, eigenVector &Py,eigenVector &prev_va
 
 	Py = P * y;
 	eigenMatrix APy(n, rindx);
-
+	#pragma omp parallel for
 	for (int i = 0; i < rindx; i++) {
 		(APy.col(i)) = (_A[i]) * Py;
 	}
@@ -235,7 +218,7 @@ bool ai_reml(eigenVector &y,eigenMatrix &P, eigenVector &Py,eigenVector &prev_va
 	// Calculate Hi
 	eigenVector R(rindx);
 	eigenMatrix Hi(rindx, rindx);
-
+	#pragma omp parallel for
 	for (int i = 0; i < rindx; i++) {
 		R(i) = (Py.transpose()*(APy.col(i)))(0, 0);
 		eigenVector cvec = P * (APy.col(i));
@@ -252,7 +235,7 @@ bool ai_reml(eigenVector &y,eigenMatrix &P, eigenVector &Py,eigenVector &prev_va
 	// Calculate variance component
 	if (!inverse_H(Hi))
 	{
-		cout << "Transfer to EM-REML(slow)." << endl;
+		cout << "the information matrix is not invertible.Transfer to EM-REML(slow)" << endl;
 		return false;
 	}
 	eigenVector delta(rindx);
@@ -269,7 +252,7 @@ void em_reml(eigenVector &y,eigenMatrix &P, eigenVector &Py, eigenVector &prev_v
 	Py = P * y;
 
 	eigenVector R(rindx);
-
+	#pragma omp parallel for
 	for (int i = 0; i < rindx; i++)
 	{
 		R(i) = (Py.transpose()*(_A[i]) * Py)(0, 0);
@@ -310,14 +293,14 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
 	{
 		if (!calcu_Vi(Vi, prev_varcmp, logdet,n, rindx))
 		{
-			cout << "REML ERROR!:V matrix is not positive." << endl;
+			cout << "REML ERROR!:V matrix is not positive. Switch to multiple linear regression!" << endl;
 			flag_converge = false;
 			flag_inv_Vi = false;
 			return varcmp;
 		}
 		if (!calcu_P(X,Vi, P, logdet_Xt_Vi_X))
 		{
-			cout << "REML ERROR!: the X^t * V^-1 * X matrix is not invertible,please check the Signature Genes." << endl;
+			cout << "REML ERROR!: the X^t * V^-1 * X matrix is not invertible,please check the Signature Genes. Switch to multiple linear regression!" << endl;
 			flag_converge = false;
 			flag_inv_P = false;
 			return varcmp;
@@ -345,8 +328,8 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
 			L_size = L_history.size();
 			for(int i=0;i<L_size-1;i++)
 			{
-				if(lgL - L_history[i]<1e-10 || lgL - L_history[i]< -1e-10){
-					step = step*0.6;
+				if(lgL - L_history[i]<1e-30 || lgL - L_history[i]< -1e-30){
+					step = step*0.8;
 					break;
 				}
 			}
@@ -354,11 +337,11 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
 		}
 
 
-		// cout << lgL << endl;
+		cout << lgL << endl;
 		dlogL = lgL - prev_lgL;
 
 		//converge
-		if ((varcmp - prev_varcmp).squaredNorm() / varcmp.squaredNorm() < 1e-8 && (fabs(dlogL) < 1e-4 || (fabs(dlogL) < 1e-3 && dlogL < 0))) {
+		if ((varcmp - prev_varcmp).squaredNorm() / varcmp.squaredNorm() < 1e-6 && (fabs(dlogL) < 1e-3 || (fabs(dlogL) < 1e-2 && dlogL < 0))) {
 			prev_varcmp = varcmp;
 			calcu_Vi(Vi, prev_varcmp, logdet,n, rindx);
 			flag_converge = true;

@@ -310,13 +310,13 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
  		if (iter ==1)
  		{
  			em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
-			flag_EM = true;
+			//flag_EM = true;
  		}
 		else
  		{
- 			//if (flag_EM) em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
- 			//else if (!ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step)) flag_EM = true;
-			em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
+ 			if (flag_EM) em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
+ 			else if (!ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step)) flag_EM = true;
+			//em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
  		}
 
 		constrain_varcmp(y,varcmp,n, rindx);

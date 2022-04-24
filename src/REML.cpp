@@ -307,17 +307,18 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
 		}
 
 		//initialized with EM-REML
-		if (iter < 0)
-		{
-			em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
-		}
-		else
-		{
-			if (flag_EM) em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
-			else if (!ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step)) flag_EM = false;
+// 		if (iter < 0)
+// 		{
+// 			em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
+// 		}
+// 		else
+// 		{
+// 			if (flag_EM) em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
+// 			else if (!ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step)) flag_EM = false;
 
-		}
+// 		}
 
+		ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step)
 		constrain_varcmp(y,varcmp,n, rindx);
 
 		lgL = -0.5 * (logdet_Xt_Vi_X + logdet + (y.transpose() * Py)(0, 0));

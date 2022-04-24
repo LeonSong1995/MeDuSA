@@ -318,7 +318,7 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
 
 // 		}
 
-		ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step)
+		ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step);
 		constrain_varcmp(y,varcmp,n, rindx);
 
 		lgL = -0.5 * (logdet_Xt_Vi_X + logdet + (y.transpose() * Py)(0, 0));

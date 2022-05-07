@@ -6,15 +6,17 @@
 
 
 //[[Rcpp::export]]
-std::vector<Eigen::MatrixXd>  reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Eigen::VectorXd &y, std::vector<Eigen::MatrixXd> &Z, int maxiter)
+std::vector<Eigen::MatrixXd>  reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Eigen::VectorXd &y, std::vector<Eigen::MatrixXd> &Z, int maxiter,Eigen::MatrixXd &S)
 {
 	flag_converge = true;
 	int rindx = (1+Z.size());
 	int n = X.rows();
 	Eigen::VectorXd varcmp(rindx);
+	double lgL = 1e-20;
+	// cout << lgL << endl;
 	// int test = 1;
-	varcmp = reml_iteration(start, X, y, Z, varcmp,n, rindx,maxiter);
-
+	varcmp = reml_iteration(start, X, y, Z, varcmp,n, rindx,maxiter,S,lgL);
+	// cout << lgL << endl;
 
 	eigenMatrix tX_VI_X;
 	eigenMatrix tX_VI_y;
@@ -100,12 +102,16 @@ std::vector<Eigen::MatrixXd>  reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Ei
 	res.row(0) = flattened;
 	res.row(1) = flattened_Xita;
 
+	eigenMatrix LogL(1,1);
+	LogL(0,0) = lgL; 
+
 	std::vector<Eigen::MatrixXd> r;
-	r.resize(4);
+	r.resize(5);
 	r[0] = fix;
 	r[1] = res;
 	r[2] = varcmp;
 	r[3] = Vi;
+	r[4] = LogL;
 
 	return(r);
 
@@ -114,13 +120,13 @@ std::vector<Eigen::MatrixXd>  reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Ei
 
 
 
-vector<eigenMatrix> calcu_A(vector<eigenMatrix> &Z, int n, int rindx)
+vector<eigenMatrix> calcu_A(vector<eigenMatrix> &Z, int n, int rindx,Eigen::MatrixXd &S)
 {
 	vector<eigenMatrix> _A;
 	_A.resize(rindx);
 	for (int i=0; i<(rindx-1);i++)
 	{
-		_A[i] = (Z[i] * Z[i].transpose())/Z[i].cols();
+		_A[i] = Z[i] * S * Z[i].transpose();
 	}
 	_A[rindx-1] = eigenMatrix::Identity(n, n);
 	return _A;
@@ -278,15 +284,14 @@ void constrain_varcmp(eigenVector &y,eigenVector &varcmp,int n, int rindx)
 
 
 
-VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, vector<eigenMatrix> &Z, eigenVector &varcmp, int n, int rindx,int maxiter)
+VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, vector<eigenMatrix> &Z, eigenVector &varcmp, int n, int rindx,int maxiter, eigenMatrix &S, double &lgL)
 {
-	double logdet = 0.0, logdet_Xt_Vi_X = 0.0, prev_lgL = -1e20, lgL = -1e20, dlogL = 1000.0, step = 0.316;
+	double logdet = 0.0, logdet_Xt_Vi_X = 0.0, prev_lgL = -1e20, dlogL = 1000.0, step = 0.316;
 	int L_size;
-
 	eigenVector prev_varcmp(rindx);
 	prev_varcmp = start;
 
-	_A = calcu_A(Z,n, rindx);
+	_A = calcu_A(Z,n, rindx, S);
 	L_history.push_back(lgL);
 
 	for (int iter = 0; iter <= maxiter; iter++)

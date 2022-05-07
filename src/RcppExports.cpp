@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // reml
-std::vector<Eigen::MatrixXd> reml(Eigen::VectorXd start, Eigen::MatrixXd& X, Eigen::VectorXd& y, std::vector<Eigen::MatrixXd>& Z, int maxiter);
-RcppExport SEXP _MeDuSA_reml(SEXP startSEXP, SEXP XSEXP, SEXP ySEXP, SEXP ZSEXP, SEXP maxiterSEXP) {
+std::vector<Eigen::MatrixXd> reml(Eigen::VectorXd start, Eigen::MatrixXd& X, Eigen::VectorXd& y, std::vector<Eigen::MatrixXd>& Z, int maxiter, Eigen::MatrixXd& S);
+RcppExport SEXP _MeDuSA_reml(SEXP startSEXP, SEXP XSEXP, SEXP ySEXP, SEXP ZSEXP, SEXP maxiterSEXP, SEXP SSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -22,13 +22,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Eigen::VectorXd& >::type y(ySEXP);
     Rcpp::traits::input_parameter< std::vector<Eigen::MatrixXd>& >::type Z(ZSEXP);
     Rcpp::traits::input_parameter< int >::type maxiter(maxiterSEXP);
-    rcpp_result_gen = Rcpp::wrap(reml(start, X, y, Z, maxiter));
+    Rcpp::traits::input_parameter< Eigen::MatrixXd& >::type S(SSEXP);
+    rcpp_result_gen = Rcpp::wrap(reml(start, X, y, Z, maxiter, S));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_MeDuSA_reml", (DL_FUNC) &_MeDuSA_reml, 5},
+    {"_MeDuSA_reml", (DL_FUNC) &_MeDuSA_reml, 6},
     {NULL, NULL, 0}
 };
 

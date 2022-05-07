@@ -56,7 +56,7 @@ eigenMatrix mat;
 
 
 //REML function
-vector<eigenMatrix> calcu_A(vector<eigenMatrix> &Z, int n, int rindx);
+vector<eigenMatrix> calcu_A(vector<eigenMatrix> &Z, int n, int rindx, eigenMatrix &S);
 bool calcu_Vi(eigenMatrix &Vi, eigenVector &prev_varcmp, double &logdet,int n, int rindx);
 bool calcu_P(eigenMatrix &X,eigenMatrix &Vi, eigenMatrix &P, double &logdet_Xt_Vi_X);
 void calcu_tr_PA(eigenMatrix &P, eigenVector &tr_PA,int n,int rindx);
@@ -65,6 +65,6 @@ bool ai_reml(eigenVector &y,eigenMatrix &P, eigenVector &Py,eigenVector &prev_va
 void em_reml(eigenVector &y,eigenMatrix &P, eigenVector &Py, eigenVector &prev_varcmp, eigenVector &varcmp, int n, int rindx);
 double y_center(eigenVector &y,int n);
 void constrain_varcmp(eigenVector &y,eigenVector &varcmp,int n, int rindx);
-VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, vector<eigenMatrix> &Z, eigenVector &varcmp, int n, int rindx, int maxiter);
+VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, vector<eigenMatrix> &Z, eigenVector &varcmp, int n, int rindx, int maxiter, eigenMatrix &S, double &lgL);
 
 #endif

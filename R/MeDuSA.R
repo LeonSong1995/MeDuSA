@@ -48,7 +48,7 @@
 #' ##Run MeDuSA (run with 6 courses):
 #' csab = MeDuSA(bulk=bulk,sce=sce,select.ct='Epithelium',ncpu=6)
 
-MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gene=NULL,nbins=10,resolution=50,knots=10,start=c(1e-5,1e-2),maxgene=200,family='gaussian',gcov=NULL,Xc=NULL,maxiter=1e+4,adj=FALSE){
+MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gene=NULL,nbins=10,resolution=50,knots=10,start=c(1e-5,1e-2),maxgene=200,family='gaussian',gcov=NULL,Xc=NULL,maxiter=1e+4,adj=FALSE,Batch=FALSE){
 
 	#Checking the format of the input parameters
 	message("Thanks for using MeDuSA to perform cell-state abundance deconvolution analyses.")
@@ -78,7 +78,9 @@ MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gen
 	bulk = bulk[commGene,]
 	ref = ref[commGene,]
 
-
+	# bulk = sweep(bulk,2,colSums(bulk),'/')
+	# ref = sweep(ref,2,colSums(ref),'/')
+	
 	#Select the genes
 	nbins = min(nbins,ncol(ref))
 	if(is.null(gene)){
@@ -108,8 +110,8 @@ MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gen
 			Xcov = rowMeans(as.matrix(Xc[g,]))
 			coef = lm(bulk[g,i]~Xcov+0)$coefficients
 			#normalize the covariates coefficients
-                        coef[coef<0] = 0
-			coef = coef/sum(coef+1e-100)
+      		coef[coef<0] = 0
+			# coef = coef/sum(coef+1e-100)
 			bulk[g,i] = bulk[g,i]-(as.matrix(Xc[g,]) %*% as.vector(coef))
 		})
 		rownames(bulk_adj) = g
@@ -117,24 +119,41 @@ MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gen
 		bulk = bulk_adj
 	}
 
+
 	resolution = min(resolution, ncol(ref))
 	bin = cluster(space,nbins = resolution)
 	names(bin) = rownames(space)
-	CBP = t(aggregate(t(ref[g,names(bin)]),by=list(bin),FUN=mean)[,-1])
+	CBP = t(aggregate(t(ref[,names(bin)]),by=list(bin),FUN=mean)[,-1])
 	bmed = aggregate(space,by=list(bin),FUN=median)[,-1]
 
+	##Correct the Batch Effect (ComBat)
+	if(Batch){
+		bin_batch = cluster(space,nbins = 10)
+		names(bin_batch) = rownames(space)
+		CBP_batch = t(aggregate(t(ref[,names(bin_batch)]),by=list(bin_batch),FUN=mean)[,-1])
 
-	# ref = sweep(ref,2,colSums(ref),'/')*1e+3
+		message('Adjusting Batch Effect.')
+		abundance = Decov(ncpu = ncpu,bulk=bulk,g=g,ref=as.matrix(ref[g,]),CBP=CBP_batch[g,],start=start,maxiter=maxiter)
+		abundance[abundance<0]=0
+		abundance = sweep(abundance,2,colSums(abundance),'/')
+		pseudo_bulk = CBP_batch %*% abundance
+		batch =c(rep('a',ncol(bulk)),rep('b',ncol(pseudo_bulk)))
+		Merge = cbind(bulk[g,],pseudo_bulk[g,])
+		Merge = sweep(Merge,2,colSums(Merge),'/')*1000
+		Merge = log2(Merge+1)
+		bulk = suppressMessages(sva::ComBat(dat=Merge, batch=batch,par.prior=TRUE)[,seq(1,ncol(bulk))])
+		bulk  = 2^bulk -1
+	}
 
-	ref = list(as.matrix(ref[g,]))
 
 	#Run deconvolution with the MLM
-	abundance = Decov(ncpu = ncpu,bulk=bulk,g=g,ref=ref,CBP=CBP,start=start,maxiter=maxiter)
-
+	message('\n',paste0(paste0('Run deconvolution with ',ncpu)),' cores.')
+	abundance = Decov(ncpu = ncpu,bulk=bulk,g=g,ref=as.matrix(ref[g,]),CBP=CBP[g,],start=start,maxiter=maxiter)
 	##for the data not converged
 	abundance[,is.na(colSums(abundance))]=0
 
-	#Smooth
+
+	#Smoothing
 	if(smooth==TRUE){
 		if(smoothMethod=='loess'){
 			abundance =apply(abundance,2,function(ab){predict(stats::loess(ab~bmed))})
@@ -152,8 +171,8 @@ MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gen
 	###change the scale
 	abundance = abundance/max(abundance*5)
 	colnames(abundance) = colnames(bulk)
-	rownames(abundance) = bmed
-	return(list('abundance'=abundance,'gene'=g,'PesudoTimeCellbin'=bmed))
+	rownames(abundance) = paste0('bin',seq(1,nrow(abundance)))
+	return(list('abundance'=abundance,'gene'=g,'PesudoTimeCellbin'=bmed,'CBP'=CBP,'ref'=ref[g,]))
 }
 
 
@@ -161,7 +180,6 @@ MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gen
 #Mixed model deconvolution
 Decov = function(ncpu,bulk,g,ref,CBP,start,maxiter=1e+4){
   ncpu =ncpu
-  message('\n',paste0(paste0('Run deconvolution with ',ncpu)),' cores.')
   cl = parallel::makeCluster(ncpu)
   parallel::clusterExport(cl=cl, varlist=c("bulk","g","reml","ref","CBP","maxiter","start"),
                           envir=environment())
@@ -170,12 +188,16 @@ Decov = function(ncpu,bulk,g,ref,CBP,start,maxiter=1e+4){
   progress = function(n) setTxtProgressBar(pb, n)
   opts = list(progress = progress)
   `%dopar2%` = foreach::`%dopar%`
-  geneNumber = NULL
+  sampleID = NULL
 
-  abundance = foreach::foreach(geneNumber = colnames(bulk), .options.snow = opts) %dopar2% {
-    b = bulk[g,geneNumber]
+  abundance = foreach::foreach(sampleID = colnames(bulk), .options.snow = opts) %dopar2% {
+    b = bulk[g,sampleID]
     fixcmp = rep(1,length(g))
-    vi = reml(start = start,X = as.matrix(fixcmp),y = as.matrix(b),Z = ref,maxiter = maxiter)[[4]]
+    # w = cor(ref[g,])
+    # diag(w) = 0
+    # S = solve(diag(nrow(w))-w)
+    S = diag(ncol(ref))
+    vi = reml(start = start,X = as.matrix(fixcmp),y = as.matrix(b),Z = list(ref[g,]),maxiter = maxiter,S=S)[[4]]
     r = apply(CBP,2,function(x){solve(t(x) %*% vi %*% x) %*% (t(x) %*% vi %*% b)})
   }
   parallel::stopCluster(cl)

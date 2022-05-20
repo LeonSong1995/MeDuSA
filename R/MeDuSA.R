@@ -48,7 +48,7 @@
 #' ##Run MeDuSA (run with 6 courses):
 #' csab = MeDuSA(bulk=bulk,sce=sce,select.ct='Epithelium',ncpu=6)
 
-MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gene=NULL,nbins=10,resolution=50,knots=10,start=c(1e-5,1e-2),maxgene=200,family='gaussian',gcov=NULL,Xc=NULL,maxiter=1e+4,adj=FALSE,Batch=FALSE){
+MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gene=NULL,nbins=10,resolution=50,knots=10,start=c(1e-5,1e-2),maxgene=200,family='gaussian',gcov=NULL,Xc=NULL,maxiter=1e+4,adj=FALSE,Batch=FALSE,CAR=TRUE,phi){
 
 	#Checking the format of the input parameters
 	message("Thanks for using MeDuSA to perform cell-state abundance deconvolution analyses.")
@@ -69,7 +69,7 @@ MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gen
 	  stop('Do you forget to specify the cell type? Please check the select.ct.')
 	}
 
-	#Prepare the reference
+	##Prepare the basci matrix 
 	index = which(sce$cell_type==select.ct)
 	space = as.matrix(sce$cell_trajectory[index])
 	space = as.matrix(space[order(space,decreasing = F),])
@@ -77,18 +77,22 @@ MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gen
 	commGene = intersect(rownames(bulk),rownames(sce))
 	bulk = bulk[commGene,]
 	ref = ref[commGene,]
+	resolution = min(resolution, ncol(ref))
+	bin = cluster(space,nbins = resolution)
+	names(bin) = rownames(space)
+	CBP = t(aggregate(t(ref[,names(bin)]),by=list(bin),FUN=mean)[,-1])
+	bmed = aggregate(space,by=list(bin),FUN=median)[,-1]
 
-	# bulk = sweep(bulk,2,colSums(bulk),'/')
-	# ref = sweep(ref,2,colSums(ref),'/')
-	
-	#Select the genes
+
+	##Select the genes
 	nbins = min(nbins,ncol(ref))
 	if(is.null(gene)){
 	  g_chi = geneSelect(exprsData = ref,space=space,bulk=bulk, maxgene=maxgene,nbins=nbins,cov=gcov,family=family,k=knots,ncpu=ncpu)
 	  g = g_chi$g
 	  chi = g_chi$chi
-
-	}else{g=Reduce(intersect,list(gene,rownames(bulk),rownames(sce)))}
+	}else{
+	  g=Reduce(intersect,list(gene,rownames(bulk),rownames(sce)))
+	}
 
 
 	#Prepare the incidence matrix of fixed covariates.
@@ -120,49 +124,46 @@ MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gen
 	}
 
 
-	resolution = min(resolution, ncol(ref))
-	bin = cluster(space,nbins = resolution)
-	names(bin) = rownames(space)
-	CBP = t(aggregate(t(ref[,names(bin)]),by=list(bin),FUN=mean)[,-1])
-	bmed = aggregate(space,by=list(bin),FUN=median)[,-1]
+	##Incorporate the CAR method
+	if(CAR){
+		message('\n',"Computing the CAR matrix")
+		k = 1
+		ED = rdist::rdist(as.matrix(space))
+		isigma = 1 ; kernel_mat =  as.matrix(exp(-ED^2 / (2 * isigma^2)));D = diag(rowSums((kernel_mat)))
+		S = list()
+		for(p in phi){
+			print(k)
+			S[[k]] = solve(D-phi*kernel_mat)
+			k = k+1
+		}
+		message('\n',paste0(paste0('Run MeDuSA (CAR) deconvolution with ',ncpu)),' cores.')
+		abundance = Decov_CAR(ncpu = ncpu,bulk=bulk,g=g,ref=as.matrix(ref[g,]),CBP=CBP[g,],start=start,maxiter=maxiter,S=S)
+	}else{
+		message('\n',paste0(paste0('Run deconvolution with ',ncpu)),' cores.')
+		abundance = Decov(ncpu = ncpu,bulk=bulk,g=g,ref=as.matrix(ref[g,]),CBP=CBP[g,],start=start,maxiter=maxiter)
+	} 
 
-	##Correct the Batch Effect (ComBat)
-	if(Batch){
-		bin_batch = cluster(space,nbins = 10)
-		names(bin_batch) = rownames(space)
-		CBP_batch = t(aggregate(t(ref[,names(bin_batch)]),by=list(bin_batch),FUN=mean)[,-1])
-
-		message('Adjusting Batch Effect.')
-		abundance = Decov(ncpu = ncpu,bulk=bulk,g=g,ref=as.matrix(ref[g,]),CBP=CBP_batch[g,],start=start,maxiter=maxiter)
-		abundance[abundance<0]=0
-		abundance = sweep(abundance,2,colSums(abundance),'/')
-		pseudo_bulk = CBP_batch %*% abundance
-		batch =c(rep('a',ncol(bulk)),rep('b',ncol(pseudo_bulk)))
-		Merge = cbind(bulk[g,],pseudo_bulk[g,])
-		Merge = sweep(Merge,2,colSums(Merge),'/')*1000
-		Merge = log2(Merge+1)
-		bulk = suppressMessages(sva::ComBat(dat=Merge, batch=batch,par.prior=TRUE)[,seq(1,ncol(bulk))])
-		bulk  = 2^bulk -1
-	}
-
-
-	#Run deconvolution with the MLM
-	message('\n',paste0(paste0('Run deconvolution with ',ncpu)),' cores.')
-	abundance = Decov(ncpu = ncpu,bulk=bulk,g=g,ref=as.matrix(ref[g,]),CBP=CBP[g,],start=start,maxiter=maxiter)
-	##for the data not converged
+	##For the data not converged
 	abundance[,is.na(colSums(abundance))]=0
 
-
-	#Smoothing
+	##Smoothing
 	if(smooth==TRUE){
 		if(smoothMethod=='loess'){
-			abundance =apply(abundance,2,function(ab){predict(stats::loess(ab~bmed))})
+			abundance =apply(abundance,2,function(ab){
+				predict(stats::loess(ab~bmed))
+			})
 		}else{
 			num = max(5,round(length(bmed)*0.2))
-			neighbour=sapply(1:length(bmed),function(i){order(abs(bmed[i]-bmed),decreasing = F)[1:num]})
-			abundance = apply(abundance,2,function(x){sapply(1:ncol(neighbour),function(i){
-				mean(x[neighbour[,i]])
-			})})
+			
+			neighbour=sapply(1:length(bmed),function(i){
+				order(abs(bmed[i]-bmed),decreasing = F)[1:num]
+			})
+			
+			abundance = apply(abundance,2,function(x){
+				sapply(1:ncol(neighbour),function(i){
+					mean(x[neighbour[,i]])
+				})
+			})
 		}
 	}
 
@@ -193,9 +194,6 @@ Decov = function(ncpu,bulk,g,ref,CBP,start,maxiter=1e+4){
   abundance = foreach::foreach(sampleID = colnames(bulk), .options.snow = opts) %dopar2% {
     b = bulk[g,sampleID]
     fixcmp = rep(1,length(g))
-    # w = cor(ref[g,])
-    # diag(w) = 0
-    # S = solve(diag(nrow(w))-w)
     S = diag(ncol(ref))
     vi = reml(start = start,X = as.matrix(fixcmp),y = as.matrix(b),Z = list(ref[g,]),maxiter = maxiter,S=S)[[4]]
     r = apply(CBP,2,function(x){solve(t(x) %*% vi %*% x) %*% (t(x) %*% vi %*% b)})
@@ -205,5 +203,37 @@ Decov = function(ncpu,bulk,g,ref,CBP,start,maxiter=1e+4){
   return(abundance)
 }
 
+#' @keywords internal
+#Mixed-CAR model deconvolution
+Decov_CAR = function(ncpu,bulk,g,ref,CBP,start,maxiter=1e+4,S){
+  ncpu =ncpu
+  cl = parallel::makeCluster(ncpu)
+  parallel::clusterExport(cl=cl, varlist=c("bulk","g","reml","ref","CBP","maxiter","start","S"),
+                          envir=environment())
+  doSNOW::registerDoSNOW(cl)
+  pb = utils::txtProgressBar(min = 1, max = ncol(bulk), style = 3)
+  progress = function(n) setTxtProgressBar(pb, n)
+  opts = list(progress = progress)
+  `%dopar2%` = foreach::`%dopar%`
+  sampleID = NULL
+
+  abundance = foreach::foreach(sampleID = colnames(bulk), .options.snow = opts) %dopar2% {
+    b = bulk[g,sampleID]
+    fixcmp = rep(1,length(g))
+    logL = -Inf
+  	for(i in seq(1,length(S))){
+    	s = S[[i]]
+    	all = reml(start = start,X = as.matrix(fixcmp),y = as.matrix(b),Z = list(ref[g,]),maxiter = 1000,S=s)
+    	if(all[[5]]>logL){
+      		vi = all[[4]]
+      		logL = all[[5]]
+    	} 
+  	}
+  	apply(CBP,2,function(x){solve(t(x) %*% vi %*% x) %*% (t(x) %*% vi %*% b)})
+  }
+  parallel::stopCluster(cl)
+  abundance = do.call(cbind,abundance)
+  return(abundance)
+}
 
 

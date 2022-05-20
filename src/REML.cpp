@@ -3,6 +3,19 @@
 
 
 
+//[[Rcpp::export]]
+Eigen::MatrixXd quickINV(Eigen::MatrixXd L)
+{
+	int i = 0, j = 0;
+	double logdet=0.0;
+	int rank = 0;
+	bool ret = true;
+	INVmethod method_try;
+	method_try = INV_LLT;
+	SquareMatrixInverse(L, logdet, rank, method_try);
+	return L;
+}
+
 
 
 //[[Rcpp::export]]
@@ -51,7 +64,7 @@ std::vector<Eigen::MatrixXd>  reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Ei
 	e.resize(rindx-1);
 	xita.resize(rindx-1);
 
-	//AUP
+	// AUP
 	// eigenMatrix MRH;
 	// double k;
 	// MRH = y.transpose() * Q * Z[i];
@@ -98,20 +111,19 @@ std::vector<Eigen::MatrixXd>  reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Ei
 
 	L_history.clear();
 
-	eigenMatrix res(2,flattened.size());
-	res.row(0) = flattened;
-	res.row(1) = flattened_Xita;
+	// eigenMatrix res(2,flattened.size());
+	// res.row(0) = flattened;
+	// res.row(1) = flattened_Xita;
 
 	eigenMatrix LogL(1,1);
 	LogL(0,0) = lgL; 
 
 	std::vector<Eigen::MatrixXd> r;
-	r.resize(5);
-	r[0] = fix;
-	r[1] = res;
+	r.resize(4);
+	r[0] = flattened;
+	r[1] = Vi;
 	r[2] = varcmp;
-	r[3] = Vi;
-	r[4] = LogL;
+	r[3] = LogL;
 
 	return(r);
 

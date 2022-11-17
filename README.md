@@ -4,7 +4,7 @@
 
 
 ## Description
-MeDuSA is a fine-resolution cellular deconvolution method, with the aim to use reference scRNA-seq data to predict the cell-state abundance of bulk RNA-seq data.
+MeDuSA is a fine-resolution cellular deconvolution method, with the aim to use reference scRNA-seq data to estimate the cell-state abundance of bulk RNA-seq data.
 
 
 ## Installation

@@ -36,19 +36,19 @@ MeDuSA package provides test data to show how to use.
 #1)---Library the package
 library(MeDuSA)
 
-#2)---Load the test data:
+#2)---Load the test data
 data(ref)
 data(cellType)
 data(cellTrajectory)
 data(bulk)
 
-#3)---Build the 'Seurat' obejct:
+#3)---Build the scRNA-seq reference (Seurat obejct)
 sce = CreateSeuratObject(ref)
 sce$cell_type = cellType
 sce$cell_trajectory = rep(0,ncol(sce))
 sce$cell_trajectory[rownames(Trajectory)]=Trajectory
 
-#4)---Run MeDuSA (2 cpu):
+#4)---Run MeDuSA (2 cores)
 csab = MeDuSA(bulk=bulk,sce=sce,select.ct='Epithelium',ncpu=2)
 
 #5)---Documents

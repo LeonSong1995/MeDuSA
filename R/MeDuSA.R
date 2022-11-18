@@ -36,7 +36,7 @@
 #' ##Load the test data:
 #' data(ref)
 #' data(cellType)
-#' data(cellTrajectory)
+#' data(Trajectory)
 #' data(bulk)
 #'
 #' ##Build the 'Seurat' obejct:
@@ -48,192 +48,105 @@
 #' ##Run MeDuSA (run with 6 courses):
 #' csab = MeDuSA(bulk=bulk,sce=sce,select.ct='Epithelium',ncpu=6)
 
-MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gene=NULL,nbins=10,resolution=50,knots=10,start=c(1e-5,1e-2),maxgene=200,family='gaussian',gcov=NULL,Xc=NULL,maxiter=1e+4,adj=FALSE,Batch=FALSE,CAR=TRUE,phi){
+MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gene=NULL,nbins=10,resolution=50,knots=10,start=c(1e-5,1e-2),maxgene=200,family='gaussian',gcov=NULL,Xc=NULL,maxiter=1e+4,adj=FALSE,Batch=FALSE,CAR=TRUE,phi=c(0.2,0.4,0.6,0.9)){
 
-	#Checking the format of the input parameters
-	message("Thanks for using MeDuSA to perform cell-state abundance deconvolution analyses.")
-	if(!("Seurat" %in% class(sce))){
-	  stop('Please input Seurat Object.')
-	}
-	if(!'cell_type' %in% colnames(sce@meta.data)){
-	  stop('Do you forget to input the cell_type? Please check your MetaData: Seurat_Obj@meta.data.')
-	}
-	if(!'cell_trajectory' %in% colnames(sce@meta.data)){
-	  stop('Do you forget to input the cell_trajectory? Please check your MetaData: Seurat_Obj@meta.data.')
-	}
-	if(!is.null(select.ct)){
-	  if(is.na(table(sce$cell_type %in% select.ct)['TRUE'])){
-	    stop('Do you forget to specify the cell type? Please check the select.ct.')
-	  }
-	}else{
-	  stop('Do you forget to specify the cell type? Please check the select.ct.')
-	}
-
-	##Prepare the basci matrix 
-	index = which(sce$cell_type==select.ct)
-	space = as.matrix(sce$cell_trajectory[index])
-	space = as.matrix(space[order(space,decreasing = F),])
-	ref = as.matrix(sce@assays$RNA@counts[,rownames(space)])
-	commGene = intersect(rownames(bulk),rownames(sce))
-	bulk = bulk[commGene,]
-	ref = ref[commGene,]
-	resolution = min(resolution, ncol(ref))
-	bin = cluster(space,nbins = resolution)
-	names(bin) = rownames(space)
-	CBP = t(aggregate(t(ref[,names(bin)]),by=list(bin),FUN=mean)[,-1])
-	bmed = aggregate(space,by=list(bin),FUN=median)[,-1]
-
-
-	##Select the genes
-	nbins = min(nbins,ncol(ref))
-	if(is.null(gene)){
-	  g_chi = geneSelect(exprsData = ref,space=space,bulk=bulk, maxgene=maxgene,nbins=nbins,cov=gcov,family=family,k=knots,ncpu=ncpu)
-	  g = g_chi$g
-	  chi = g_chi$chi
-	}else{
-	  g=Reduce(intersect,list(gene,rownames(bulk),rownames(sce)))
-	}
-
-
-	#Prepare the incidence matrix of fixed covariates.
-	Xc_input = Xc[intersect(commGene,rownames(Xc)),]
-	Xc = as.matrix(rep(1,length(commGene)))
-	if(!is.null(Xc_input)){Xc = cbind(Xc,Xc_input)}
-
-	#Include expression profiles of other cells as fixed covariates.
-	if(length(index)<ncol(sce)){
-		refALL = as.matrix(sce@assays$RNA@counts[commGene,-index])
-		Xc = cbind(Xc,rowMeans(refALL[commGene,]))
-	}
-
-	#adjust the bulk RNA-seq data by covariates
-	if(adj==TRUE){
-		Xc = as.matrix(Xc[,-1])
-		rownames(Xc)=commGene
-		bulk_adj = sapply(1:ncol(bulk),function(i){
-			Xcov = rowMeans(as.matrix(Xc[g,]))
-			coef = lm(bulk[g,i]~Xcov+0)$coefficients
-			#normalize the covariates coefficients
-      		coef[coef<0] = 0
-			# coef = coef/sum(coef+1e-100)
-			bulk[g,i] = bulk[g,i]-(as.matrix(Xc[g,]) %*% as.vector(coef))
-		})
-		rownames(bulk_adj) = g
-		colnames(bulk_adj) = colnames(bulk)
-		bulk = bulk_adj
-	}
-
-
-	##Incorporate the CAR method
-	if(CAR){
-		message('\n',"Computing the CAR matrix")
-		k = 1
-		ED = rdist::rdist(as.matrix(space))
-		isigma = 1 ; kernel_mat =  as.matrix(exp(-ED^2 / (2 * isigma^2)));D = diag(rowSums((kernel_mat)))
-		S = list()
-		for(p in phi){
-			print(k)
-			S[[k]] = solve(D-phi*kernel_mat)
-			k = k+1
-		}
-		message('\n',paste0(paste0('Run MeDuSA (CAR) deconvolution with ',ncpu)),' cores.')
-		abundance = Decov_CAR(ncpu = ncpu,bulk=bulk,g=g,ref=as.matrix(ref[g,]),CBP=CBP[g,],start=start,maxiter=maxiter,S=S)
-	}else{
-		message('\n',paste0(paste0('Run deconvolution with ',ncpu)),' cores.')
-		abundance = Decov(ncpu = ncpu,bulk=bulk,g=g,ref=as.matrix(ref[g,]),CBP=CBP[g,],start=start,maxiter=maxiter)
-	} 
-
-	##For the data not converged
-	abundance[,is.na(colSums(abundance))]=0
-
-	##Smoothing
-	if(smooth==TRUE){
-		if(smoothMethod=='loess'){
-			abundance =apply(abundance,2,function(ab){
-				predict(stats::loess(ab~bmed))
-			})
-		}else{
-			num = max(5,round(length(bmed)*0.2))
-			
-			neighbour=sapply(1:length(bmed),function(i){
-				order(abs(bmed[i]-bmed),decreasing = F)[1:num]
-			})
-			
-			abundance = apply(abundance,2,function(x){
-				sapply(1:ncol(neighbour),function(i){
-					mean(x[neighbour[,i]])
-				})
-			})
-		}
-	}
-
-	abundance = as.data.frame(abundance)
-
-	###change the scale
-	abundance = abundance/max(abundance*5)
-	colnames(abundance) = colnames(bulk)
-	rownames(abundance) = paste0('bin',seq(1,nrow(abundance)))
-	return(list('abundance'=abundance,'gene'=g,'PesudoTimeCellbin'=bmed,'CBP'=CBP,'ref'=ref[g,]))
-}
-
-
-#' @keywords internal
-#Mixed model deconvolution
-Decov = function(ncpu,bulk,g,ref,CBP,start,maxiter=1e+4){
-  ncpu =ncpu
-  cl = parallel::makeCluster(ncpu)
-  parallel::clusterExport(cl=cl, varlist=c("bulk","g","reml","ref","CBP","maxiter","start"),
-                          envir=environment())
-  doSNOW::registerDoSNOW(cl)
-  pb = utils::txtProgressBar(min = 1, max = ncol(bulk), style = 3)
-  progress = function(n) setTxtProgressBar(pb, n)
-  opts = list(progress = progress)
-  `%dopar2%` = foreach::`%dopar%`
-  sampleID = NULL
-
-  abundance = foreach::foreach(sampleID = colnames(bulk), .options.snow = opts) %dopar2% {
-    b = bulk[g,sampleID]
-    fixcmp = rep(1,length(g))
-    S = diag(ncol(ref))
-    vi = reml(start = start,X = as.matrix(fixcmp),y = as.matrix(b),Z = list(ref[g,]),maxiter = maxiter,S=S)[[4]]
-    r = apply(CBP,2,function(x){solve(t(x) %*% vi %*% x) %*% (t(x) %*% vi %*% b)})
+  #1)---Check the format of the input parameters
+  message("Thanks for using MeDuSA.")
+  if(!("Seurat" %in% class(sce))){
+    stop('Please input Seurat Object.')
   }
-  parallel::stopCluster(cl)
-  abundance = do.call(cbind,abundance)
-  return(abundance)
-}
-
-#' @keywords internal
-#Mixed-CAR model deconvolution
-Decov_CAR = function(ncpu,bulk,g,ref,CBP,start,maxiter=1e+4,S){
-  ncpu =ncpu
-  cl = parallel::makeCluster(ncpu)
-  parallel::clusterExport(cl=cl, varlist=c("bulk","g","reml","ref","CBP","maxiter","start","S"),
-                          envir=environment())
-  doSNOW::registerDoSNOW(cl)
-  pb = utils::txtProgressBar(min = 1, max = ncol(bulk), style = 3)
-  progress = function(n) setTxtProgressBar(pb, n)
-  opts = list(progress = progress)
-  `%dopar2%` = foreach::`%dopar%`
-  sampleID = NULL
-
-  abundance = foreach::foreach(sampleID = colnames(bulk), .options.snow = opts) %dopar2% {
-    b = bulk[g,sampleID]
-    fixcmp = rep(1,length(g))
-    logL = -Inf
-  	for(i in seq(1,length(S))){
-    	s = S[[i]]
-    	all = reml(start = start,X = as.matrix(fixcmp),y = as.matrix(b),Z = list(ref[g,]),maxiter = 1000,S=s)
-    	if(all[[5]]>logL){
-      		vi = all[[4]]
-      		logL = all[[5]]
-    	} 
-  	}
-  	apply(CBP,2,function(x){solve(t(x) %*% vi %*% x) %*% (t(x) %*% vi %*% b)})
+  if(!'cell_type' %in% colnames(sce@meta.data)){
+    stop('Do you forget to input the cell_type? Please check your MetaData: Seurat_Obj@meta.data.')
   }
-  parallel::stopCluster(cl)
-  abundance = do.call(cbind,abundance)
-  return(abundance)
+  if(!'cell_trajectory' %in% colnames(sce@meta.data)){
+    stop('Do you forget to input the cell_trajectory? Please check your MetaData: Seurat_Obj@meta.data.')
+  }
+  if(!is.null(select.ct)){
+    if(is.na(table(sce$cell_type %in% select.ct)['TRUE'])){
+      stop('Do you forget to specify the cell type? Please check the select.ct.')
+    }
+  }else{
+    stop('Do you forget to specify the cell type? Please check the select.ct.')
+  }
+
+  #2)---Process the scRNA-seq reference
+  index = which(sce$cell_type==select.ct)
+  space = as.matrix(sce$cell_trajectory[index])
+  space = as.matrix(space[order(space,decreasing = F),])
+  ref = as.matrix(sce@assays$RNA@counts[,rownames(space)])
+  commGene = intersect(rownames(bulk),rownames(sce))
+  bulk = bulk[commGene,]
+  ref = ref[commGene,]
+
+  #3)---Select signature genes
+  nbins = min(nbins,ncol(ref))
+  if(is.null(gene)){
+    g_chi = geneSelect(exprsData = ref,space=space,bulk=bulk, maxgene=maxgene,nbins=nbins,cov=gcov,family=family,k=knots,ncpu=ncpu)
+    g = g_chi$g
+    chi = g_chi$chi
+  }else{
+    g = Reduce(intersect,list(gene,rownames(bulk),rownames(sce)))
+  }
+
+  #4)---Prepare the incidence matrix of fixed covariates.
+  if(adj==TRUE){
+    Xc = cbind(Xc[g,],rep(1,length(g)))
+  }else{
+    Xc = as.matrix(rep(1,length(g)))
+  }
+  rownames(Xc) = g
+
+  #5)---Process the input matrix
+  if(resolution=='single-cell'){
+    CBP = ref[g,]
+    bin = colnames(ref)
+    bmed = space
+  }else{
+    resolution = min(resolution, ncol(ref))
+    bin = cluster(space,nbins = resolution)
+    names(bin) = rownames(space)
+    CBP = t(aggregate(t(ref[,names(bin)]),by=list(bin),FUN=mean)[,-1])
+    bmed = aggregate(space,by=list(bin),FUN=median)[,-1]
+  }
+
+  #6)---Deconvolution
+  timeStart = Sys.time()
+  abundance = Decov(ncpu = ncpu,bulk=bulk,g=g,ref=as.matrix(ref[g,]),space=space,
+                    CBP=CBP[g,],start=start,cov=Xc[g,],maxiter=maxiter,phi = phi,CAR = CAR)
+  timeEnd = Sys.time()
+  timeCost = difftime(timeEnd, timeStart, units='mins')
+  message(paste("\n",paste(paste0('Elapsed time of LMM for ',paste0(ncol(bulk),' bulk samples')),paste0(timeCost,' mins'),sep=':')))
+
+  #7)---Collect the data that are not convergent (constrained at 0)
+  index = is.na(colSums(abundance))
+  convergent = abundance
+  convergent[,index] = 0
+
+  #8)---Smoothing
+  if(smooth==TRUE){
+    if(smoothMethod=='loess'){
+      convergent =apply(convergent,2,function(ab){
+        predict(stats::loess(ab~bmed))
+      })
+    }else{
+      num = max(5,round(length(bmed)*0.2))
+      neighbour=sapply(1:length(bmed),function(i){
+        order(abs(bmed[i]-bmed),decreasing = F)[1:num]
+      })
+      convergent = apply(convergent,2,function(x){
+        sapply(1:ncol(neighbour),function(i){
+          mean(x[neighbour[,i]])
+        })
+      })
+    }
+  }
+
+  #9)---Adjust the scale
+  convergent = as.data.frame(convergent)
+  convergent = convergent/max(5*convergent)
+  colnames(convergent) = colnames(bulk)
+  rownames(convergent) = paste0('bin',seq(1,nrow(convergent)))
+
+  #10)---Return
+  return(list('abundance'=convergent,'gene'=g,'PesudoTimeCellbin'=bmed))
 }
-
-

@@ -11,17 +11,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// quickINV
-Eigen::MatrixXd quickINV(Eigen::MatrixXd L);
-RcppExport SEXP _MeDuSA_quickINV(SEXP LSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type L(LSEXP);
-    rcpp_result_gen = Rcpp::wrap(quickINV(L));
-    return rcpp_result_gen;
-END_RCPP
-}
 // reml
 std::vector<Eigen::MatrixXd> reml(Eigen::VectorXd start, Eigen::MatrixXd& X, Eigen::VectorXd& y, std::vector<Eigen::MatrixXd>& Z, int maxiter, Eigen::MatrixXd& S);
 RcppExport SEXP _MeDuSA_reml(SEXP startSEXP, SEXP XSEXP, SEXP ySEXP, SEXP ZSEXP, SEXP maxiterSEXP, SEXP SSEXP) {
@@ -40,7 +29,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_MeDuSA_quickINV", (DL_FUNC) &_MeDuSA_quickINV, 1},
     {"_MeDuSA_reml", (DL_FUNC) &_MeDuSA_reml, 6},
     {NULL, NULL, 0}
 };

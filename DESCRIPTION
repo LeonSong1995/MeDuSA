@@ -4,7 +4,7 @@ Title: Mixed model-based deconvolution of cell-state abundance
 Version: 1.00
 Author: Liyang Song <songliyang@westlake.edu.cn>
 Maintainer: Liyang Song <songliyang@westlake.edu.cn>
-Description: MeDuSA is a fine-resolution cellular deconvolution method that aimes to predict cell-state abundance along a predefined cell trajectory in a given bulk RNA-seq data.
+Description: MeDuSA is a fine-resolution cellular deconvolution method that aimes to estimate cell-state abundance along a predefined cell trajectory in a given bulk RNA-seq data.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
@@ -18,7 +18,7 @@ Depends:
     parallel,
     stats,
     R (>= 3.5.0)
-Imports: Rcpp (>= 1.0.3),RcppEigen,foreach,Seurat,mgcv,parallel,stats,doSNOW
+Imports: Rcpp (>= 1.0.3),RcppEigen,foreach,Seurat,mgcv,parallel,stats,doSNOW,BiocParallel
 LinkingTo: Rcpp,RcppEigen
 RoxygenNote: 7.1.1
 Suggests: 

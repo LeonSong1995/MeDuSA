@@ -1,23 +1,6 @@
 #include "INV.hpp"
 #include "MLM.h"
 
-
-
-//[[Rcpp::export]]
-Eigen::MatrixXd quickINV(Eigen::MatrixXd L)
-{
-	int i = 0, j = 0;
-	double logdet=0.0;
-	int rank = 0;
-	bool ret = true;
-	INVmethod method_try;
-	method_try = INV_LLT;
-	SquareMatrixInverse(L, logdet, rank, method_try);
-	return L;
-}
-
-
-
 //[[Rcpp::export]]
 std::vector<Eigen::MatrixXd>  reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Eigen::VectorXd &y, std::vector<Eigen::MatrixXd> &Z, int maxiter,Eigen::MatrixXd &S)
 {
@@ -116,7 +99,7 @@ std::vector<Eigen::MatrixXd>  reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Ei
 	// res.row(1) = flattened_Xita;
 
 	eigenMatrix LogL(1,1);
-	LogL(0,0) = lgL; 
+	LogL(0,0) = lgL;
 
 	std::vector<Eigen::MatrixXd> r;
 	r.resize(4);
@@ -130,8 +113,6 @@ std::vector<Eigen::MatrixXd>  reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Ei
 }
 
 
-
-
 vector<eigenMatrix> calcu_A(vector<eigenMatrix> &Z, int n, int rindx,Eigen::MatrixXd &S)
 {
 	vector<eigenMatrix> _A;
@@ -142,10 +123,7 @@ vector<eigenMatrix> calcu_A(vector<eigenMatrix> &Z, int n, int rindx,Eigen::Matr
 	}
 	_A[rindx-1] = eigenMatrix::Identity(n, n);
 	return _A;
-
 }
-
-
 
 bool calcu_Vi(eigenMatrix &Vi, eigenVector &prev_varcmp, double &logdet,int n, int rindx)
 {
@@ -354,7 +332,6 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
 			L_history.push_back(lgL);
 		}
 
-
 		//cout << lgL << endl;
 		dlogL = lgL - prev_lgL;
 
@@ -377,10 +354,8 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
 			flag_not_itermax = false;
 
 		}
-
 		prev_varcmp = varcmp;
 		prev_lgL = lgL;
 	}
-
 	return varcmp;
 }

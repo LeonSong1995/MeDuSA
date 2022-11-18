@@ -23,7 +23,7 @@ devtools::install_github("LeonSong1995/MeDuSA", build_vignettes=F)
 ## Usage
 The function for **cell-state abundance** deconvolution in this package is `MeDuSA`, which needs:  
 1. Bulk RNA-seq data.  A matrix of bulk RNA-seq data. Each row corresponds to a specific gene and each column corresponds to a particular sample.
-2. Single-cell RNA-seq data. A [seurat](https://satijalab.org/seurat/) obejct of the reference scRNA-seq data. 
+2. Single-cell RNA-seq data. A [Seurat](https://satijalab.org/seurat/) obejct of the reference scRNA-seq data. 
 
 ## Example
 MeDuSA package provides test data to show how to use.

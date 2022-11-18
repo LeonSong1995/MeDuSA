@@ -10,10 +10,15 @@ MeDuSA is a fine-resolution cellular deconvolution method, with the aim to use r
 
 ## Installation
 ```R
-#Please install the Seurat first. (https://satijalab.org/seurat/)
+#1)---Please install the Seurat. (https://satijalab.org/seurat/)
 install.packages("Seurat")
 
-#R version > 3.5.0
+#2)---Please install the BiocParallel. (https://bioconductor.org/packages/release/bioc/html/BiocParallel.html)
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("BiocParallel")
+
+#3)---Install the MeDuSA (R version > 3.5.0)
 if (!requireNamespace("devtools", quietly = TRUE))
     install.packages("devtools")
 devtools::install_github("LeonSong1995/MeDuSA", build_vignettes=F)

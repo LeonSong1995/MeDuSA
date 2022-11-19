@@ -39,7 +39,7 @@ library(MeDuSA)
 #2)---Load the test data
 data(ref)
 data(cellType)
-data(cellTrajectory)
+data(Trajectory)
 data(bulk)
 
 #3)---Build the scRNA-seq reference (Seurat obejct)

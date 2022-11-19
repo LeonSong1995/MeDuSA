@@ -2,7 +2,7 @@
 # Author: Liyang Song <songliyang@westlake.edu.cn>
 #############################################################################################################
 #' @title MeDuSA: mixed model-based deconvolution of cell-state abundance.
-#' @description \code{MeDuSA} is a fine-resolution cellular deconvolution method, with the aim to use reference scRNA-seq data to predict the cell-state abundance of bulk RNA-seq data.
+#' @description \code{MeDuSA} is a fine-resolution cellular deconvolution method that leverages scRNA-seq data as a reference to estimate cell-state abundance in bulk RNA-seq data.
 #'
 #' @param bulk A matrix of bulk RNA-seq data. Each row corresponds to a specific gene and each column corresponds to a particular sample.
 #' @param sce A \code{seurat} object of the  reference scRNA-seq data (see \code{\link{seurat}}). Meta-data of the seurat object (sce@meta.data) need include two columns named as cell_type and cell_trajectory.
@@ -21,6 +21,8 @@
 #' @param Xc A matrix (vector) of fixed covariates in the linear mixed model (i.e., covariates for predicting cell-state abundance). The default value is NULL.
 #' @param maxiter The iteration number of REML. Default by 1e+4.
 #' @param adj A Boolean variable to determine whether to include covariates when predicting the cell-state abundance.
+#' @param CAR A Boolean variable to determine whether to model abundance correlations among cells.
+#' @param phi A numeric vector for searching the optimal cell correlations. The default value is c(0.2,0.4,0.6,0.9)
 #'
 #' @return \code{MeDuSA} returns: \itemize{
 #' \item\code{abundance}: A numeric matrix of cell-state abundance. Each row corresponds to a cell bin and each column corresponds to a sample.
@@ -48,7 +50,7 @@
 #' ##Run MeDuSA (run with 6 courses):
 #' csab = MeDuSA(bulk=bulk,sce=sce,select.ct='Epithelium',ncpu=6)
 
-MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gene=NULL,nbins=10,resolution=50,knots=10,start=c(1e-5,1e-2),maxgene=200,family='gaussian',gcov=NULL,Xc=NULL,maxiter=1e+4,adj=FALSE,Batch=FALSE,CAR=TRUE,phi=c(0.2,0.4,0.6,0.9)){
+MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gene=NULL,nbins=10,resolution=50,knots=10,start=c(1e-5,1e-2),maxgene=200,family='gaussian',gcov=NULL,Xc=NULL,maxiter=1e+4,adj=FALSE,CAR=TRUE,phi=c(0.2,0.4,0.6,0.9)){
 
   #1)---Check the format of the input parameters
   message("Thanks for using MeDuSA.")

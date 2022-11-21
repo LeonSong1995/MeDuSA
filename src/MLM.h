@@ -1,8 +1,6 @@
 /* Head file 
  * Residual maximum likelihood (REML) to fit the linear mixed model
- * Author: Liyang Song <songliyang@westlake.edu.cn>
- * Adviser: Jian Yang, Xiwei Sun
- * Copyright: Jian Yang 
+ * Author: Liyang Song <songliyang@westlake.edu.cn> 
  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  
  *@param X: vector of the fixed component;

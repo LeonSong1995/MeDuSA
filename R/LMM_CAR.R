@@ -16,7 +16,7 @@ Decov = function(ncpu,bulk,g,ref,CBP,start,cov,maxiter=maxiter,phi,CAR,space){
   }
 
   #2)---Run REML for the fist bulk sample to determine the initial iteration value
-  start = reml(start = start,X = as.matrix(cov),y = as.matrix(bulk[g,1]),Z = list(as.matrix(ref[g,])) ,maxiter = maxiter,S=diag(nrow(space)))[[3]]
+  start = reml(start = start,X = as.matrix(cov),y = as.matrix(bulk[g,1]),Z = list(as.matrix(ref[g,])) ,maxiter = maxiter,S=diag(nrow(space)))[[2]]
 
   #3)---Run deconvolution-----------------------
   message('\n',paste0(paste0('Run MeDuSA with ',ncpu)),' cores.')
@@ -45,12 +45,11 @@ Decov = function(ncpu,bulk,g,ref,CBP,start,cov,maxiter=maxiter,phi,CAR,space){
       for(i in seq_len(length(S))){
         s = S[[i]]
         parameter = reml(start = start,X = as.matrix(fixcmp),y = as.matrix(b),Z = rancmp ,maxiter = maxiter,S=s)
-        print(parameter[[4]])
-        start = parameter[[3]]
-        if(parameter[[4]]>logL){vi = parameter[[2]];logL = parameter[[4]]}
+        start = parameter[[2]]
+        if(parameter[[3]]>logL){vi = parameter[[1]];logL = parameter[[3]]}
       }
     }else{
-      vi = reml(start = start,X = as.matrix(fixcmp),y = as.matrix(b),Z = rancmp ,maxiter = maxiter,S=S)[[2]]
+      vi = reml(start = start,X = as.matrix(fixcmp),y = as.matrix(b),Z = rancmp ,maxiter = maxiter,S=S)[[1]]
     }
     #3.2.2)--Generalized least squares
     r = apply(CBP[g,],2,function(x){

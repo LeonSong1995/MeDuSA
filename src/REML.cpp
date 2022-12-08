@@ -14,97 +14,99 @@ std::vector<Eigen::MatrixXd>  reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Ei
 	varcmp = reml_iteration(start, X, y, Z, varcmp,n, rindx,maxiter,S,lgL);
 	// cout << lgL << endl;
 
-// 	eigenMatrix tX_VI_X;
-// 	eigenMatrix tX_VI_y;
-// 	tX_VI_X = X.transpose() * Vi * X;
-// 	tX_VI_y = X.transpose() * Vi * y;
+	// eigenMatrix tX_VI_X;
+	// eigenMatrix tX_VI_y;
+	// tX_VI_X = X.transpose() * Vi * X;
+	// tX_VI_y = X.transpose() * Vi * y;
 
-// 	eigenMatrix b;
-// 	eigenMatrix sd;
+	// eigenMatrix b;
+	// eigenMatrix sd;
 
-// 	// int converge = 0;
-// 	// int inv_vi = 0;
-// 	// int inv_p = 0;
-// 	// int not_itermax = 0;
+	// // int converge = 0;
+	// // int inv_vi = 0;
+	// // int inv_p = 0;
+	// // int not_itermax = 0;
 
-// 	if (flag_converge)
-// 	{
-// 		// converge = 1;
+	// if (flag_converge)
+	// {
+	// 	// converge = 1;
 
-// 		b = tX_VI_X.inverse() * tX_VI_y;
-// 		sd = tX_VI_X.inverse();
-// 	}
-// 	eigenMatrix fix(2,b.size());
-// 	fix.row(0) = b;
-// 	fix.row(1) = sd;
+	// 	b = tX_VI_X.inverse() * tX_VI_y;
+	// 	sd = tX_VI_X.inverse();
+	// }
+	// eigenMatrix fix(2,b.size());
+	// fix.row(0) = b;
+	// fix.row(1) = sd;
 
-// 	eigenMatrix Q;
-// 	eigenMatrix temp;
-// 	eigenVector flattened;
-// 	eigenVector flattened_Xita;
-// 	std::vector<Eigen::VectorXd> e;
-// 	std::vector<Eigen::VectorXd> xita;
-// 	e.resize(rindx-1);
-// 	xita.resize(rindx-1);
+	// eigenMatrix Q;
+	// eigenMatrix temp;
+	// eigenVector flattened;
+	// eigenVector flattened_Xita;
+	// std::vector<Eigen::VectorXd> e;
+	// std::vector<Eigen::VectorXd> xita;
+	// e.resize(rindx-1);
+	// xita.resize(rindx-1);
 
-// 	// AUP
-// 	// eigenMatrix MRH;
-// 	// double k;
-// 	// MRH = y.transpose() * Q * Z[i];
-// 	// cout << (MRH * MRH.transpose())[0,0] << endl;
-// 	// k = (MRH * MRH.transpose())[0,0];
-// 	// k = sqrt((varcmp[i]*(Z[i].cols()-1))/(MRH * MRH.transpose()));
-// 	// e[i]  = (k * Z[i].transpose() * Q * y)/ sqrt(Z[i].cols());
+	// // AUP
+	// // eigenMatrix MRH;
+	// // double k;
+	// // MRH = y.transpose() * Q * Z[i];
+	// // cout << (MRH * MRH.transpose())[0,0] << endl;
+	// // k = (MRH * MRH.transpose())[0,0];
+	// // k = sqrt((varcmp[i]*(Z[i].cols()-1))/(MRH * MRH.transpose()));
+	// // e[i]  = (k * Z[i].transpose() * Q * y)/ sqrt(Z[i].cols());
 
-// 	eigenMatrix v_tZ_Q;
+	// eigenMatrix v_tZ_Q;
 
-// 	if (flag_converge)
-// 	{
-// 		Q = Vi - Vi * X * tX_VI_X.inverse()  * X.transpose() *Vi;
-// 		for (int i=0; i<(rindx-1);i++)
-// 		{
-// 			v_tZ_Q = varcmp[i] * Z[i].transpose() * Q;
-// 			//BLUP
-// 			e[i] = (v_tZ_Q * y)/Z[i].cols();
-// 			//BLUP se
-// 			temp = varcmp[i] *v_tZ_Q * Z[i];
-// 			xita[i] = temp.diagonal().array().sqrt() / Z[i].cols();
-// 		}
+	// if (flag_converge)
+	// {
+	// 	Q = Vi - Vi * X * tX_VI_X.inverse()  * X.transpose() *Vi;
+	// 	for (int i=0; i<(rindx-1);i++)
+	// 	{
+	// 		v_tZ_Q = varcmp[i] * Z[i].transpose() * Q;
+	// 		//BLUP
+	// 		e[i] = (v_tZ_Q * y)/Z[i].cols();
+	// 		//BLUP se
+	// 		temp = varcmp[i] *v_tZ_Q * Z[i];
+	// 		xita[i] = temp.diagonal().array().sqrt() / Z[i].cols();
+	// 	}
 
 
-// 		// concatenate vector
-// 		int len = 0;
-// 		for (auto const &v : e) len += v.size();
+	// 	// concatenate vector
+	// 	int len = 0;
+	// 	for (auto const &v : e) len += v.size();
 
-// 		flattened.resize(len); flattened_Xita.resize(len);
+	// 	flattened.resize(len); flattened_Xita.resize(len);
 
-// 		int offset = 0;
-// 		int size;
-// 		for (int i=0; i<(rindx-1);i++)
-// 		{
-// 			size = e[i].size();
-// 			flattened.middleRows(offset,size) = e[i];
-// 			flattened_Xita.middleRows(offset,size) = xita[i];
-// 			offset += size;
-// 		}
-// 	}else{
-// 		flattened.resize(1); flattened_Xita.resize(1);
-// 		flattened << 0; flattened_Xita << 0;
-// 	}
+	// 	int offset = 0;
+	// 	int size;
+	// 	for (int i=0; i<(rindx-1);i++)
+	// 	{
+	// 		size = e[i].size();
+	// 		flattened.middleRows(offset,size) = e[i];
+	// 		flattened_Xita.middleRows(offset,size) = xita[i];
+	// 		offset += size;
+	// 	}
+	// }else{
+	// 	flattened.resize(1); flattened_Xita.resize(1);
+	// 	flattened << 0; flattened_Xita << 0;
+	// }
 
-// 	L_history.clear();
+	// L_history.clear();
 
-// 	// eigenMatrix res(2,flattened.size());
-// 	// res.row(0) = flattened;
-// 	// res.row(1) = flattened_Xita;
+	// eigenMatrix res(2,flattened.size());
+	// res.row(0) = flattened;
+	// res.row(1) = flattened_Xita;
 
-// 	eigenMatrix LogL(1,1);
-// 	LogL(0,0) = lgL;
+	eigenMatrix LogL(1,1);
+	LogL(0,0) = lgL;
 
 	std::vector<Eigen::MatrixXd> r;
-	r.resize(2);
-	r[0] = varcmp;
-	r[2] = Vi;
+	r.resize(3);
+	r[0] = Vi;
+	r[1] = varcmp;
+	r[2] = LogL;
+
 	return(r);
 
 }

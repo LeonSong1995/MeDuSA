@@ -301,28 +301,26 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
 		}
 
 		//initialized with EM-REML
- 		if (iter ==1)
- 		{
- 			em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
-			//flag_EM = true;
- 		}
-		else
- 		{
- 			if (flag_EM) em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
- 			else if (!ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step)) flag_EM = true;
-			//em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
- 		}
+//  		if (iter ==1)
+//  		{
+//  			em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
+// 			//flag_EM = true;
+//  		}
+// 		else
+//  		{
+//  			if (flag_EM) em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
+//  			else if (!ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step)) flag_EM = true;
+// 			//em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
+//  		}
 		
-// 		if (!ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step))
-// 		{
-// 			varcmp = varcmp * 0;
-// 			return varcmp;
-// 		}
+		if (!ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step))
+		{
+			varcmp = varcmp * 0;
+			return varcmp;
+		}
 		
 		constrain_varcmp(y,varcmp,n, rindx);
-
 		lgL = -0.5 * (logdet_Xt_Vi_X + logdet + (y.transpose() * Py)(0, 0));
-
 
 		//change step size
 		if (iter > 300){
@@ -348,7 +346,6 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
 			flag_inv_Vi = true;
 			flag_inv_P = true;
 			flag_not_itermax = true;
-			flag_EM = false;
 			return varcmp;
 		}
 
@@ -358,7 +355,6 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
 			calcu_Vi(Vi, prev_varcmp, logdet,n, rindx);
 			cout << "Warning: Log-likelihood not converged. Results are not reliable.\nYou can specify the parameter max_iter to allow for more iterations." << endl;
 			flag_not_itermax = false;
-			flag_EM = false;
 
 		}
 		prev_varcmp = varcmp;

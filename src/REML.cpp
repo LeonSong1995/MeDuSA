@@ -342,6 +342,7 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
 			flag_inv_Vi = true;
 			flag_inv_P = true;
 			flag_not_itermax = true;
+			flag_EM = false;
 			return varcmp;
 		}
 
@@ -351,6 +352,7 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
 			calcu_Vi(Vi, prev_varcmp, logdet,n, rindx);
 			cout << "Warning: Log-likelihood not converged. Results are not reliable.\nYou can specify the parameter max_iter to allow for more iterations." << endl;
 			flag_not_itermax = false;
+			flag_EM = false;
 
 		}
 		prev_varcmp = varcmp;

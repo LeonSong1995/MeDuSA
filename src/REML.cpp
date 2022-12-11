@@ -287,32 +287,38 @@ VectorXd reml_iteration(Eigen::VectorXd start, eigenMatrix &X,eigenVector &y, ve
 	{
 		if (!calcu_Vi(Vi, prev_varcmp, logdet,n, rindx))
 		{
-			cout << "REML ERROR!:V matrix is not positive. Switch to multiple linear regression!" << endl;
+			cout << "REML ERROR!:V matrix is not positive,please check the data!" << endl;
 			flag_converge = false;
 			flag_inv_Vi = false;
 			return varcmp;
 		}
 		if (!calcu_P(X,Vi, P, logdet_Xt_Vi_X))
 		{
-			cout << "REML ERROR!: the X^t * V^-1 * X matrix is not invertible,please check the Signature Genes. Switch to multiple linear regression!" << endl;
+			cout << "REML ERROR!: the X^t * V^-1 * X matrix is not invertible,please check the data!" << endl;
 			flag_converge = false;
 			flag_inv_P = false;
 			return varcmp;
 		}
 
 		//initialized with EM-REML
- 		if (iter ==1)
- 		{
- 			em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
-			//flag_EM = true;
- 		}
-		else
- 		{
- 			if (flag_EM) em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
- 			else if (!ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step)) flag_EM = true;
-			//em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
- 		}
-
+//  		if (iter ==1)
+//  		{
+//  			em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
+// 			//flag_EM = true;
+//  		}
+// 		else
+//  		{
+//  			if (flag_EM) em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
+//  			else if (!ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step)) flag_EM = true;
+// 			//em_reml(y,P, Py, prev_varcmp, varcmp, n, rindx);
+//  		}
+		
+		if (!ai_reml(y,P, Py, prev_varcmp, varcmp,n, rindx,step))
+		{
+			varcmp = varcmp * 0;
+			return varcmp;
+		}
+		
 		constrain_varcmp(y,varcmp,n, rindx);
 
 		lgL = -0.5 * (logdet_Xt_Vi_X + logdet + (y.transpose() * Py)(0, 0));

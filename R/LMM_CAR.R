@@ -53,7 +53,7 @@ Decov = function(ncpu,bulk,g,ref,CBP,start,cov,maxiter=maxiter,phi,CAR,space){
     }
     #3.2.2)--Generalized least squares
     r = apply(CBP[g,],2,function(x){
-      x=cbind(x,cov)
+      x = cbind(x,cov)
       (solve(t(x) %*% vi %*% x) %*% (t(x) %*% vi %*% b))[1]
     })
     return(r)

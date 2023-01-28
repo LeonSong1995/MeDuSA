@@ -16,11 +16,7 @@ geneAsso = function(space,exprsData,CellBin,maxgene,cov=NULL,family,k,ncpu){
   #1)---Pre-adjust the covariates
   if(!is.null(cov)){
     message('Adjust covariates of gene expression')
-    formula = as.formula(paste0('y~',paste(colnames(cov),collapse='+')))
-    exprsData = t(apply(exprsData,1,function(y){
-      dat = data.frame(y=y,cov)
-      residuals(lm(formula=formula,dat))
-    }))
+    exprsData = t(apply(exprsData,1,function(y){residuals(lm(y~cov))}))
   }
 
   #2)---Cell-state-bin expression profile

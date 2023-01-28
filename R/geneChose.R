@@ -13,12 +13,13 @@ cluster =  function(XY,nbins){
 #Select genes via GAM
 geneAsso = function(space,exprsData,CellBin,maxgene,cov=NULL,family,k,ncpu){
 
-  #1)---Pre-adjust the covariates
+  #1)---Covariates
   if(!is.null(cov)){
-    message('Adjust covariates of gene expression')
-    exprsData = t(apply(exprsData,1,function(y){residuals(lm(y~cov))}))
+    cov = as.matrix(rep(1,ncol(exprsData)))
+  }else{
+    cov = cov[colnames(exprsData),]
   }
-
+  
   #2)---Cell-state-bin expression profile
   groupRef = t(aggregate(t(exprsData),by=list(CellBin),FUN=mean)[,-1])
   colnames(groupRef) = paste0(unique(CellBin),'c')
@@ -29,7 +30,7 @@ geneAsso = function(space,exprsData,CellBin,maxgene,cov=NULL,family,k,ncpu){
   ncpu = min(ncpu,detectCores())
   cl = parallel::makeCluster(ncpu)
 
-  parallel::clusterExport(cl=cl, varlist=c("exprsData","space","k"),
+  parallel::clusterExport(cl=cl, varlist=c("exprsData","space","k","cov"),
                           envir=environment())
   doSNOW::registerDoSNOW(cl)
   pb = utils::txtProgressBar(min = 1, max = nrow(exprsData), style = 3)
@@ -38,7 +39,7 @@ geneAsso = function(space,exprsData,CellBin,maxgene,cov=NULL,family,k,ncpu){
   `%dopar2%` = foreach::`%dopar%`
   geneNumber = NULL
   fitF= foreach::foreach(geneNumber = 1:nrow(exprsData), .options.snow = opts) %dopar2% {
-    gam_mod=mgcv::gam(exprsData[geneNumber,] ~ 1+s(space,k=k,bs='cr',fx=FALSE),family = family,method='GCV.Cp')
+    gam_mod=mgcv::gam(exprsData[geneNumber,] ~ cov+s(space,k=k,bs='cr',fx=FALSE),family = family,method='GCV.Cp')
     gam_mod=mgcv::anova.gam(gam_mod)$chi.sq
     gam_mod
   }

@@ -50,7 +50,7 @@
 #' ##Run MeDuSA (run with 6 courses):
 #' csab = MeDuSA(bulk=bulk,sce=sce,select.ct='Epithelium',ncpu=6)
 
-MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gene=NULL,nbins=10,resolution=50,knots=10,start=c(1e-5,1e-2),maxgene=200,family='gaussian',gcov=NULL,Xc=NULL,maxiter=1e+4,adj=FALSE,CAR=TRUE,phi=c(0.2,0.4,0.6,0.9)){
+MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gene=NULL,nbins=10,resolution=50,knots=10,start=c(1e-5,1e-2),maxgene=200,family='gaussian',gcov=NULL,Xc=NULL,maxiter=1e+4,adj=FALSE,CAR=TRUE,phi=c(0.2,0.4,0.6,0.9),span=0.25,neighbour=5){
 
   #1)---Check the format of the input parameters
   message("Thanks for using MeDuSA.")
@@ -128,10 +128,10 @@ MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gen
   if(smooth==TRUE){
     if(smoothMethod=='loess'){
       convergent =apply(convergent,2,function(ab){
-        predict(stats::loess(ab~bmed))
+        predict(stats::loess(ab~bmed,span))
       })
     }else{
-      num = max(5,round(length(bmed)*0.2))
+      num = max(neighbour,round(length(bmed)*0.2))
       neighbour=sapply(1:length(bmed),function(i){
         order(abs(bmed[i]-bmed),decreasing = F)[1:num]
       })

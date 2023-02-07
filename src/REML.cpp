@@ -9,32 +9,18 @@ std::vector<Eigen::MatrixXd>  reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Ei
 	int n = X.rows();
 	Eigen::VectorXd varcmp(rindx);
 	double lgL = 1e-20;
-	varcmp = reml_iteration(start, X, y, Z, varcmp,n, rindx,maxiter,S,lgL);
 	
-	eigenMatrix A;
-	eigenMatrix Q;
-	eigenMatrix H;
-	eigenMatrix tX_VI_X;
-	tX_VI_X = X.transpose() * Vi * X;
+	//Run REML
+	varcmp = reml_iteration(start, X, y, Z, varcmp,n, rindx,maxiter,S,lgL);		
 	
-	A = (Z[0] * S * Z[0].transpose())/Z[0].cols();
-	Q = Vi - Vi * X * tX_VI_X.inverse() * X.inverse() * Vi;
-	H = Q * A * Q * A;
-	cout << H.diagonal() << endl;
-	
-// 	eigenMatrix chi(1,1);
-// 	chi(0,0) = (varcmp[0] * varcmp[0] * H.diagonal().sum()) / 2;	
-	
-		
+	//Return parameters
 	eigenMatrix LogL(1,1);
 	LogL(0,0) = lgL;
-
 	std::vector<Eigen::MatrixXd> r;
 	r.resize(3);
 	r[0] = Vi;
 	r[1] = varcmp;
 	r[2] = LogL;
-
 	return(r);
 
 }

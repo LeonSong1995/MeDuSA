@@ -30,7 +30,7 @@ geneAsso = function(space,exprsData,CellBin,maxgene,cov=NULL,family,k,ncpu){
   ncpu = min(ncpu,detectCores())
   cl = parallel::makeCluster(ncpu)
 
-  parallel::clusterExport(cl=cl, varlist=c("exprsData","space","k","cov"),
+  parallel::clusterExport(cl=cl, varlist=c("exprsData","space","k"),
                           envir=environment())
   doSNOW::registerDoSNOW(cl)
   pb = utils::txtProgressBar(min = 1, max = nrow(exprsData), style = 3)
@@ -39,7 +39,7 @@ geneAsso = function(space,exprsData,CellBin,maxgene,cov=NULL,family,k,ncpu){
   `%dopar2%` = foreach::`%dopar%`
   geneNumber = NULL
   fitF= foreach::foreach(geneNumber = 1:nrow(exprsData), .options.snow = opts) %dopar2% {
-    gam_mod=mgcv::gam(exprsData[geneNumber,] ~ cov+s(space,k=k,bs='cr',fx=FALSE),family = family,method='GCV.Cp')
+    gam_mod=mgcv::gam(exprsData[geneNumber,] ~ s(space,k=k,bs='cr',fx=FALSE),family = family,method='GCV.Cp')
     gam_mod=mgcv::anova.gam(gam_mod)$chi.sq
     gam_mod
   }

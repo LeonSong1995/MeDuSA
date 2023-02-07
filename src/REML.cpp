@@ -11,15 +11,15 @@ std::vector<Eigen::MatrixXd>  reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Ei
 	double lgL = 1e-20;
 	varcmp = reml_iteration(start, X, y, Z, varcmp,n, rindx,maxiter,S,lgL);
 	
-// 	eigenMatrix A;
-// 	eigenMatrix Q;
-// 	eigenMatrix H;
-// 	eigenMatrix tX_VI_X;
-// 	tX_VI_X = X.transpose() * Vi * X;
+	eigenMatrix A;
+	eigenMatrix Q;
+	eigenMatrix H;
+	eigenMatrix tX_VI_X;
+	tX_VI_X = X.transpose() * Vi * X;
 	
-// 	A = (Z[0] * S * Z[0].transpose())/Z[0].cols();
-// 	Q = Vi - Vi * X * tX_VI_X.inverse() * X.inverse() * Vi;
-// 	H = Q * A * Q * A;
+	A = (Z[0] * S * Z[0].transpose())/Z[0].cols();
+	Q = Vi - Vi * X * tX_VI_X.inverse() * X.inverse() * Vi;
+	H = Q * A * Q * A;
 	
 // 	eigenMatrix chi(1,1);
 // 	chi(0,0) = (varcmp[0] * varcmp[0] * H.diagonal().sum()) / 2;	

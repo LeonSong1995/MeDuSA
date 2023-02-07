@@ -22,7 +22,7 @@ std::vector<Eigen::MatrixXd>  reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Ei
 	H = Q * A * Q * A;
 	
 	eigenMatrix chi(1,1);
-	chi(0,0) = (Vi[0] * Vi[0] * H.diagonal().sum()) / 2;	
+	chi(0,0) = (varcmp[0] * varcmp[0] * H.diagonal().sum()) / 2;	
 	
 		
 	eigenMatrix LogL(1,1);

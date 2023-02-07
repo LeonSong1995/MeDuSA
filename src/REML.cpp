@@ -118,7 +118,7 @@ vector<eigenMatrix> calcu_A(vector<eigenMatrix> &Z, int n, int rindx,Eigen::Matr
 	_A.resize(rindx);
 	for (int i=0; i<(rindx-1);i++)
 	{
-		_A[i] = (Z[i] * S * Z[i].transpose())/Z[i].cols();;
+		_A[i] = Z[i] * S * Z[i].transpose();
 	}
 	_A[rindx-1] = eigenMatrix::Identity(n, n);
 	return _A;

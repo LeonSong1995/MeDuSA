@@ -121,9 +121,11 @@ MeDuSA = function(bulk,sce,select.ct,ncpu=1,smooth=TRUE,smoothMethod='loess',gen
 
   #7)---Collect the data that are not convergent (constrained at 0)
   index = is.na(colSums(abundance))
-  convergent = abundance
-  convergent[,index] = 0
-
+  convergent = as.matrix(abundance)
+  if(length(is.na)>0){
+    convergent[,index] = 0
+  }
+  
   #8)---Smoothing
   if(smooth==TRUE){
     if(smoothMethod=='loess'){

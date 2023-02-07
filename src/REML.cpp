@@ -9,103 +9,31 @@ std::vector<Eigen::MatrixXd>  reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Ei
 	int n = X.rows();
 	Eigen::VectorXd varcmp(rindx);
 	double lgL = 1e-20;
-	// cout << lgL << endl;
-	// int test = 1;
 	varcmp = reml_iteration(start, X, y, Z, varcmp,n, rindx,maxiter,S,lgL);
-	// cout << lgL << endl;
-
-	// eigenMatrix tX_VI_X;
-	// eigenMatrix tX_VI_y;
-	// tX_VI_X = X.transpose() * Vi * X;
-	// tX_VI_y = X.transpose() * Vi * y;
-
-	// eigenMatrix b;
-	// eigenMatrix sd;
-
-	// // int converge = 0;
-	// // int inv_vi = 0;
-	// // int inv_p = 0;
-	// // int not_itermax = 0;
-
-	// if (flag_converge)
-	// {
-	// 	// converge = 1;
-
-	// 	b = tX_VI_X.inverse() * tX_VI_y;
-	// 	sd = tX_VI_X.inverse();
-	// }
-	// eigenMatrix fix(2,b.size());
-	// fix.row(0) = b;
-	// fix.row(1) = sd;
-
-	// eigenMatrix Q;
-	// eigenMatrix temp;
-	// eigenVector flattened;
-	// eigenVector flattened_Xita;
-	// std::vector<Eigen::VectorXd> e;
-	// std::vector<Eigen::VectorXd> xita;
-	// e.resize(rindx-1);
-	// xita.resize(rindx-1);
-
-	// // AUP
-	// // eigenMatrix MRH;
-	// // double k;
-	// // MRH = y.transpose() * Q * Z[i];
-	// // cout << (MRH * MRH.transpose())[0,0] << endl;
-	// // k = (MRH * MRH.transpose())[0,0];
-	// // k = sqrt((varcmp[i]*(Z[i].cols()-1))/(MRH * MRH.transpose()));
-	// // e[i]  = (k * Z[i].transpose() * Q * y)/ sqrt(Z[i].cols());
-
-	// eigenMatrix v_tZ_Q;
-
-	// if (flag_converge)
-	// {
-	// 	Q = Vi - Vi * X * tX_VI_X.inverse()  * X.transpose() *Vi;
-	// 	for (int i=0; i<(rindx-1);i++)
-	// 	{
-	// 		v_tZ_Q = varcmp[i] * Z[i].transpose() * Q;
-	// 		//BLUP
-	// 		e[i] = (v_tZ_Q * y)/Z[i].cols();
-	// 		//BLUP se
-	// 		temp = varcmp[i] *v_tZ_Q * Z[i];
-	// 		xita[i] = temp.diagonal().array().sqrt() / Z[i].cols();
-	// 	}
-
-
-	// 	// concatenate vector
-	// 	int len = 0;
-	// 	for (auto const &v : e) len += v.size();
-
-	// 	flattened.resize(len); flattened_Xita.resize(len);
-
-	// 	int offset = 0;
-	// 	int size;
-	// 	for (int i=0; i<(rindx-1);i++)
-	// 	{
-	// 		size = e[i].size();
-	// 		flattened.middleRows(offset,size) = e[i];
-	// 		flattened_Xita.middleRows(offset,size) = xita[i];
-	// 		offset += size;
-	// 	}
-	// }else{
-	// 	flattened.resize(1); flattened_Xita.resize(1);
-	// 	flattened << 0; flattened_Xita << 0;
-	// }
-
-	// L_history.clear();
-
-	// eigenMatrix res(2,flattened.size());
-	// res.row(0) = flattened;
-	// res.row(1) = flattened_Xita;
-
+	
+	eigenMatrix A;
+	eigenMatrix Q;
+	eigenMatrix H;
+	eigenMatrix tX_VI_X;
+	tX_VI_X = X.transpose() * Vi * X;
+	
+	A = (Z[0] * S * Z[0].transpose())/Z[0].cols();
+	Q = Vi - Vi * X * tX_VI_X.inverse() * X.inverse() * Vi;
+	H = Q * A * Q * A;
+	
+	eigenMatrix chi(1,1);
+	chi(0,0) = (Vi[0] * Vi[0] * H.diagonal().sum()) / 2;	
+	
+		
 	eigenMatrix LogL(1,1);
 	LogL(0,0) = lgL;
 
 	std::vector<Eigen::MatrixXd> r;
-	r.resize(3);
+	r.resize(4);
 	r[0] = Vi;
 	r[1] = varcmp;
 	r[2] = LogL;
+	r[3] = chi;
 
 	return(r);
 
@@ -118,7 +46,7 @@ vector<eigenMatrix> calcu_A(vector<eigenMatrix> &Z, int n, int rindx,Eigen::Matr
 	_A.resize(rindx);
 	for (int i=0; i<(rindx-1);i++)
 	{
-		_A[i] = Z[i] * S * Z[i].transpose();
+		_A[i] = (Z[i] * S * Z[i].transpose())/Z[i].cols();
 	}
 	_A[rindx-1] = eigenMatrix::Identity(n, n);
 	return _A;

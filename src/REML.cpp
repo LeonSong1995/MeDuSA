@@ -20,7 +20,7 @@ std::vector<Eigen::MatrixXd>  reml(Eigen::VectorXd start, Eigen::MatrixXd &X, Ei
 	A = (Z[0] * S * Z[0].transpose())/Z[0].cols();
 	Q = Vi - Vi * X * tX_VI_X.inverse() * X.inverse() * Vi;
 	H = Q * A * Q * A;
-	cout << H.diagonal().sum() << endl;
+	cout << H.diagonal() << endl;
 	
 // 	eigenMatrix chi(1,1);
 // 	chi(0,0) = (varcmp[0] * varcmp[0] * H.diagonal().sum()) / 2;	

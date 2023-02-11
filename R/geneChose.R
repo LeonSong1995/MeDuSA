@@ -14,11 +14,11 @@ cluster =  function(XY,nbins){
 geneAsso = function(space,exprsData,CellBin,maxgene,cov=NULL,family,k,ncpu){
 
   #1)---Covariates
-  if(!is.null(cov)){
-    cov = as.matrix(rep(1,ncol(exprsData)))
-  }else{
-    cov = cov[colnames(exprsData),]
-  }
+#   if(!is.null(cov)){
+#     cov = as.matrix(rep(1,ncol(exprsData)))
+#   }else{
+#     cov = cov[colnames(exprsData),]
+#   }
   
   #2)---Cell-state-bin expression profile
   groupRef = t(aggregate(t(exprsData),by=list(CellBin),FUN=mean)[,-1])
@@ -39,7 +39,7 @@ geneAsso = function(space,exprsData,CellBin,maxgene,cov=NULL,family,k,ncpu){
   `%dopar2%` = foreach::`%dopar%`
   geneNumber = NULL
   fitF= foreach::foreach(geneNumber = 1:nrow(exprsData), .options.snow = opts) %dopar2% {
-    gam_mod=mgcv::gam(exprsData[geneNumber,] ~ s(space,k=k,bs='cr',fx=FALSE),family = family,method='GCV.Cp')
+    gam_mod=mgcv::gam(exprsData[geneNumber,] ~ 1+s(space,k=k,bs='cr',fx=FALSE),family = family,method='GCV.Cp')
     gam_mod=mgcv::anova.gam(gam_mod)$chi.sq
     gam_mod
   }

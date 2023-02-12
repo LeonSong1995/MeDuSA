@@ -6,7 +6,7 @@ Decov = function(ncpu,bulk,g,ref,CBP,start,cov,maxiter=maxiter,phi,CAR,space){
     BPPARAM = BiocParallel::MulticoreParam(workers=ncpu,progressbar = T)
     message('\n',"Computing the CAR matrix")
     ED = rdist::rdist(as.matrix(space))
-    kernel_mat =  as.matrix(exp(-ED^2 / (2)))
+    kernel_mat = exp(-(ED^2 / 2))
     D = diag(rowSums((kernel_mat)))
     CAR_mat = function(p){solve(D-p*kernel_mat)}
     S = BiocParallel::bplapply(FUN = CAR_mat,phi,BPPARAM=BPPARAM)

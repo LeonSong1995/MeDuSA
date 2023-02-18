@@ -1,2 +1,8 @@
 remote_theme: allejo/jekyll-docs-theme
 name: CARD
+
+# Build settings
+markdown: kramdown
+exclude:
+  - LICENSE.md
+  - README.md

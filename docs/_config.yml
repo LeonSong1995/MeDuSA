@@ -21,11 +21,7 @@ links:
     - title: GitHub
       icon: github
       brand: true
-      url: https://github.com/LeonSong1995/MeDuSA
-    - title: Issues
-      icon: bug
-      url:https://github.com/LeonSong1995/MeDuSA/issues?state=open
-
+      url: https://github.com/LeonSong1995/MeDuSA      
 ui:
   mode: 'dark' # 'auto', 'dark', 'light'
   brand:
@@ -49,23 +45,6 @@ ui:
     align:
       homepage: 'center'
       page: 'left'
-
-social:
-  github:
-    user: allejo
-    repo: jekyll-docs-theme
-  twitter:
-    enabled: false
-    via:
-    hash:
-    account:
-  facebook:
-    enabled: false
-    profileUrl:
-
-analytics:
-  google: UA-123456-1
-
 
 
 # Build settings

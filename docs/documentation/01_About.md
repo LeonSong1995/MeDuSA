@@ -3,19 +3,19 @@ layout: page
 title: About
 ---
 
-Cite `MeDuSA`
+### Cite `MeDuSA`
 -------------------
 Liyang Song, Xiwei Sun, Ting Qi, Jian Yang
 
-Contact
+### Contact
 -------------------
 If you have any questions about MeDuSA, please feel free to contact: songliyang@westlake.edu.cn.
 
-Our group
+### Our group
 -------------------
 [Yang lab website](https://yanglab.westlake.edu.cn/)
 
-Other tools developed by our group
+### Other tools developed by our group
 -------------------
 [GCTA: A tool for Genome-wide Complex Trait Analysis](https://yanglab.westlake.edu.cn/software/gcta/#Overview)
 

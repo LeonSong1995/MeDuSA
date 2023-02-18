@@ -31,9 +31,13 @@ links:
       icon: github
       brand: true
       url: https://github.com/LeonSong1995/MeDuSA/
+    - title: Issues
+      icon: bug
+      url: https://github.com/YingMa0107/CARD/issues?state=open
+
 
 ui:
-  mode: 'dark' # 'auto', 'dark', 'light'
+  mode: 'light' # 'auto', 'dark', 'light'
   brand:
     dark: "#00ceff"
     light: "#a20000"
@@ -42,10 +46,10 @@ ui:
     light: "#dee2e6"
   header:
     trianglify: true
-    dark:
+    light:
       color1: "#062a48"
       color2: "#304e67"
-    light:
+    dark:
       color1: "#080331"
       color2: "#673051"
   masthead:

@@ -1,7 +1,0 @@
-remote_theme: allejo/jekyll-docs-theme
-name: Test
-
-# Build settings
-markdown: kramdown
-exclude:
-  - README.md

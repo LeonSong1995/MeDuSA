@@ -1,16 +1,6 @@
 remote_theme:  allejo/jekyll-docs-theme
 name: Overview
 
-project:
-  version: 1.0.0
-  download_url: https://github.com/LeonSong1995/MeDuSA
-  download_text: Download
-
-project:
-  version: 1.0.0
-  download_url: https://github.com/LeonSong1995/MeDuSA
-  download_text: Download
-
 license:
   software: GNU License 3.0
   software_url: https://www.gnu.org/licenses/licenses.en.html

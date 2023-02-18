@@ -1,0 +1,8 @@
+remote_theme: allejo/jekyll-docs-theme
+name: Test
+
+# Build settings
+markdown: kramdown
+exclude:
+  - LICENSE.md
+  - README.md

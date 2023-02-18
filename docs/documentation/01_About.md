@@ -3,19 +3,20 @@ layout: page
 title: About
 ---
 
-We developed a deconvolution method, 'CARD', that leverages cell type specific expression information from single cell RNA sequencing (scRNA-seq) for the deconvolution of spatial transcriptomics. A unique feature of CARD is its ability to model the spatial correlation in cell type composition across tissue locations, thus enabling spatially informed cell type deconvolution. Modeling spatial correlation allows us to not only borrow the cell type composition information across locations on the entire tissue to accurately infer the cell type composition on each individual location, but also impute cell type compositions and gene expression levels on unmeasured tissue locations, facilitating the construction of a refined spatial tissue map with a resolution much higher than that measured in the original study. We demonstrate the benefits of CARD through extensive simulations and in-depth analysis of four spatial transcriptomics data sets that are paired with different scRNA-seq references. In the real data applications, CARD revealed refined tissue structures with enhanced spatial resolution and identified novel marker genes that underlie the functional and structural organization of the olfactory bulb and hippocampus. CARD also revealed distinct spatial localization of multiple cell types and molecular markers that define the progression, heterogeneity and compartmentalization of pancreatic cancer. 
+We established MeDuSA, a mixed model-based method that leverages single-cell RNA-seq data as a reference to estimate cell-state abundance along a cell trajectory in bulk RNA-seq data. MeDuSA estimates cell abundance at each state while fitting the remaining cells of the same type individually as random effects, resulting in improved deconvolution accuracy over the compared methods. Extensive benchmark analyses demonstrate the effectiveness of MeDuSA, while applying it to cohort-level RNA-seq datasets reveals associations of cell-state abundances with disease or treatment conditions and cell-state-dependent genetic control of transcription. Our study provides a high-accuracy deconvolution tool to estimate cell-state abundance along a cell trajectory, and shows its utility in characterizing the dynamics of cell states in various biological processes.
 
-Cite `CARD`
+Cite `MeDuSA`
 -------------------
-Ying Ma, Xiang Zhou#, Spatially Informed Cell Type Deconvolution for Spatial Transcriptomics, 2021 
+Liyang Song, Xiwei Sun, Ting Qi, Jian Yang
 
 Contact
 -------------------
-if you have questions, feel free to leave messages on the [github issues](https://github.com/YingMa1993/CARD/issues) or contact me through email: yingma@umich.edu
+If you have any questions about MeDuSA, please feel free to contact: songliyang@westlake.edu.cn.
 
 Our group
 -------------------
-[Zhou lab website](https://www.xzlab.org/)
+[Yang lab website](https://yanglab.westlake.edu.cn/)
 
-![lab](screenshot_zhoulab.png)
-
+Other tools developed by our group
+-------------------
+[GCTA](https://yanglab.westlake.edu.cn/software/gcta/#Overview)

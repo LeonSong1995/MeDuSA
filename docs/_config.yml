@@ -26,10 +26,6 @@ links:
       icon: github
       brand: true
       url:https://github.com/LeonSong1995/MeDuSA
-    - title: Issues
-      icon: bug
-      url: https://github.com/LeonSong1995/MeDuSA/issues?state=open
-
 ui:
   mode: 'auto' # 'auto', 'dark', 'light'
   brand:
@@ -66,9 +62,6 @@ social:
   facebook:
     enabled: false
     profileUrl:
-
-analytics:
-  google: UA-123456-1
 
 # Build settings
 markdown: kramdown

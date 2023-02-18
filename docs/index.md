@@ -1,5 +1,5 @@
 ---
-layout: half
+layout: full
 homepage: true
 disable_anchors: true
 

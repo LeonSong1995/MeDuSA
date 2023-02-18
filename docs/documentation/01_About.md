@@ -19,4 +19,4 @@ Our group
 
 Other tools developed by our group
 -------------------
-[GCTA](https://yanglab.westlake.edu.cn/software/gcta/#Overview)
+[a tool for Genome-wide Complex Trait Analysis (GCTA)](https://yanglab.westlake.edu.cn/software/gcta/#Overview)

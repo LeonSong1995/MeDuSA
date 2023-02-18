@@ -6,22 +6,32 @@ project:
   download_url: https://github.com/LeonSong1995/MeDuSA
   download_text: Download
 
+project:
+  version: 1.0.0
+  download_url: https://github.com/YingMa0107/CARD/
+  download_text: Download
+
+license:
+  software: GNU License 3.0
+  software_url: https://www.gnu.org/licenses/licenses.en.html
+ 
 links:
   header:
     - title: GitHub
       icon: github
       brand: true
-      url: https://github.com/LeonSong1995/MeDuSA
+      url: https://github.com/LeonSong1995/MeDuSA/
   homepage:
     - title: View on GitHub
       icon: github
       brand: true
-      url: https://github.com/LeonSong1995/MeDuSA
+      url: https://github.com/LeonSong1995/MeDuSA/
   footer:
     - title: GitHub
       icon: github
       brand: true
-      url: https://github.com/LeonSong1995/MeDuSA      
+      url: https://github.com/LeonSong1995/MeDuSA/
+
 ui:
   mode: 'dark' # 'auto', 'dark', 'light'
   brand:
@@ -46,6 +56,18 @@ ui:
       homepage: 'center'
       page: 'left'
 
+social:
+  github:
+    user: LeonSong1995
+    repo: MeDuSA
+  twitter:
+    enabled: false
+    via:
+    hash:
+    account:
+  facebook:
+    enabled: false
+    profileUrl:
 
 # Build settings
 markdown: kramdown

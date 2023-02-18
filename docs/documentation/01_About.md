@@ -19,4 +19,7 @@ Our group
 
 Other tools developed by our group
 -------------------
-[a tool for Genome-wide Complex Trait Analysis (GCTA)](https://yanglab.westlake.edu.cn/software/gcta/#Overview)
+[A tool for Genome-wide Complex Trait Analysis (GCTA)](https://yanglab.westlake.edu.cn/software/gcta/#Overview)
+[Summary-data-based Mendelian Randomization (SMR)](https://yanglab.westlake.edu.cn/software/smr/#Overview)
+[Generalised Summary-data-based Mendelian Randomisaion (GSMR)](https://yanglab.westlake.edu.cn/software/gsmr/)
+[OmicS-data-based Complex trait Analysis (OSCA)](https://yanglab.westlake.edu.cn/software/osca/#Overview)

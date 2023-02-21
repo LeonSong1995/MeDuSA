@@ -70,11 +70,31 @@ MeDuSA_obj = MeDuSA(bulk,sce_use,
                   select.ct = 'mon',markerGene = NULL,span = 0.35,
 		  resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)		 
 ```
+The results are stored in MeDuSA_obj@Estimation
+```r
+#The estimated cell-state abundance
+MeDuSA_obj@Estimation$cell_state_abundance[1:3,1:3]
+               A           B           C
+bin1 0.018230362 0.012866330 0.015188014
+bin2 0.011331655 0.009618875 0.010931174
+bin3 0.007009345 0.007740727 0.008308389
+
+#The median state (pseudo-time) of cell-state bins
+MeDuSA_obj@Estimation$TimeBin[1:3]
+[1] 0.006934536 0.031808065 0.050630336
+
+#The used marker genes
+MeDuSA_obj@Estimation$markerGene[1:3]
+[1] "FCGR3A" "IFITM2" "IFITM3"
+```
+
+- bulk:
+- 
 
 
 
-### 2. Deconvolution using CARD
-Now we have evrything stored in the CARD object, we can use CARD to deconvolute the spatial transcriptomics data. CARD is computationally fast and memory efficient. CARD relies on an efficient optimization algorithm for constrained maximum likelihood estimation and is scalable to spatial transcriptomics with tens of thousands of spatial locations and tens of thousands of genes. For the example dataset with the sample size of 428 locations, it takes within a minute to finish the deconvolution. 
+### 2. Visualize the estimated cell-state abundance 
+Now let us visu 
 
 ```r
 CARD_obj = CARD_deconvolution(CARD_object = CARD_obj)

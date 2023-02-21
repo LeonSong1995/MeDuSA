@@ -3,16 +3,16 @@ layout: page
 title: Example Analysis-1
 description: ~
 ---
-This tutorial provides an example analysis using MeDuSA on the human monocytes data from [Oetjen et al., 2018](https://insight.jci.org/articles/view/124928). 
-Before running the analysis, please ensure that the MeDuSA package has been installed. Refer to the [link](https://github.com/LeonSong1995/MeDuSA) for installation instructions.
+This tutorial offers an illustrative analysis of the human monocytes data from [Oetjen et al., 2018](https://insight.jci.org/articles/view/124928) using MeDuSA. Prior to running the analysis, it is important to ensure that the MeDuSA package has been installed. For installation instructions, please refer to the following link(https://github.com/LeonSong1995/MeDuSA).
+
 
 ## Input data
 `MeDuSA` requires two types of input data:
 - Bulk RNA-seq data. 
-- Single cell RNA-seq (scRNA-seq) data: A seurat obejct along with the annotated cell state trajectory and cell-types. 
+- Single cell RNA-seq (scRNA-seq) data, which should be provided in the form of a Seurat object that includes the annotated cell state trajectory and cell types. 
 
-The data for runing this tutorial can be downloaded [here](https://github.com/LeonSong1995/MeDuSA) 
-Here are the details about the input data 
+The input data required for running this tutorial can be downloaded from the [following](https://github.com/LeonSong1995/MeDuSA) 
+Detailed information regarding the input data is provided as follows
 ### 1. Bulk RNA-seq data
 ```r
 #### load the example bulk RNA-seq data, 
@@ -24,7 +24,7 @@ A1CF    9.093464  25.30405  22.23557  19.24875
 A2M   350.147382 280.15882 413.49436 616.65499
 A2ML1  21.073328  24.57603  50.72397  42.51505
 ```
-The bulk RNA-seq data is in a matrix format, with each row corresponding to a particular gene and each column corresponding to a specific sample.
+The bulk RNA-seq data is represented in a matrix format, where each row corresponds to a specific gene and each column corresponds to a particular sample.
 
 ### 2. Reference scRNA-seq data
 ```r
@@ -43,7 +43,7 @@ sce$cell_type[1:3]
 A/A.rds_AAACCTGCAGCGAACA-1 A/A.rds_AAACCTGGTCGACTGC-1 A/A.rds_AAACCTGGTCGCTTCT-1 
                      "mon"                      "mon"                      "mon" 
 ```
-The reference scRNA-seq data is in the format of seurat object, with the cell-state trajectory stored in sce$cell_trajectory and the cell-type stored in sce$cell_type. Please see this [link]](https://satijalab.org/seurat/) for more information about the seurat. 
+The reference scRNA-seq data must be in the Seurat object format, where the cell-state trajectory is stored in `sce$cell_trajectory` and the cell-type is stored in `sce$cell_type`. Please see this [link](https://satijalab.org/seurat/) for more information about the seurat. 
 
 
 

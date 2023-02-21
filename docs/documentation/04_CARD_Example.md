@@ -9,7 +9,7 @@ Before running the analysis, please ensure that the MeDuSA package has been inst
 ## Input data
 `MeDuSA` requires two types of input data:
 - Bulk RNA-seq data. 
-- Single-cell RNA-seq (scRNA-seq) data: A [Seurat](https://satijalab.org/seurat/) obejct along with the annotated cell-state trajectories and cell types. 
+- Single-cell RNA-seq (scRNA-seq) data: A [Seurat](https://satijalab.org/seurat/) obejct along with the annotated cell-state trajectory and cell types. 
 
 The data for runing this tutorial can be downloaded [here](https://github.com/LeonSong1995/MeDuSA)
 Here are the details about the input data 
@@ -27,19 +27,22 @@ A2ML1  21.073328  24.57603  50.72397  42.51505
 The bulk RNA-seq data is in a matrix format, with each row corresponding to a particular gene and each column corresponding to a specific sample.
 ```r
 
-
-
-### 2. single cell RNAseq ((scRNA-seq)) data,  e.g.,
+### 2. Reference scRNA-seq data
 ```r
-#### load the example scRNA-seq count data, 
-load("./sc_count.RData")
-sc_count[1:4,1:4]
-4 x 4 sparse Matrix of class "dgCMatrix"
-      Cell1 Cell2 Cell3 Cell4
-A1BG      .     .     .     .
-A1CF      .     .     .     1
-A2M       .     .     .     .
-A2ML1     .     .     .     .
+#### load the example scRNA-seq data, 
+sce = readRDS("./Monocytes_sce.rds")
+class(sce)
+[1] "Seurat"
+attr(,"package")
+[1] "SeuratObject"
+
+sce$cell_trajectory[1:3]
+A/A.rds_AAACCTGCAGCGAACA-1 A/A.rds_AAACCTGGTCGACTGC-1 A/A.rds_AAACCTGGTCGCTTCT-1 
+                 0.9220488                  0.5167408                  0.4567616 
+		 
+sce$cell_type[1:3]
+A/A.rds_AAACCTGCAGCGAACA-1 A/A.rds_AAACCTGGTCGACTGC-1 A/A.rds_AAACCTGGTCGCTTCT-1 
+                     "mon"                      "mon"                      "mon" 
 ```
 The scRNA-seq count data must be in the format of matrix or sparseMatrix, while each row represents a gene and each column represents a cell.
 

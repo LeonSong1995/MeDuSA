@@ -90,14 +90,27 @@ MeDuSA_obj@Estimation$markerGene[1:3]
 MeDuSA allows users to input their own cultivated marker genes. Additionally, MeDuSA provides two methods for selecting marker genes that are representative of the cell-state trajectory.
 - wilcox test: MeduSA first divides the cells in the trajectory into a specified number of bins. For each bin, MeduSA applies the wilcox test implemented in the `Seurat::FindMarkers` function. The wilcox test is used to compare gene expression levels between two groups of cells and determine whether the difference in expression is statistically significant. In this case, the two groups of cells are the cells in the current bin being tested and all the other cells in the trajectory. The wilcox test is performed for each gene, and genes with significant differential expression are identified as marker genes for that particular bin. By applying the wilcox test to each bin along the cell-state trajectory, MeduSA can identify marker genes that are specific to each stage of the trajectory.
 
-- gam-wald test: MeduSA associates genes along the cell-state trajectory using the generalized additive model (gam). Only genes with a false discovery rate (FDR) adjusted p-value less than 0.01 are considered. These significant genes are then ranked based on their association strength, which allows for the identification of the most relevant genes that are associated with the cell-state trajectory.To prevent certain cell states from being overrepresented, MeduSA divides the cell-state trajectory into a specified number of intervals.Each gene is then assigned to the interval in which it has the highest mean expression. For each interval, a set of top informative genes is selected as signature genes.
+- gam-wald test: MeduSA associates genes along the cell-state trajectory using the generalized additive model (gam). Only genes with a false discovery rate (FDR) adjusted p-value less than 0.01 are considered. These significant genes are then ranked based on their association strength, which allows for the identification of the most relevant genes that are associated with the cell-state trajectory. To prevent certain cell-states from being overrepresented, MeduSA divides the cell-state trajectory into a specified number of intervals. Each gene is then assigned to the interval in which it has the highest mean expression. For each interval, a set of top informative genes is selected as signature genes.
 
-To use these two methods, users can specificy the parameter `method` in the `MeDuSA` function as `wilcox` or `gam`. Alternatively,users can use the function of `MeDuSA_marker` to select the marker genes before running cell-state deconvolution analysis. 
+To use these two methods, users can specificy the parameter `method` in the `MeDuSA` function as `wilcox` or `gam`. Alternatively, users can use the function of `MeDuSA_marker` to select the marker genes before running cell-state deconvolution analysis. 
 
 ```r
-library(ggplot2)
-marker = 
-
+##Set the gene selection method in MeDuSA function 
+library(MeDuSA)
+#wilcox
+MeDuSA_obj = MeDuSA(bulk,sce,
+		    select.ct = 'mon',markerGene = NULL,span = 0.35,method = "wilcox",
+		    resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	
+#gam-wald
+MeDuSA_obj = MeDuSA(bulk,sce,
+		    select.ct = 'mon',markerGene = NULL,span = 0.35,method = "gam",
+		    resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)
+		    
+##Select marker genes using MeDuSA::MeDuSA_marker before running cell-state deconvolution analysis
+help(MeDuSA_marker)
+marker = MeDuSA_marker(sce[,which(sce$cell_type=='mon')],bulk,
+                               GeneNumber = 200,nbins = 10,
+                               family ="gaussian",k = 10,ncpu = 2,method = "wilcox")
 ```
 ### 3. How to include other cell types as covariates
 

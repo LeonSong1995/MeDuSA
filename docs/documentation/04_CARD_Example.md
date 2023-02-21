@@ -50,19 +50,16 @@ The reference scRNA-seq data must be in the Seurat object format, where the cell
 ## Cell State Deconvolution
 ```r
 library(MeDuSA)
+help(MeDuSA)
 ``` 
 ### 1. Parameters of MeDuSA
-Here we introduce the enssential parameters of MeDuSA.
-- sc_count: Matrix or sparse matrix of raw scRNA-seq count data, each row represents a gene and each column represents a cell. This sc_count data serves as a reference for the cell type deconvolution for spatial transcriptomics data. 
-- sc_meta: Data frame, with each row representing the cell type and/or sample information of a specific cell. The row names of this data frame should match exactly with the column names of the sc_count data. The sc_meta data must contain the column indicating the cell type assignment for each cell (e.g., "cellType" column in the example sc_meta data). 
-- spatial_count: Matrix or sparse matrix of raw spatial resolved transcriptomics count data, each row represents a gene and each column represents a spatial location. This is the spatial transcriptomics data that we are interested to deconvolute.
-- spatial_location: Data frame, with two columns representing the x and y coordinates of the spatial location. The rownames of this data frame should match eaxctly with the columns of the spatial_count.
-- ct.varname: Caracter, the name of the column in sc_meta that specifies the cell type assignment. 
-- ct.select: Vector of cell type names that you are interested in to deconvolute, default as NULL. If NULL, then use all cell types provided by single cell dataset.
-- sample.varname: Character,the name of the column in sc_meta that specifies the sample/subject information. If NULL, we just use the whole data as one sample/subject.
-- minCountGene: Numeric, include spatial locations where at least this number of counts detected. Default is 100. 
-- minCountSpot: Numeric, include genes where at least this number of spatial locations that have non-zero expression. Default is 5.
-
+In this section, we introduce the essential parameters of MeDuSA. 
+- bulk: A matrix of bulk RNA-seq data. 
+- sce: A Seurat object of scRNA-seq data.  
+- select.ct: A character variable indicating the focal cell type.
+- markerGene: A character vector containing the marker genes across the cell-state trajectory.If not provided, MeDuSA will utilize the `MeDuSA_marker` function to select marker genes for the analysis.
+- resolution: A numeric variable used to specify the number of cell bins along the cell trajectory.
+- 
 ```r
 CARD_obj = createCARDObject(
 	sc_count = sc_count,

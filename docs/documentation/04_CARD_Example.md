@@ -9,7 +9,7 @@ Before running the analysis, please ensure that the MeDuSA package has been inst
 ## Input data
 `MeDuSA` requires two types of input data:
 - Bulk RNA-seq data. 
-- Single-cell RNA-seq (scRNA-seq) data: A [Seurat](https://satijalab.org/seurat/) obejct along with the annotated cell-state trajectory and cell types. 
+- Single cell RNA-seq (scRNA-seq) data: A [Seurat](https://satijalab.org/seurat/) obejct along with the annotated cell state trajectory and cell-types. 
 
 The data for runing this tutorial can be downloaded [here](https://github.com/LeonSong1995/MeDuSA)
 Here are the details about the input data 
@@ -43,21 +43,10 @@ sce$cell_type[1:3]
 A/A.rds_AAACCTGCAGCGAACA-1 A/A.rds_AAACCTGGTCGACTGC-1 A/A.rds_AAACCTGGTCGCTTCT-1 
                      "mon"                      "mon"                      "mon" 
 ```
-The scRNA-seq count data must be in the format of matrix or sparseMatrix, while each row represents a gene and each column represents a cell.
+The reference scRNA-seq data is in the format of Seurat object, with the cell-state trajectory stored in sce$cell_trajectory and the cell-type stored in sce$cell_type. 
 
-```r
-#### load the example scRNA-seq meta data, 
-load("./sc_meta.RData")
-sc_meta[1:4,]
-      cellID                             cellType sampleInfo
-Cell1  Cell1                         Acinar_cells    sample1
-Cell2  Cell2          Ductal_terminal_ductal_like    sample1
-Cell3  Cell3          Ductal_terminal_ductal_like    sample1
-Cell4  Cell4 Ductal_CRISP3_high-centroacinar_like    sample1
-```
-The scRNAseq meta data must be in the format of data frame while each row represents a cell. The rownames of the scRNAseq meta data should match exactly with the column names of the scRNAseq count data. The sc_meta data must contain the column indicating the cell type assignment for each cell (e.g., "cellType" column in the example sc_meta data). Sample/subject information should be provided, if there is only one sample, we can add a column by ```sc_meta$sampleInfo = "sample1"```.
 
-We suggest the users to check their single cell RNASeq data carefully before running CARD. We suggest the users to input the single cell RNAseq data with each cell type containing at least 2 cells. i.e. print(table(sc_meta$cellType,useNA = "ifany"))
+
 
 ## Cell Type Deconvolution
 ```r

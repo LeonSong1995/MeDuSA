@@ -66,6 +66,7 @@ In this section, we introduce the essential parameters of MeDuSA.
 CARD_obj = MeDuSA(bulk,sce_use,
                   select.ct = 'mon',markerGene = NULL,
 		  resolution = 50,smooth=TRUE,fractional=TRUE,ncpu = 4)
+		  
 MeDuSA: mixed model-based deconvolution of cell-state abundance
 Marker genes are not provided. MeDuSA will select marker genes over the cell trajectory using wilcox.
 Select genes using wilcox test with 4 cores.

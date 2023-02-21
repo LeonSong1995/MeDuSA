@@ -52,8 +52,8 @@ The reference scRNA-seq data must be in the Seurat object format, where the cell
 library(MeDuSA)
 help(MeDuSA)
 ``` 
-### 1. Parameters of MeDuSA
-In this section, we introduce the essential parameters of MeDuSA. 
+### 1. Basic usage of MeDuSA
+This section provides an introduction to the basic usage of MeDuSA.
 - bulk: A matrix of bulk RNA-seq data. 
 - sce: A Seurat object of scRNA-seq data.  
 - select.ct: A character variable indicating the focal cell type.
@@ -63,9 +63,12 @@ In this section, we introduce the essential parameters of MeDuSA.
 - fractional: A Boolean variable to determine whether to normalize the estimated cell-state abundance to the fractional abundance (0-1).
 - ncpu: The number of CPU cores to be used. 
 
-For further details about the parameters, please refer to this [link](https://github.com/LeonSong1995/MeDuSA).
+For further details about the parameters, please refer to this [link](https://github.com/LeonSong1995/MeDuSA) or use ```r
+help(MeDuSA)
+```
+
 ```r
-CARD_obj = MeDuSA(bulk,sce_use,
+MeDuSA_obj = MeDuSA(bulk,sce_use,
                   select.ct = 'mon',markerGene = NULL,
 		  resolution = 50,smooth=TRUE,fractional=TRUE,ncpu = 4)		 
 ```

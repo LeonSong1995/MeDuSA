@@ -115,7 +115,6 @@ help(MeDuSA_marker)
 ```
 ### 3. How to include other cell types as covariates
 To account for potential confounding factors casued by other cell types, MeDuSA allows (recommends) users to include them as covariates. 
-
 ```r
 
 ```
@@ -123,9 +122,9 @@ To account for potential confounding factors casued by other cell types, MeDuSA 
 ### 4. How to use the mode of conditional auto-regressive (CAR)
 
 ### 5. Do I need to normalize the data 
-Yes, we recommend the user to normalize their reference scRNA-seq data and bulk RNA-seq data into the same scale before running deconvolution analysis. 
+Yes, before running deconvolution analysis, we suggest users to normalize the reference data and the bulk data into the same scale. Considering the  variety in data scale (e.g., Count/CPM/TPM/FPKM/Log), MeDuSA `does not` perform any normalization for the input reference and bulk data. Users need carefully check the 
 
-### 6. How to get the p-value of the random-effects component
+### 6. How to get the p-value of the random effects component
 
 
 ## Prepare reference data

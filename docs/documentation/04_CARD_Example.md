@@ -6,7 +6,7 @@ description: ~
 This tutorial offers an illustrative analysis of the human monocytes data from [Oetjen et al., 2018](https://insight.jci.org/articles/view/124928) using MeDuSA. Prior to running the analysis, it is important to ensure that the MeDuSA package has been installed. For installation instructions, please refer to the following [link](https://github.com/LeonSong1995/MeDuSA).
 
 
-## Input Data
+## Input data
 `MeDuSA` requires two types of input data:
 - Bulk RNA-seq data. 
 - Single cell RNA-seq (scRNA-seq) data, which should be provided in the form of a Seurat object that includes the annotated cell-state trajectory and cell types. 
@@ -45,7 +45,7 @@ The reference scRNA-seq data must be in the Seurat object format, where the cell
 
 
 
-## Cell State Deconvolution Analysis
+## Cell-state deconvolution analysis
 ```r
 library(MeDuSA)
 help(MeDuSA)
@@ -92,7 +92,7 @@ MeDuSA allows users to input their own cultivated marker genes. Additionally, Me
 
 - gam-wald test: MeduSA associates genes along the cell-state trajectory using the generalized additive model (gam). Only genes with a false discovery rate (FDR) adjusted p-value less than 0.01 are considered. These significant genes are then ranked based on their association strength, which allows for the identification of the most relevant genes that are associated with the cell-state trajectory. To prevent certain cell-states from being overrepresented, MeduSA divides the cell-state trajectory into a specified number of intervals. Each gene is then assigned to the interval in which it has the highest mean expression. For each interval, a set of top informative genes is selected as signature genes.
 
-To use these two methods, users can specificy the parameter `method` in the `MeDuSA` function as `wilcox` or `gam`. Alternatively, users can use the function of `MeDuSA_marker` to select the marker genes before running cell-state deconvolution analysis. 
+To use these two methods, users can specificy the `method` in the `MeDuSA` function as `wilcox` or `gam`. Alternatively, users can use the function of `MeDuSA_marker` to select the marker genes before running cell-state deconvolution analysis. 
 
 ```r
 ##Set the gene selection method in MeDuSA function 
@@ -114,10 +114,14 @@ marker = MeDuSA_marker(sce[,which(sce$cell_type=='mon')],bulk,
 help(MeDuSA_marker)			       
 ```
 ### 3. How to include other cell types as covariates
+MeDuSA allows users to input their own cultivated marker genes.
 
 ### 4. How to use the mode of conditional auto-regressive (CAR)
 
 ### 5. Do I need to normalize the data 
+Yes, we recommend the user to normalize their reference scRNA-seq data and bulk RNA-seq data into the same scale before running deconvolution analysis. 
+
+### 6. How to get the p-value of the random-effects component
 
 
 ## Prepare reference scRNA-seq data

@@ -11,7 +11,7 @@ This tutorial offers an illustrative analysis of the human monocytes data from [
 - Bulk RNA-seq data. 
 - Single cell RNA-seq (scRNA-seq) data, which should be provided in the form of a Seurat object that includes the annotated cell-state trajectory and cell types. 
 
-For how to prepare the cell-state trajectory data, please read the section of `Prepare reference scRNA-seq data` in this tutorial. 
+For how to prepare the cell-state trajectory data, please read the section of `Prepare reference data` in this tutorial. 
 
 The input data required for running this tutorial can be downloaded from the following [link](https://github.com/LeonSong1995/MeDuSA). 
 Detailed information regarding the input data is provided as follows.
@@ -114,7 +114,11 @@ marker = MeDuSA_marker(sce[,which(sce$cell_type=='mon')],bulk,
 help(MeDuSA_marker)			       
 ```
 ### 3. How to include other cell types as covariates
-MeDuSA allows users to input their own cultivated marker genes.
+To account for potential confounding factors casued by other cell types, MeDuSA allows (recommends) users to include them as covariates. 
+
+```r
+
+```
 
 ### 4. How to use the mode of conditional auto-regressive (CAR)
 
@@ -124,7 +128,7 @@ Yes, we recommend the user to normalize their reference scRNA-seq data and bulk 
 ### 6. How to get the p-value of the random-effects component
 
 
-## Prepare reference scRNA-seq data
+## Prepare reference data
 
 ## Compare the estimated cell-state abundance to the expected truth
 

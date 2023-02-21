@@ -9,9 +9,9 @@ Before running the analysis, please ensure that the MeDuSA package has been inst
 ## Input data
 `MeDuSA` requires two types of input data:
 - Bulk RNA-seq data. 
-- Single cell RNA-seq (scRNA-seq) data: A [Seurat](https://satijalab.org/seurat/) obejct along with the annotated cell state trajectory and cell-types. 
+- Single cell RNA-seq (scRNA-seq) data: A seurat obejct along with the annotated cell state trajectory and cell-types. 
 
-The data for runing this tutorial can be downloaded [here](https://github.com/LeonSong1995/MeDuSA)
+The data for runing this tutorial can be downloaded [here](https://github.com/LeonSong1995/MeDuSA) 
 Here are the details about the input data 
 ### 1. Bulk RNA-seq data
 ```r
@@ -43,7 +43,7 @@ sce$cell_type[1:3]
 A/A.rds_AAACCTGCAGCGAACA-1 A/A.rds_AAACCTGGTCGACTGC-1 A/A.rds_AAACCTGGTCGCTTCT-1 
                      "mon"                      "mon"                      "mon" 
 ```
-The reference scRNA-seq data is in the format of Seurat object, with the cell-state trajectory stored in sce$cell_trajectory and the cell-type stored in sce$cell_type. 
+The reference scRNA-seq data is in the format of seurat object, with the cell-state trajectory stored in sce$cell_trajectory and the cell-type stored in sce$cell_type. Please see this [link]](https://satijalab.org/seurat/) for more information about the seurat. 
 
 
 

@@ -66,16 +66,13 @@ In this section, we introduce the essential parameters of MeDuSA.
 CARD_obj = MeDuSA(bulk,sce_use,
                   select.ct = 'mon',markerGene = NULL,
 		  resolution = 50,smooth=TRUE,fractional=TRUE,ncpu = 4)
-		  
 MeDuSA: mixed model-based deconvolution of cell-state abundance
-
 Marker genes are not provided. MeDuSA will select marker genes over the cell trajectory using wilcox.
-
 Select genes using wilcox test with 4 cores.
   |===============================================================================================================================| 100%
 Run MeDuSA with 4 cores.
   |===============================================================================================================================| 100%
- Elapsed time of LMM-CAR for 8 bulk-samples:0.448206015427907 mins
+Elapsed time of LMM-CAR for 8 bulk-samples:0.448206015427907 mins
 ```
 The spatial data are stored in `CARD_obj@spatial_countMat` and `CARD_obj@spatial_location` while the scRNA-seq data is stored in CARD_obj@sc_eset in the format of SingleCellExperiment. 
 

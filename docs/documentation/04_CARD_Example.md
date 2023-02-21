@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Example Analysis I
+title: Example Analysis
 description: ~
 ---
 This tutorial offers an illustrative analysis of the human monocytes data from [Oetjen et al., 2018](https://insight.jci.org/articles/view/124928) using MeDuSA. Prior to running the analysis, it is important to ensure that the MeDuSA package has been installed. For installation instructions, please refer to the following [link](https://github.com/LeonSong1995/MeDuSA).
@@ -11,9 +11,8 @@ This tutorial offers an illustrative analysis of the human monocytes data from [
 - Bulk RNA-seq data. 
 - Single cell RNA-seq (scRNA-seq) data, which should be provided in the form of a Seurat object that includes the annotated cell state trajectory and cell types. 
 
-The input data required for running this tutorial can be downloaded from the following [link](https://github.com/LeonSong1995/MeDuSA)
-
-Detailed information regarding the input data is provided as follows
+The input data required for running this tutorial can be downloaded from the following [link](https://github.com/LeonSong1995/MeDuSA). 
+Detailed information regarding the input data is provided as follows.
 ### 1. Bulk RNA-seq data
 ```r
 #### load the example bulk RNA-seq data, 
@@ -52,8 +51,8 @@ The reference scRNA-seq data must be in the Seurat object format, where the cell
 ```r
 library(MeDuSA)
 ``` 
-### 1. Create an `CARD` object
-The CARD object is created by the function `createCARDObject`. The essential inputs are:
+### 1. Parameters of MeDuSA
+Here we introduce the enssential parameters of MeDuSA.
 - sc_count: Matrix or sparse matrix of raw scRNA-seq count data, each row represents a gene and each column represents a cell. This sc_count data serves as a reference for the cell type deconvolution for spatial transcriptomics data. 
 - sc_meta: Data frame, with each row representing the cell type and/or sample information of a specific cell. The row names of this data frame should match exactly with the column names of the sc_count data. The sc_meta data must contain the column indicating the cell type assignment for each cell (e.g., "cellType" column in the example sc_meta data). 
 - spatial_count: Matrix or sparse matrix of raw spatial resolved transcriptomics count data, each row represents a gene and each column represents a spatial location. This is the spatial transcriptomics data that we are interested to deconvolute.

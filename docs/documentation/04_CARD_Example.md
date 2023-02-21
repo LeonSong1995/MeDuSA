@@ -9,7 +9,9 @@ This tutorial offers an illustrative analysis of the human monocytes data from [
 ## Input Data
 `MeDuSA` requires two types of input data:
 - Bulk RNA-seq data. 
-- Single cell RNA-seq (scRNA-seq) data, which should be provided in the form of a Seurat object that includes the annotated cell state trajectory and cell types. 
+- Single cell RNA-seq (scRNA-seq) data, which should be provided in the form of a Seurat object that includes the annotated cell-state trajectory and cell types. 
+
+For how to prepare the cell-state trajectory data, please read the section of `Prepare reference scRNA-seq data` in this tutorial. 
 
 The input data required for running this tutorial can be downloaded from the following [link](https://github.com/LeonSong1995/MeDuSA). 
 Detailed information regarding the input data is provided as follows.
@@ -17,12 +19,8 @@ Detailed information regarding the input data is provided as follows.
 ```r
 #### load the example bulk RNA-seq data, 
 bulk = readRDS("./Monocytes_bulk.rds")
-bulk[1:4,1:4]
-               A         B         C         H
-A1BG  187.743759 212.53553 316.84772 401.00022
-A1CF    9.093464  25.30405  22.23557  19.24875
-A2M   350.147382 280.15882 413.49436 616.65499
-A2ML1  21.073328  24.57603  50.72397  42.51505
+class(bulk)
+"matrix" "array" 
 ```
 The bulk RNA-seq data is represented in a matrix format, where each row corresponds to a specific gene and each column corresponds to a particular sample.
 
@@ -58,15 +56,15 @@ This section provides an introduction to the basic usage of MeDuSA.
 - sce: A Seurat object of scRNA-seq data.  
 - select.ct: A character variable indicating the focal cell type.
 - markerGene: A character vector containing the marker genes across the cell-state trajectory.If not provided, MeDuSA will utilize the `MeDuSA_marker` function to select marker genes for the analysis.
-- resolution: A numeric variable used to specify the number of cell-state bins along the cell trajectory. The default value is 50.
-- smooth: A boolean variable to determine whether to smooth the estimated cell-state abundance. The default value is TRUE. 
-- span: A numeric variable to control the degree of smoothing. The default value is 0.35. 
+- resolution: A numeric variable used to specify the number of cell-state bins along the cell trajectory.
+- smooth: A boolean variable to determine whether to smooth the estimated cell-state abundance.
+- span: A numeric variable to control the degree of smoothing.
 - fractional: A boolean variable to determine whether to normalize the estimated cell-state abundance to the fractional abundance (0-1).
 - ncpu: The number of CPU cores to be used. 
 
 For further details about the parameters, please refer to this [link](https://github.com/LeonSong1995/MeDuSA).
 ```r
-MeDuSA_obj = MeDuSA(bulk,sce_use,
+MeDuSA_obj = MeDuSA(bulk,sce,
                   select.ct = 'mon',markerGene = NULL,span = 0.35,
 		  resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)		 
 ```
@@ -88,44 +86,18 @@ MeDuSA_obj@Estimation$markerGene[1:3]
 [1] "FCGR3A" "IFITM2" "IFITM3"
 ```
 
-- bulk:
-- 
+### 2. How to select marker genes
+MeDuSA allows users to input their own cultivated marker genes. Additionally, MeDuSA provides two methods for selecting marker genes that are representative of the cell-state trajectory.
+- wilcox test: 
+- gam-wald test:
 
-
-
-### 2. Visualize the estimated cell-state abundance 
-Now let us visu 
 
 ```r
-CARD_obj = CARD_deconvolution(CARD_object = CARD_obj)
-## create reference matrix from scRNASeq...
-## Select Informative Genes! ...
-## Deconvolution Starts! ...
-## Deconvolution Finish! ...
+library(ggplot2)
+abundance = MeDuSA_obj@Estimation$cell_state_abundance
+
 ```
-The results are stored in `CARD_obj@Proportion_CARD`. 
-```r
-print(CARD_obj@Proportion_CARD[1:2,])
-      Acinar_cells Ductal_terminal_ductal_like
-10x10 6.370860e-02                  0.02391251
-10x13 7.818278e-08                  0.02996182
-      Ductal_CRISP3_high-centroacinar_like Cancer_clone_A Ductal_MHC_Class_II
-10x10                            0.1801753   4.229928e-04         0.021557706
-10x13                            0.9620440   1.910394e-07         0.006437371
-      Cancer_clone_B      mDCs_A Ductal_APOL1_high-hypoxic   Tuft_cells
-10x10   4.339480e-05 0.011136707              4.967235e-04 2.025089e-03
-10x13   2.319262e-05 0.001013068              3.864917e-06 1.796433e-06
-            mDCs_B         pDCs Endocrine_cells Endothelial_cells Macrophages_A
-10x10 0.0792525811 7.432979e-07    6.848627e-03      1.722855e-01  9.909662e-02
-10x13 0.0004695018 1.566377e-11    3.925412e-11      4.198468e-11  2.766705e-05
-        Mast_cells Macrophages_B T_cells_&_NK_cells    Monocytes        RBCs
-10x10 7.411147e-11  3.090675e-02       4.976256e-06 2.663846e-06 3.84187e-10
-10x13 2.387132e-11  9.499908e-06       1.172387e-11 2.000116e-06 1.00967e-06
-       Fibroblasts
-10x10 3.081225e-01
-10x13 4.898874e-06
-```
-### 3. Visualize the cell type proportion
+### 3. How to include other cell types as covariates
 First, we jointly visualize the cell type proportion matrix through scatterpie plot. Note that here because the number of spots is relatively small, so jointly visualize the cell type proportion matrix in the scatterpie plot format is duable. We do not recommend users to visualize this plot when the number of spots is > 500. Instead, we recommend users to visualize the proportion directly, i.e., using the function CARD.visualize.prop(). Details of using this function see the next example.  
 ```r
 ## set the colors. Here, I just use the colors in the manuscript, if the color is not provided, the function will use default color in the package. 

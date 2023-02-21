@@ -58,21 +58,24 @@ In this section, we introduce the essential parameters of MeDuSA.
 - sce: A Seurat object of scRNA-seq data.  
 - select.ct: A character variable indicating the focal cell type.
 - markerGene: A character vector containing the marker genes across the cell-state trajectory.If not provided, MeDuSA will utilize the `MeDuSA_marker` function to select marker genes for the analysis.
-- resolution: A numeric variable used to specify the number of cell bins along the cell trajectory.
-- 
+- resolution: A numeric variable used to specify the number of cell-state bins along the cell trajectory. The default value is 50.
+- smooth: A Boolean variable to determine whether to smooth the estimated cell-state abundance. The default value is TRUE. 
+- fractional: A Boolean variable to determine whether to normalize the estimated cell-state abundance to the fractional abundance (0-1).
+- ncpu: The number of CPU cores to be used.
 ```r
-CARD_obj = createCARDObject(
-	sc_count = sc_count,
-	sc_meta = sc_meta,
-	spatial_count = spatial_count,
-	spatial_location = spatial_location,
-	ct.varname = "cellType",
-	ct.select = unique(sc_meta$cellType),
-	sample.varname = "sampleInfo",
-	minCountGene = 100,
-	minCountSpot = 5) 
-## QC on scRNASeq dataset! ...
-## QC on spatially-resolved dataset! ..
+CARD_obj = MeDuSA(bulk,sce_use,
+                  select.ct = 'mon',markerGene = NULL,
+		  resolution = 50,smooth=TRUE,fractional=TRUE,ncpu = 4)
+		  
+MeDuSA: mixed model-based deconvolution of cell-state abundance
+
+Marker genes are not provided. MeDuSA will select marker genes over the cell trajectory using wilcox.
+
+Select genes using wilcox test with 4 cores.
+  |===============================================================================================================================| 100%
+Run MeDuSA with 4 cores.
+  |===============================================================================================================================| 100%
+ Elapsed time of LMM-CAR for 8 bulk-samples:0.448206015427907 mins
 ```
 The spatial data are stored in `CARD_obj@spatial_countMat` and `CARD_obj@spatial_location` while the scRNA-seq data is stored in CARD_obj@sc_eset in the format of SingleCellExperiment. 
 

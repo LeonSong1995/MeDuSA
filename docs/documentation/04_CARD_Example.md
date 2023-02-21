@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Example Analysis of monocytes 
+title: Example Analysis-1
 description: ~
 ---
 This tutorial provides an example analysis using MeDuSA on the human monocytes data from [Oetjen et al., 2018](https://insight.jci.org/articles/view/124928). 
@@ -8,35 +8,26 @@ Before running the analysis, please ensure that the MeDuSA package has been inst
 
 ## Input data
 `MeDuSA` requires two types of input data:
-- bulk RNA-seq data. 
-- Single-cell RNA-seq (scRNA-seq) data along with the meta information, including annotated cell-state trajectories and cell types. 
+- Bulk RNA-seq data. 
+- Single-cell RNA-seq (scRNA-seq) data: A [Seurat](https://satijalab.org/seurat/) obejct along with the annotated cell-state trajectories and cell types. 
 
 The data for runing this tutorial can be downloaded [here](https://github.com/LeonSong1995/MeDuSA)
-Here are the details about the required data input illustrated by the example datasets. 
-### 1. spatial transcriptomics data, e.g.,
+Here are the details about the input data 
+### 1. Bulk RNA-seq data
 ```r
-#### load the example spatial transcriptomics count data, 
-load("./spatial_count.RData")
-spatial_count[1:4,1:4]
-4 x 4 sparse Matrix of class "dgCMatrix"
-           10x10 10x13 10x14 10x15
-X5S_rRNA       .     .     .     .
-X5_8S_rRNA     .     .     .     .
-X7SK           .     .     .     .
-A1BG.AS1       .     .     .     .
+#### load the example bulk RNA-seq data, 
+bulk = readRDS("./Monocytes_bulk.rds")
+bulk[1:4,1:4]
+               A         B         C         H
+A1BG  187.743759 212.53553 316.84772 401.00022
+A1CF    9.093464  25.30405  22.23557  19.24875
+A2M   350.147382 280.15882 413.49436 616.65499
+A2ML1  21.073328  24.57603  50.72397  42.51505
 ```
-The spatial transcriptomics count data must be in the format of matrix or sparseMatrix, while each row represents a gene and each column represents a spatial location. The column names of the spatial data can be in the "XcoordxYcoord" (i.e., 10x10) format, but you can also maintain your original spot names, for example, barcode names. 
+The bulk RNA-seq data is in a matrix format, with each row corresponding to a particular gene and each column corresponding to a specific sample.
 ```r
-#### load the example spatial location data, 
-load("./spatial_location.RData")
-spatial_location[1:4,]
-       x  y
-10x10 10 10
-10x13 10 13
-10x14 10 14
-10x15 10 15
-```
-The spatial location data must be in the format of data frame while each row represents a spatial location, the first column represents the x coordinate and the second column represents the y coordinate. The rownames of the spatial location data frame should match exactly with the column names of the spatial_count.
+
+
 
 ### 2. single cell RNAseq ((scRNA-seq)) data,  e.g.,
 ```r

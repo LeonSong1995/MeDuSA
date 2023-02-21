@@ -61,7 +61,8 @@ In this section, we introduce the essential parameters of MeDuSA.
 - resolution: A numeric variable used to specify the number of cell-state bins along the cell trajectory. The default value is 50.
 - smooth: A Boolean variable to determine whether to smooth the estimated cell-state abundance. The default value is TRUE. 
 - fractional: A Boolean variable to determine whether to normalize the estimated cell-state abundance to the fractional abundance (0-1).
-- ncpu: The number of CPU cores to be used.
+- ncpu: The number of CPU cores to be used. 
+
 For further details about the parameters, please refer to this [link](https://github.com/LeonSong1995/MeDuSA).
 ```r
 CARD_obj = MeDuSA(bulk,sce_use,

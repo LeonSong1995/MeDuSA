@@ -99,6 +99,11 @@ abundance = MeDuSA_obj@Estimation$cell_state_abundance
 ```
 ### 3. How to include other cell types as covariates
 
+### 4. How to use the mode of Conditional Autoregressive (CAR)
+
+### 5. Do I need to normalize the data 
+
+
 ## Prepare reference scRNA-seq data
 
 ## Compare the estimated cell-state abundance to the expected truth

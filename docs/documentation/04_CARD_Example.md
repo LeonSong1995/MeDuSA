@@ -43,14 +43,13 @@ sce$cell_type[1:3]
 A/A.rds_AAACCTGCAGCGAACA-1 A/A.rds_AAACCTGGTCGACTGC-1 A/A.rds_AAACCTGGTCGCTTCT-1 
                      "mon"                      "mon"                      "mon" 
 ```
-The reference scRNA-seq data must be in the Seurat object format, where the cell-state trajectory is stored in `sce$cell_trajectory` and the cell-type is stored in `sce$cell_type`. Please see this [link](https://satijalab.org/seurat/) for more information about the seurat. 
+The reference scRNA-seq data must be in the Seurat object format, where the cell-state trajectory is stored in `sce$cell_trajectory` and the cell-type is stored in `sce$cell_type`. For further information about Seurat, please visit the following [link](https://satijalab.org/seurat/).
 
 
 
-
-## Cell Type Deconvolution
+## Cell State Deconvolution
 ```r
-library(CARD)
+library(MeDuSA)
 ``` 
 ### 1. Create an `CARD` object
 The CARD object is created by the function `createCARDObject`. The essential inputs are:

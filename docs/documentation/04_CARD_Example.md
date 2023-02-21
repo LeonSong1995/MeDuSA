@@ -62,20 +62,14 @@ In this section, we introduce the essential parameters of MeDuSA.
 - smooth: A Boolean variable to determine whether to smooth the estimated cell-state abundance. The default value is TRUE. 
 - fractional: A Boolean variable to determine whether to normalize the estimated cell-state abundance to the fractional abundance (0-1).
 - ncpu: The number of CPU cores to be used.
+For further details about the parameters, please refer to this [link](https://github.com/LeonSong1995/MeDuSA).
 ```r
 CARD_obj = MeDuSA(bulk,sce_use,
                   select.ct = 'mon',markerGene = NULL,
-		  resolution = 50,smooth=TRUE,fractional=TRUE,ncpu = 4)
-		  
-MeDuSA: mixed model-based deconvolution of cell-state abundance
-Marker genes are not provided. MeDuSA will select marker genes over the cell trajectory using wilcox.
-Select genes using wilcox test with 4 cores.
-  |===============================================================================================================================| 100%
-Run MeDuSA with 4 cores.
-  |===============================================================================================================================| 100%
-Elapsed time of LMM-CAR for 8 bulk-samples:0.448206015427907 mins
+		  resolution = 50,smooth=TRUE,fractional=TRUE,ncpu = 4)		 
 ```
-The spatial data are stored in `CARD_obj@spatial_countMat` and `CARD_obj@spatial_location` while the scRNA-seq data is stored in CARD_obj@sc_eset in the format of SingleCellExperiment. 
+
+
 
 ### 2. Deconvolution using CARD
 Now we have evrything stored in the CARD object, we can use CARD to deconvolute the spatial transcriptomics data. CARD is computationally fast and memory efficient. CARD relies on an efficient optimization algorithm for constrained maximum likelihood estimation and is scalable to spatial transcriptomics with tens of thousands of spatial locations and tens of thousands of genes. For the example dataset with the sample size of 428 locations, it takes within a minute to finish the deconvolution. 

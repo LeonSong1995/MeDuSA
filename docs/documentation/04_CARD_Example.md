@@ -1,16 +1,16 @@
 ---
 layout: page
-title: Example-1
+title: Example Analysis: monocytes
 description: ~
 ---
-This tutorial is the example analysis with CARD on the human pancreatic ductal adenocarcinomas data from [Moncada et al, 2020](https://www.nature.com/articles/s41587-019-0392-8?proof=t). Before runing the tutorial, make sure that the CARD package is installed. Installation instructions see the [link](https://yingma0107.github.io/CARD/documentation/02_installation.html)
+This tutorial provides an example analysis using MeDuSA on the human monocytes data from [Oetjen et al., 2018](https://insight.jci.org/articles/view/124928). Before running the tutorial, ensure that the MeDuSA package has been installed. Refer to the [link](https://yingma0107.github.io/CARD/documentation/02_installation.html) for installation instructions.
 
 ## Required input data
-`CARD` requires two types of input data:
-- spatial transcriptomics count data, along with spatial location information.  
-- single cell RNAseq (scRNA-seq) count data, along with meta information indicating the cell type information and the sample (subject) information for each cell.  
+`MeDuSA` requires two types of input data:
+- bulk RNA-seq data. 
+- single cell RNAseq (scRNA-seq) count data, along with meta information including the annotated cell state trajectory and cell types.  
 
-The example data for runing the tutorial can be downloaded in this [page](https://yingma0107.github.io/CARD/documentation/03_data.html)
+The example data for runing the tutorial can be downloaded [here](https://yingma0107.github.io/CARD/documentation/03_data.html)
 Here are the details about the required data input illustrated by the example datasets. 
 ### 1. spatial transcriptomics data, e.g.,
 ```r

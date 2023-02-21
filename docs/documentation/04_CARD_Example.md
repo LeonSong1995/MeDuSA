@@ -1,16 +1,17 @@
 ---
 layout: page
-title: Example-1
+title: Example Analysis of monocytes 
 description: ~
 ---
-This tutorial provides an example analysis using MeDuSA on the human monocytes data from [Oetjen et al., 2018](https://insight.jci.org/articles/view/124928). Before running the tutorial, ensure that the MeDuSA package has been installed. Refer to the [link](https://yingma0107.github.io/CARD/documentation/02_installation.html) for installation instructions.
+This tutorial provides an example analysis using MeDuSA on the human monocytes data from [Oetjen et al., 2018](https://insight.jci.org/articles/view/124928). 
+Before running the analysis, please ensure that the MeDuSA package has been installed. Refer to the [link](https://github.com/LeonSong1995/MeDuSA) for installation instructions.
 
-## Required input data
+## Input data
 `MeDuSA` requires two types of input data:
 - bulk RNA-seq data. 
-- single cell RNAseq (scRNA-seq) count data, along with meta information including the annotated cell state trajectory and cell types.  
+- Single-cell RNA-seq (scRNA-seq) data along with the meta information, including annotated cell-state trajectories and cell types. 
 
-The example data for runing the tutorial can be downloaded [here](https://yingma0107.github.io/CARD/documentation/03_data.html)
+The data for runing this tutorial can be downloaded [here](https://github.com/LeonSong1995/MeDuSA)
 Here are the details about the required data input illustrated by the example datasets. 
 ### 1. spatial transcriptomics data, e.g.,
 ```r

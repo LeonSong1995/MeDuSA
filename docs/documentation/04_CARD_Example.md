@@ -92,7 +92,7 @@ MeDuSA allows users to input their own cultivated marker genes. Additionally, Me
 
 - gam-wald test: MeduSA associates genes along the cell-state trajectory using the generalized additive model (gam). Only genes with a false discovery rate (FDR) adjusted p-value less than 0.01 are considered. These significant genes are then ranked based on their association strength, which allows for the identification of the most relevant genes that are associated with the cell-state trajectory. To prevent certain cell-states from being overrepresented, MeduSA divides the cell-state trajectory into a specified number of intervals. Each gene is then assigned to the interval in which it has the highest mean expression. For each interval, a set of top informative genes is selected as signature genes.
 
-To use these two methods, users can specificy the `method` in the `MeDuSA` function as `wilcox` or `gam`. Alternatively, users can use the function of `MeDuSA_marker` to select the marker genes before running cell-state deconvolution analysis. 
+To use these two methods, users can specificy the `method` in the `MeDuSA` function as `wilcox` or `gam`. Alternatively, users can use the function of `MeDuSA_marker` to select the marker genes before running deconvolution analysis. 
 
 ```r
 ##Set the gene selection method in MeDuSA function 

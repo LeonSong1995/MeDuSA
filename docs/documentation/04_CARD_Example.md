@@ -88,8 +88,8 @@ MeDuSA_obj@Estimation$markerGene[1:3]
 
 ### 2. How to select marker genes
 MeDuSA allows users to input their own cultivated marker genes. Additionally, MeDuSA provides two methods for selecting marker genes that are representative of the cell-state trajectory.
-- wilcox test: 
-- gam-wald test:
+- wilcox test: MeduSA first divides the cells in the trajectory into a specified number of bins. For each bin, MeduSA applies the wilcox test implemented in the `Seurat::FindMarkers` function. The wilcox test is used to compare gene expression levels between two groups of cells and determine whether the difference in expression is statistically significant. In this case, the two groups of cells are the cells in the current bin being tested and all the other cells in the trajectory. The wilcox test is performed for each gene, and genes with significant differential expression are identified as marker genes for that particular bin. By applying the wilcox test to each bin along the cell-state trajectory, MeduSA can identify marker genes that are specific to each stage of the trajectory.
+- gam-wald test: MeduSA associates genes along the cell-state trajectory using the generalized additive model (gam). Only genes with a false discovery rate (FDR) adjusted p-value less than 0.01 are considered. These significant genes are then ranked based on their association strength, which allows for the identification of the most relevant genes that are associated with the cell-state trajectory.To prevent certain cell states from being overrepresented, MeduSA divides the cell-state trajectory into a specified number of intervals.Each gene is then assigned to the interval in which it has the highest mean expression. For each interval, a set of top informative genes is selected as signature genes.
 
 
 ```r
@@ -99,7 +99,7 @@ abundance = MeDuSA_obj@Estimation$cell_state_abundance
 ```
 ### 3. How to include other cell types as covariates
 
-### 4. How to use the mode of Conditional Autoregressive (CAR)
+### 4. How to use the mode of conditional autoregressive (CAR)
 
 ### 5. Do I need to normalize the data 
 

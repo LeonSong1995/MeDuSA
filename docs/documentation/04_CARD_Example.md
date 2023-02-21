@@ -25,7 +25,6 @@ A2M   350.147382 280.15882 413.49436 616.65499
 A2ML1  21.073328  24.57603  50.72397  42.51505
 ```
 The bulk RNA-seq data is in a matrix format, with each row corresponding to a particular gene and each column corresponding to a specific sample.
-```r
 
 ### 2. Reference scRNA-seq data
 ```r

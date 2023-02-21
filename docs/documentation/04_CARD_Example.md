@@ -45,7 +45,7 @@ The reference scRNA-seq data must be in the Seurat object format, where the cell
 
 
 
-## Cell State Deconvolution
+## Cell State Deconvolution Analysis
 ```r
 library(MeDuSA)
 help(MeDuSA)
@@ -115,7 +115,7 @@ help(MeDuSA_marker)
 ```
 ### 3. How to include other cell types as covariates
 
-### 4. How to use the mode of conditional autoregressive (CAR)
+### 4. How to use the mode of conditional auto-regressive (CAR)
 
 ### 5. Do I need to normalize the data 
 

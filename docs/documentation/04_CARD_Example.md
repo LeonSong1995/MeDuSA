@@ -59,9 +59,9 @@ This section provides an introduction to the basic usage of MeDuSA.
 - select.ct: A character variable indicating the focal cell type.
 - markerGene: A character vector containing the marker genes across the cell-state trajectory.If not provided, MeDuSA will utilize the `MeDuSA_marker` function to select marker genes for the analysis.
 - resolution: A numeric variable used to specify the number of cell-state bins along the cell trajectory. The default value is 50.
-- smooth: A Boolean variable to determine whether to smooth the estimated cell-state abundance. The default value is TRUE. 
+- smooth: A boolean variable to determine whether to smooth the estimated cell-state abundance. The default value is TRUE. 
 - span: A numeric variable to control the degree of smoothing. The default value is 0.35. 
-- fractional: A Boolean variable to determine whether to normalize the estimated cell-state abundance to the fractional abundance (0-1).
+- fractional: A boolean variable to determine whether to normalize the estimated cell-state abundance to the fractional abundance (0-1).
 - ncpu: The number of CPU cores to be used. 
 
 For further details about the parameters, please refer to this [link](https://github.com/LeonSong1995/MeDuSA).

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Example Analysis
+title: Example-1
 description: ~
 ---
 This tutorial is the example analysis with CARD on the human pancreatic ductal adenocarcinomas data from [Moncada et al, 2020](https://www.nature.com/articles/s41587-019-0392-8?proof=t). Before runing the tutorial, make sure that the CARD package is installed. Installation instructions see the [link](https://yingma0107.github.io/CARD/documentation/02_installation.html)

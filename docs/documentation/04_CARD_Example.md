@@ -106,11 +106,12 @@ MeDuSA_obj = MeDuSA(bulk,sce,
 		    select.ct = 'mon',markerGene = NULL,span = 0.35,method = "gam",
 		    resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)
 		    
-##Select marker genes using MeDuSA::MeDuSA_marker before running cell-state deconvolution analysis
-help(MeDuSA_marker)
+##Select marker genes using MeDuSA_marker before running deconvolution analysis
 marker = MeDuSA_marker(sce[,which(sce$cell_type=='mon')],bulk,
                                GeneNumber = 200,nbins = 10,
                                family ="gaussian",k = 10,ncpu = 2,method = "wilcox")
+##Documentations			       
+help(MeDuSA_marker)			       
 ```
 ### 3. How to include other cell types as covariates
 

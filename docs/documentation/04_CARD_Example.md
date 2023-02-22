@@ -123,7 +123,7 @@ marker = MeDuSA_marker(sce[,which(sce$cell_type=='mon')],bulk,
 help(MeDuSA_marker)			       
 ```
 ### 3. How to include other cell types as covariates
-To address the possibility of confounding factors arising from other cell types, MeDuSA allows (suggests) that users include these cell types as covariates. MeDuSA provides two ways to import the other cell types in the model. 
+To address the possibility of confounding factors arising from other cell types, MeDuSA allows (suggests) that users include these cell types as covariates. MeDuSA provides two ways to incorporate the other cell types in the model. 
 ```r
 ##1)--We recommend that users build the covariates matrix before running the deconvolution analysis, as this can help to save memory during the analysis. 
 

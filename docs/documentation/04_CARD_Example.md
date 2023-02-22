@@ -33,6 +33,12 @@ class(sce)
 attr(,"package")
 [1] "SeuratObject"
 
+sce@assays$RNA@counts[1:3,1:3]
+              A/A.rds_AAACCTGCAGCGAACA-1 A/A.rds_AAACCTGGTCGACTGC-1 A/A.rds_AAACCTGGTCGCTTCT-1
+FO538757.2                             .                          .                          .
+AP006222.2                             .                          .                          .
+RP4-669L17.10                          .                          .                          .
+
 sce$cell_trajectory[1:3]
 A/A.rds_AAACCTGCAGCGAACA-1 A/A.rds_AAACCTGGTCGACTGC-1 A/A.rds_AAACCTGGTCGCTTCT-1 
                  0.9220488                  0.5167408                  0.4567616 
@@ -41,7 +47,7 @@ sce$cell_type[1:3]
 A/A.rds_AAACCTGCAGCGAACA-1 A/A.rds_AAACCTGGTCGACTGC-1 A/A.rds_AAACCTGGTCGCTTCT-1 
                      "mon"                      "mon"                      "mon" 
 ```
-The reference scRNA-seq data must be in the Seurat object format, where the cell-state trajectory is stored in `sce$cell_trajectory` and the cell-type is stored in `sce$cell_type`. For further information about Seurat, please visit the following [link](https://satijalab.org/seurat/).
+For compatibility with MeDuSA, the reference scRNA-seq data must be in the Seurat object format. Specifically, the reference data should be stored in `sce@assays$RNA@counts`, the cell-state trajectory in `sce$cell_trajectory`, and the cell-type in `sce$cell_type`. For more information about Seurat, please refer to the following [resource](https://satijalab.org/seurat/).
 
 
 
@@ -87,12 +93,13 @@ MeDuSA_obj@Estimation$markerGene[1:3]
 ```
 
 ### 2. How to select marker genes
-MeDuSA allows users to input their own cultivated marker genes. Additionally, MeDuSA provides two methods for selecting marker genes that are representative of the cell-state trajectory.
-- wilcox test: MeduSA first divides the cells in the trajectory into a specified number of bins. For each bin, MeduSA applies the wilcox test implemented in the `Seurat::FindMarkers` function. The wilcox test is used to compare gene expression levels between two groups of cells and determine whether the difference in expression is statistically significant. In this case, the two groups of cells are the cells in the current bin being tested and all the other cells in the trajectory. The wilcox test is performed for each gene, and genes with significant differential expression are identified as marker genes for that particular bin. By applying the wilcox test to each bin along the cell-state trajectory, MeduSA can identify marker genes that are specific to each stage of the trajectory.
+MeDuSA offers users the flexibility to input their own cultivated marker genes. In addition, MeDuSA provides two methods for selecting marker genes that are representative of the cell-state trajectory.
 
-- gam-wald test: MeduSA associates genes along the cell-state trajectory using the generalized additive model (gam). Only genes with a false discovery rate (FDR) adjusted p-value less than 0.01 are considered. These significant genes are then ranked based on their association strength, which allows for the identification of the most relevant genes that are associated with the cell-state trajectory. To prevent certain cell-states from being overrepresented, MeduSA divides the cell-state trajectory into a specified number of intervals. Each gene is then assigned to the interval in which it has the highest mean expression. For each interval, a set of top informative genes is selected as signature genes.
+- wilcox test: MeDuSA divides the cells in the trajectory into a specified number of bins and applies the wilcox test, which is implemented in the `Seurat::FindMarkers` function, to each bin. The wilcox test is used to compare gene expression levels between the cells in the current bin and all other cells in the trajectory. Genes with significant differential expression are identified as marker genes for that particular bin. By performing the wilcox test for each gene at every bin along the cell-state trajectory, MeduSA can identify marker genes that are specific to each stage of the trajectory.
 
-To use these two methods, users can specificy the `method` in the `MeDuSA` function as `wilcox` or `gam`. Alternatively, users can use the function of `MeDuSA_marker` to select the marker genes before running deconvolution analysis. 
+- gam-wald test: MeduSA uses the generalized additive model (gam) to associate genes along the cell-state trajectory, and considers only genes with an FDR-adjusted p-value less than 0.01. These significant genes are ranked based on their association strength, allowing for the identification of the most relevant genes that are associated with the cell-state trajectory. To prevent certain cell-states from being overrepresented, MeduSA divides the cell-state trajectory into a specified number of intervals and assigns each gene to the interval in which it has the highest mean expression. For each interval, a set of top informative genes is selected as signature genes.
+
+Users can specify the `method` in the `MeDuSA` function as either `wilcox` or `gam` to utilize these two methods. Alternatively, users can select the marker genes using the `MeDuSA_marker` function before running the deconvolution analysis. 
 
 ```r
 ##Set the gene selection method in MeDuSA function 
@@ -114,15 +121,23 @@ marker = MeDuSA_marker(sce[,which(sce$cell_type=='mon')],bulk,
 help(MeDuSA_marker)			       
 ```
 ### 3. How to include other cell types as covariates
-To account for potential confounding factors casued by other cell types, MeDuSA allows (recommends) users to include them as covariates. 
+To address the possibility of confounding factors arising from other cell types, MeDuSA recommends that users include these cell types as covariates.
 ```r
 
 ```
 
 ### 4. How to use the mode of conditional auto-regressive (CAR)
 
-### 5. Do I need to normalize the data 
-Yes, before running deconvolution analysis, we suggest users to normalize the reference data and the bulk data into the same scale. Considering the  variety in data scale (e.g., Count/CPM/TPM/FPKM/Log), MeDuSA `does not` perform any normalization for the input reference and bulk data. Users need carefully check the 
+### 5. How to normalize the data 
+Before running the deconvolution analysis, we recommend that users normalize the reference data and the bulk data to the same scale. It is important to note that MeDuSA does not perform any normalization for the input reference and bulk data due to the variety in data scale, which may include raw counts, counts per million (CPM), transcripts per million (TPM), fragments per kilobase of transcript per million (FPKM), or log-transformed data.  While MeDuSA is generally robust to different scales, the heterogeneity in data scale between the bulk and reference data may negatively impact the performance. Therefore, users must carefully check and perform the appropriate normalization of their data before running MeDuSA to ensure accurate and reliable results. For example, in this tutorial, we have normalized the data into CPM scale.
+```r
+###To prevent exceeding the largest upper limit in R during REML iteration, we normalized the data to a 1e+3 scale instead of 1e+6
+bulk = sweep(bulk,2,colSums(bulk),'/')*1000
+sce@assays$RNA@counts = sweep(sce@assays$RNA@counts,2,colSums(sce@assays$RNA@counts),'/')*1000
+
+### User can try the count scale 
+```
+
 
 ### 6. How to get the p-value of the random effects component
 

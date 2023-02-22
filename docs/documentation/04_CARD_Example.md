@@ -296,7 +296,7 @@ Users can obtain the merged scRNA-seq data by either following the above pipelin
 
 ### 3. Annotate cell types
 - cluster cells and annotate their cell types.
-We need to use the black gene list in this analysis to account for potential confounding factors during the single-cell RNA sequencing. This list is provided by [Xue et al](https://www.nature.com/articles/s41586-022-05400-x), and be downloaded from the following[link] (https://github.com/LeonSong1995/MeDuSA).
+We need to use the black gene list in this analysis to account for potential confounding factors during the single-cell RNA sequencing. This list is provided by [Xue et al](https://www.nature.com/articles/s41586-022-05400-x), and be can downloaded from the following [link](https://github.com/LeonSong1995/MeDuSA).
 
 ```R
 library(Seurat)

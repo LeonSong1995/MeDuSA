@@ -180,8 +180,11 @@ sce@assays$RNA@counts = sweep(sce@assays$RNA@counts,2,colSums(sce@assays$RNA@cou
 ### Users can try normalizing data to other scales as well, such as the count or log-transformed scale. 
 ```
 
-
 ### 6. How to get the p-value of the random effects component
+After completing the deconvolution analysis using MeDuSA, users can utilize the MeDuSA_VarExplain function to obtain the explained variance of the bulk data by the reference scRNA-seq data, as well as the corresponding p-values.
+```R
+MeDuSA_obj = MeDuSA_VarExplain(MeDuSA_obj)
+```
 
 
 ## Prepare reference data

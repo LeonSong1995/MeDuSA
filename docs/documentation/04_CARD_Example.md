@@ -54,6 +54,7 @@ For compatibility with MeDuSA, the reference scRNA-seq data must be in the Seura
 ## Cell-state deconvolution analysis
 ```r
 library(MeDuSA)
+
 #Documentations
 help(MeDuSA)
 ``` 

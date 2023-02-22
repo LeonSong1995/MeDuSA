@@ -193,7 +193,20 @@ In this section, we will walk through the steps involved in preparing the refere
 
 ### 1. Download the raw scRNA-seq data 
 ```bash
+##1) download the data from the GEO database
+mkdir JCI; cd JCI
+wget https://ftp.ncbi.nlm.nih.gov/geo/series/GSE120nnn/GSE120221/suppl/GSE120221_RAW.tar
+tar -xvf GSE120221_RAW.tar
 
+##2) rename the data based on sample id 
+ls *mtx.gz | while read file
+do
+  id=$(echo $file | cut -d "_" -f 3 | cut -d "." -f 1)
+  mkdir `pwd`/${id}
+  mv *barcodes_${id}.tsv.gz `pwd`/${id}/barcodes.tsv.gz 
+  mv *genes_${id}.tsv.gz `pwd`/${id}/features.tsv.gz 
+  mv *matrix_${id}.mtx.gz `pwd`/${id}/matrix.mtx.gz 
+done
 ```
 ### 2. Process the raw scRNA-seq data 
 ```R

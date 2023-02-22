@@ -223,6 +223,7 @@ done
 ### 2. Process the raw scRNA-seq data 
 - identify the possible doublets in each scRNA-seq data
 - merge the data into a single Seurat object.
+
 ```R
 library(Seurat)
 library(DoubletFinder)
@@ -293,11 +294,65 @@ saveRDS(data.merge,'../Human_BoneMarrow_JCI_Insight.rds')
 Users can obtain the merged scRNA-seq data by either following the above pipeline or directly downloading it from the following [link](https://github.com/LeonSong1995/MeDuSA).  
 
 ### 3. Annotate cell types
-- cluster cells and annotate their cell types
-In this sect
-```R
-bl = read.csv('../Gene_BlackList_2022Nature_LiverCancer_ZZM.csv',fill=T)
+- cluster cells and annotate their cell types.
+We need to use the black gene list in this analysis to account for potential confounding factors during the single-cell RNA sequencing. This list is provided by [Xue et al] (https://www.nature.com/articles/s41586-022-05400-x), and be downloaded from the following [link (https://github.com/LeonSong1995/MeDuSA).
 
+```R
+library(Seurat)
+library(DoubletFinder)
+library(dplyr)
+
+BlackGene = read.csv('../Gene_BlackList.csv',fill=T)
+BM = readRDS('../Human_BoneMarrow_JCI_Insight.rds')
+BM$sample[which(BM$sample=='C1')]='C'
+
+#construct the confounding score
+mt_gene = intersect(unique(BlackGene[,'Mitochondria']),rownames(BM))
+hsp_gene = intersect(unique(BlackGene[,'Heat.shock.protein']),rownames(BM))
+rib_gene = intersect(unique(BlackGene[,'Ribosome']),rownames(BM))
+disso_gene = intersect(unique(BlackGene[,'Dissociation']),rownames(BM))
+noisy_gene = c(mt_gene,hsp_gene,rib_gene,disso_gene)
+BM = AddModuleScore(BM,features=list(mt_gene),name = 'mt_score',nbin=10)
+BM = AddModuleScore(BM,features=list(hsp_gene),name = 'hsp_score',nbin=10)
+BM = AddModuleScore(BM,features=list(rib_gene),name = 'rib_score',nbin=10)
+BM = AddModuleScore(BM,features=list(disso_gene),name = 'disso_score',nbin=10)
+
+#regress out the confounding score
+out = c('mt_score1','hsp_score1','rib_score1','disso_score1')
+BM = BM[!rownames(BM) %in% noisy_gene,]
+BM = NormalizeData(BM) %>% 
+     FindVariableFeatures() %>% 
+     ScaleData(vars.to.regress = out) %>% 
+     RunPCA(verbose = FALSE) %>%
+     RunUMAP(reduction = "pca", dims = 1:50) %>% 
+     FindNeighbors(reduction = "pca", dims = 1:50) %>%
+     FindClusters(resolution=2)
+
+mk_gene = c('HBD','AVP','CD3E','CD3G','CD3D','CD79B','CD79A','NKG7','GATA1','SPI1','CD4','CD8A','FOXP3','CCR7','CD74','TMSB10')
+
+#check the expression level of marker genes
+figure.dim = DimPlot(BM,pt.size=0.05,label=T,label.size = 6,repel = TRUE)+ 
+               theme(legend.position='none') +
+               ggtitle(NULL) +
+               xlab('UMAP-1')+ylab('UMAP-2')
+
+p = FeaturePlot(BM,features = mk_gene,combine = FALSE)
+for(i in 1:length(p)) {p[[i]] = p[[i]] + NoLegend() + NoAxes()}
+figure.feature  = cowplot::plot_grid(plotlist = p,ncol = 4)
+
+#annotate cell types
+HSPC = c('21')
+HSPCtoMon = c('22','23','26','30','1','16')
+HSPCtoEry = c('32','25','19','14','31','17','42','15','37')
+ct = as.vector(Idents(BM))
+ct[ct %in% HSPC] = 'HSPC'
+ct[ct %in% HSPCtoMon] = 'HSPCtoMon'
+ct[ct %in% HSPCtoEry] = 'HSPCtoEry'
+BM$ct = ct
+
+#splict the data based on cell types and save the data. 
+Mon = BM[,BM$ct %in% c('HSPC','HSPCtoMon')]
+OtherCell = BM[,BM$ct %in% setdiff(cell_type_annotated,c('HSPC','HSPCtoMon'))]
 ```
 
 ### 4. Annotate the cell-state trajectory 

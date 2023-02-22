@@ -194,7 +194,8 @@ In this section, we will walk through the steps involved in preparing the refere
 ### 1. Download the raw scRNA-seq data 
 ```bash
 ##1) download the data from the GEO database
-mkdir JCI; cd JCI
+mkdir JCI
+cd JCI
 wget https://ftp.ncbi.nlm.nih.gov/geo/series/GSE120nnn/GSE120221/suppl/GSE120221_RAW.tar
 tar -xvf GSE120221_RAW.tar
 

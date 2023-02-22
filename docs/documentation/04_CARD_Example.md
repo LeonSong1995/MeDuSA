@@ -378,30 +378,11 @@ path = as.data.frame(sds@metadata$curves$Lineage1$s)
 pseudo_time = sds@metadata$curves$Lineage1$lambda
 pseudo_time = pseudo_time/max(pseudo_time)
 
-#visualize the cell-state trajectory
-colors = c("#9e0142", "#d53e4f", "#f46d43", "#fdae61", "#fee08b", "#ffffbf", "#e6f598", "#abdda4", "#66c2a5", "#3288bd", "#5e4fa2")
-colors = colors[seq(length(colors),1,-1)]
-p1 = ggplot(umap,aes(x=UMAP_1,y=UMAP_2))+
-  geom_point(aes(col=pseudo_time),size=0.5)+
-  xlab('PATH-1')+
-  ylab('PATH-2')+
-  theme(legend.position = 'right',
-        legend.justification = "left",
-        panel.border = element_blank(), axis.line = element_line(size = 0.8))+
-  annotate('text',x=-2,y=-9,label='GMPs',size=5)+
-  annotate('text',x=3,y=-3,label='Non-classical monocytes',size=5)+
-  scale_color_gradientn(colours = colors,name='Pseudotime',labels = scales::number_format(accuracy = 0.1))
-print(p1)
-
 #add the cell-type and cell-state trajectory into the meta data. 
 sce$cell_type = 'mon'
 sce$cell_trajectory = pseudo_time[colnames(sce)]
 
 #save the reference scRNA-seq data
 saveRDS(Mon,'../Monocytes_sce.rds')
-```
-
-## Compare the estimated cell-state abundance to the expected truth
-```R
 ```
 

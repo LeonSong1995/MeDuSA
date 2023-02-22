@@ -178,9 +178,8 @@ Before running the deconvolution analysis, we recommend that users normalize the
 ###To prevent exceeding the largest upper limit in R during REML iteration, we normalized the data to 1e+3 instead of 1e+6. 
 bulk = sweep(bulk,2,colSums(bulk),'/')*1000
 sce@assays$RNA@counts = sweep(sce@assays$RNA@counts,2,colSums(sce@assays$RNA@counts),'/')*1000
-
-### Users can try normalizing data to other scales as well, such as the count or log-transformed scale. 
 ```
+Users can try normalizing data to other scales as well, such as the count or log-transformed scale. 
 
 ### 6. How to get the p-value of the random effects component
 After completing the deconvolution analysis using MeDuSA, users can utilize the MeDuSA_VarExplain function to obtain the explained variance of the bulk data by the reference scRNA-seq data, as well as the corresponding p-values.

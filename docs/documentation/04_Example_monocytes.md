@@ -402,6 +402,8 @@ saveRDS(sce,'../Monocytes_sce.rds')
 Here is an example output: 
 ![Example_Pie](Monocytes_pseudotime.png)
 
+## Compare the estimated cell-state abundance to the expected truth
+In this dataset, both bulk RNA-seq data and scRNA-seq data are generated from the same sample. It is anticipated that the abundance of cell states along a linear trajectory would exhibit a strong correlation between the two types of data, even in the presence of variations in the sequenced specimens.
 
 
 

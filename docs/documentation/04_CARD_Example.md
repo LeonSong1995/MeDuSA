@@ -353,10 +353,10 @@ OtherCell = BM[,BM$ct %in% setdiff(cell_type_annotated,c('HSPC','HSPCtoMon'))]
 saveRDS(Mon,'../Mon.rds')
 saveRDS(OtherCell,'../OtherCell.rds')
 ```
+For user convenience, we have provided the processed scRNA-seq data of monocytes in the following [link](https://github.com/LeonSong1995/MeDuSA).
 
 ### 4. Infer the cell-state trajectory 
 In this tutorial analysis, we will use [Slingshot](https://bioconductor.org/packages/devel/bioc/vignettes/slingshot/inst/doc/vignette.html) to infer the development trajectory of monocytes. 
-
 
 ```R
 library(Seurat)
@@ -408,6 +408,9 @@ print(p1)
 #add the cell-type and cell-state trajectory into the meta data. 
 sce$cell_type = 'mon'
 sce$cell_trajectory = pseudo_time[colnames(sce)]
+
+#save the reference scRNA-seq data
+saveRDS(Mon,'../Monocytes_sce.rds')
 ```
 
 ## Compare the estimated cell-state abundance to the expected truth

@@ -195,7 +195,16 @@ In this section, we will walk through the steps involved in preparing the refere
 ```bash
 
 ```
+### 2. Process the raw scRNA-seq data 
+```R
+```
+
+### 3. Annotate the cell-state trajectory 
+```R
+```
+
 
 ## Compare the estimated cell-state abundance to the expected truth
-
+```R
+```
 

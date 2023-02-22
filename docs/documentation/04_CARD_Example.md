@@ -377,11 +377,12 @@ Mon = NormalizeData(Mon) %>%
       FindClusters(Mon,resolution = 2)
 	
 #remove clusters that are not connect to the main trajectory.    
-Mon = Mon[,!Idents(Mon) %in% c('18','12','27','2','25')]
+sce = Mon[,!Idents(Mon) %in% c('18','12','27','2','25')]
 FeaturePlot(Mon,features=c('CD34','FGL2'))
+remove(Mon)
 
 #annotate cell trajectory using the slingshot
-umap = as.data.frame(Embeddings(Mon,'umap'))
+umap = as.data.frame(Embeddings(sce,'umap'))
 umap$ct = as.vector(Idents(Mon))
 sds = getLineages(umap[,1:2], umap$ct, start.clus = '21')
 sds = getCurves(sds)
@@ -403,8 +404,11 @@ p1 = ggplot(umap,aes(x=UMAP_1,y=UMAP_2))+
   annotate('text',x=3,y=-3,label='Non-classical monocytes',size=5)+
   scale_color_gradientn(colours = colors,name='Pseudotime',labels = scales::number_format(accuracy = 0.1))
 print(p1)
-```
 
+#add the cell-type and cell-state trajectory into the meta data. 
+sce$cell_type = 'mon'
+sce$cell_trajectory = pseudo_time[colnames(sce)]
+```
 
 ## Compare the estimated cell-state abundance to the expected truth
 ```R

@@ -142,9 +142,11 @@ MeDuSA_obj = MeDuSA(bulk,sce,fixCov = cov_otherCT,
 #2.1 load the data
 sce_otherCT = readRDS("/Monocytes_OtherCell.rds")
 sce_big = merge(sce,sce_otherCT)
-remove(sce_otherCT)
+cell_type = c(sce$cell_type,sce_otherCT$cell_type)
+sce_big$cell_type = cell_type[colnames(sce_big)]
+remove(sce_otherCT); remove(sce)
 
-#2.2 MeDuSA will automatically construct the covariates matrix based on the cell-type annotation stored in sce_big$cell_type.
+#2.2 MeDuSA will automatically construct the covariates matrix based on the cell-type labels stored in sce_big$cell_type.
 MeDuSA_obj = MeDuSA(bulk,sce = sce_big,
 		    select.ct = 'mon',markerGene = NULL,span = 0.35,method = "wilcox",
 		    resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	

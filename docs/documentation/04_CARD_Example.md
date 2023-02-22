@@ -402,7 +402,7 @@ print(p1)
 #save the reference scRNA-seq data
 saveRDS(sce,'../Monocytes_sce.rds')
 ```
-![Example_Pie](Example_analysis_visualizePie.png)
+![Example_Pie](Monocytes_pseudotime.png)
 
 
 

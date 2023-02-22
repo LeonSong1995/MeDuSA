@@ -18,7 +18,7 @@ Detailed information regarding the input data is provided as follows.
 ### 1. Bulk RNA-seq data
 ```r
 #### load the example bulk RNA-seq data, 
-bulk = readRDS("./Monocytes_bulk.rds")
+bulk = readRDS("../Monocytes_bulk.rds")
 class(bulk)
 "matrix" "array" 
 ```
@@ -127,7 +127,7 @@ To address the possibility of confounding factors arising from other cell types,
 ##1)--We recommend that users build the covariates matrix before running the deconvolution analysis, as this can help to save memory during the analysis. 
 
 #1.1 load the data
-sce_otherCT = readRDS("/Monocytes_OtherCell.rds")
+sce_otherCT = readRDS("../Monocytes_OtherCell.rds")
 cov_otherCT = Seurat::AverageExpression(object = sce_otherCT,group.by = 'cell_type',assays ='RNA',slot='counts')$RNA
 remove(sce_otherCT)
 
@@ -137,10 +137,11 @@ MeDuSA_obj = MeDuSA(bulk,sce,fixCov = cov_otherCT,
 		    resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	
 
 
+
 ##2)--Alternatively, users can also choose to merge the data of the focal cell-type and other cell-types into a single Seurat object.
 
 #2.1 load the data
-sce_otherCT = readRDS("/Monocytes_OtherCell.rds")
+sce_otherCT = readRDS("../Monocytes_OtherCell.rds")
 sce_big = merge(sce,sce_otherCT)
 cell_type = c(sce$cell_type,sce_otherCT$cell_type)
 sce_big$cell_type = cell_type[colnames(sce_big)]
@@ -153,6 +154,20 @@ MeDuSA_obj = MeDuSA(bulk,sce = sce_big,
 ```
 
 ### 4. How to use the mode of conditional autoregressive (CAR)
+In many LMM applications, random effects are assumed to be independent and identically distributed. However, the abundances of cells at adjacent states are likely to be correlated. MeDuSA incorporates the CAR model in the LMM to accommodate such correlations. Users can set the parameter of `CAR` as TRUE to use the CAR mode. Further, MeDuSA provides users with the ability to set the range of possible correlation strengths through the `phi` parameter, and then searches for the optimal correlation strength that maximizes the likelihood function. 
+```R
+#The default phi is c(0.2,0.4,0.6,0.9)
+MeDuSA_obj = MeDuSA(bulk,sce, CAR = TRUE,
+                   select.ct = 'mon',markerGene = NULL,span = 0.35,
+		   resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	
+
+#Change the parameter space of phi
+phi = c(0,0.1,0.99)
+MeDuSA_obj = MeDuSA(bulk,sce, CAR = TRUE, phi = phi,
+                   select.ct = 'mon',markerGene = NULL,span = 0.35,
+		   resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	
+``` 
+
 
 ### 5. How to normalize the data 
 Before running the deconvolution analysis, we recommend that users normalize the reference data and the bulk data to the same scale. It is important to note that MeDuSA <big>does not</big> perform any normalization for the input reference and bulk data due to the variety in data scale, which may include raw counts, counts per million (CPM), transcripts per million (TPM), fragments per kilobase of transcript per million (FPKM), or log-transformed data.  While MeDuSA is generally robust to different scales, the heterogeneity in data scale between the bulk and reference data may negatively impact the performance. Therefore, users must carefully check and perform the appropriate normalization of their data before running MeDuSA to ensure accurate and reliable results. For example, in this tutorial, we have normalized the data into CPM scale.

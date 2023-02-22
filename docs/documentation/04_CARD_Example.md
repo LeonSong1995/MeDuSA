@@ -15,6 +15,7 @@ For how to prepare the cell-state trajectory data, please read the section of `P
 
 The input data required for running this tutorial can be downloaded from the following [link](https://github.com/LeonSong1995/MeDuSA). 
 Detailed information regarding the input data is provided as follows.
+
 ### 1. Bulk RNA-seq data
 ```r
 #### load the example bulk RNA-seq data, 
@@ -353,12 +354,59 @@ BM$ct = ct
 #splict the data based on cell types and save the data. 
 Mon = BM[,BM$ct %in% c('HSPC','HSPCtoMon')]
 OtherCell = BM[,BM$ct %in% setdiff(cell_type_annotated,c('HSPC','HSPCtoMon'))]
+saveRDS(Mon,'../Mon.rds')
+saveRDS(OtherCell,'../OtherCell.rds')
 ```
 
 ### 4. Annotate the cell-state trajectory 
 - In this tutorial, we will use [Slingshot](https://bioconductor.org/packages/devel/bioc/vignettes/slingshot/inst/doc/vignette.html) to idenyify the development trajectory of monocytes. 
-```R
 
+
+```R
+library(Seurat)
+library(dplyr)
+library(slingshot)
+library(ggplot2)
+
+#load the data
+Mon = readRDS('../Mon.rds')
+
+#regress out the confounding factors and use the SCT transformation. 
+confounding = c("mt_score1","hsp_score1","rib_score1","disso_score1","nCount_RNA","sample")
+Mon = NormalizeData(Mon) %>%
+      SCTransform(vars.to.regress = confounding,return.only.var.genes = T) %>%
+      RunPCA(verbose = FALSE) %>%
+      RunUMAP(Mon, reduction = "pca", dims = 1:15) %>%
+      FindNeighbors(Mon, reduction = "pca", dims = 1:15)  %>%
+      FindClusters(Mon,resolution = 2)
+	
+#remove clusters that are not connect to the main trajectory.    
+Mon = Mon[,!Idents(Mon) %in% c('18','12','27','2','25')]
+FeaturePlot(Mon,features=c('CD34','FGL2'))
+
+#annotate cell trajectory using the slingshot
+umap = as.data.frame(Embeddings(Mon,'umap'))
+umap$ct = as.vector(Idents(Mon))
+sds = getLineages(umap[,1:2], umap$ct, start.clus = '21')
+sds = getCurves(sds)
+path = as.data.frame(sds@metadata$curves$Lineage1$s)
+pseudo_time = sds@metadata$curves$Lineage1$lambda
+pseudo_time = pseudo_time/max(pseudo_time)
+
+#visualize the cell-state trajectory
+colors = c("#9e0142", "#d53e4f", "#f46d43", "#fdae61", "#fee08b", "#ffffbf", "#e6f598", "#abdda4", "#66c2a5", "#3288bd", "#5e4fa2")
+colors = colors[seq(length(colors),1,-1)]
+p1 = ggplot(umap,aes(x=UMAP_1,y=UMAP_2))+
+  geom_point(aes(col=pseudo_time),size=0.5)+
+  xlab('PATH-1')+
+  ylab('PATH-2')+
+  theme(legend.position = 'right',
+        legend.justification = "left",
+        panel.border = element_blank(), axis.line = element_line(size = 0.8))+
+  annotate('text',x=-2,y=-9,label='GMPs',size=5)+
+  annotate('text',x=3,y=-3,label='Non-classical monocytes',size=5)+
+  scale_color_gradientn(colours = colors,name='Pseudotime',labels = scales::number_format(accuracy = 0.1))
+print(p1)
 ```
 
 

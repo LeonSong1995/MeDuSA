@@ -329,11 +329,9 @@ figure.feature  = cowplot::plot_grid(plotlist = p,ncol = 4)
 #annotate cell types
 HSPC = c('21')
 HSPCtoMon = c('22','23','26','30','1','16')
-HSPCtoEry = c('32','25','19','14','31','17','42','15','37')
 ct = as.vector(Idents(BM))
 ct[ct %in% HSPC] = 'HSPC'
 ct[ct %in% HSPCtoMon] = 'HSPCtoMon'
-ct[ct %in% HSPCtoEry] = 'HSPCtoEry'
 BM$ct = ct
 
 #splict the data based on cell types and save the data. 
@@ -387,7 +385,7 @@ sce$cell_trajectory = pseudo_time[colnames(sce)]
 colors = c("#9e0142", "#d53e4f", "#f46d43", "#fdae61", "#fee08b", "#ffffbf", "#e6f598", "#abdda4", "#66c2a5", "#3288bd", "#5e4fa2")
 colors = colors[seq(length(colors),1,-1)]
 p1 = ggplot(umap,aes(x=UMAP_1,y=UMAP_2))+
-  geom_point(aes(col=time),size=0.5)+
+  geom_point(aes(col=pseudo_time),size=0.5)+
   xlab('PATH-1')+
   ylab('PATH-2')+
   theme(legend.position = 'right',
@@ -396,12 +394,12 @@ p1 = ggplot(umap,aes(x=UMAP_1,y=UMAP_2))+
   annotate('text',x=-2,y=-9,label='GMPs',size=5)+
   annotate('text',x=3,y=-3,label='Non-classical monocytes',size=5)+
   scale_color_gradientn(colours = colors,name='Pseudotime',labels = scales::number_format(accuracy = 0.1))
-
 print(p1)
 
 #save the reference scRNA-seq data
 saveRDS(sce,'../Monocytes_sce.rds')
 ```
+Here is an example output: 
 ![Example_Pie](Monocytes_pseudotime.png)
 
 

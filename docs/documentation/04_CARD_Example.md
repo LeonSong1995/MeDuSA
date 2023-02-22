@@ -77,23 +77,11 @@ MeDuSA_obj = MeDuSA(bulk,sce,
                   select.ct = 'mon',markerGene = NULL,span = 0.35,
 		  resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)		 
 ```
-The results are stored in MeDuSA_obj@Estimation
-```r
-#The estimated cell-state abundance
-MeDuSA_obj@Estimation$cell_state_abundance[1:3,1:3]
-               A           B           C
-bin1 0.018230362 0.012866330 0.015188014
-bin2 0.011331655 0.009618875 0.010931174
-bin3 0.007009345 0.007740727 0.008308389
+The results are stored in MeDuSA_obj@Estimation.
+- The estimated cell-state abundance: MeDuSA_obj@Estimation$cell_state_abundance
+- The median state (pseudo-time) of cell-state bins: MeDuSA_obj@Estimation$TimeBin
+- The used marker genes: MeDuSA_obj@Estimation$markerGene
 
-#The median state (pseudo-time) of cell-state bins
-MeDuSA_obj@Estimation$TimeBin[1:3]
-[1] 0.006934536 0.031808065 0.050630336
-
-#The used marker genes
-MeDuSA_obj@Estimation$markerGene[1:3]
-[1] "FCGR3A" "IFITM2" "IFITM3"
-```
 
 ### 2. How to select marker genes
 MeDuSA offers users the flexibility to input their own cultivated marker genes. In addition, MeDuSA provides two methods for selecting marker genes that are representative of the cell-state trajectory.

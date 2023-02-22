@@ -168,7 +168,7 @@ MeDuSA_obj = MeDuSA(bulk,sce, CAR = TRUE, phi = phi,
                    select.ct = 'mon',markerGene = NULL,span = 0.35,
 		   resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	
 ``` 
-
+It is important to note that when using the CAR mode, the computational speed can become slow. This is primarily due to the computational burden of inverting the covariance matrix between cells, which can become especially significant when using large reference datasets.
 
 ### 5. How to normalize the data 
 Before running the deconvolution analysis, we recommend that users normalize the reference data and the bulk data to the same scale. It is important to note that MeDuSA <big>does not</big> perform any normalization for the input reference and bulk data due to the variety in data scale, which may include raw counts, counts per million (CPM), transcripts per million (TPM), fragments per kilobase of transcript per million (FPKM), or log-transformed data.  While MeDuSA is generally robust to different scales, the heterogeneity in data scale between the bulk and reference data may negatively impact the performance. Therefore, users must carefully check and perform the appropriate normalization of their data before running MeDuSA to ensure accurate and reliable results. For example, in this tutorial, we have normalized the data into CPM scale.

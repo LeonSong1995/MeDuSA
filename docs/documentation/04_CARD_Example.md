@@ -212,10 +212,63 @@ done
 ```
 ### 2. Process the raw scRNA-seq data 
 ```R
+library(data.table)
+library(Seurat)
+library(DoubletFinder)
+library(dplyr)
+
+##1) read the data and do quality control
+setwd("../JCI")
+file = list.files()
+for(id in file){
+	print(id)
+	#read the data
+	path = paste0("../JCI/",id)
+	data = Read10X(data.dir = path)
+	data = CreateSeuratObject(counts = data,min.cells = 3, min.features = 200)
+	data[["percent.mt"]] = PercentageFeatureSet(data, pattern = "^MT-")
+	
+	#standard process
+	data = NormalizeData(data)
+	data = FindVariableFeatures(data, selection.method = "vst", nfeatures = 2000)
+	data = ScaleData(data)
+	data = RunPCA(data)
+	data = RunUMAP(data, dims = 1:15)
+	data = FindNeighbors(data, reduction = "pca", dims = 1:15)
+	data = FindClusters(data)
+	
+	#the doublet
+	ncell = ncol(data)
+	if(ncell<500){dbrate = 0.4/100}
+	if(ncell>=500 && ncell<1000){dbrate = 0.4/100}
+	if(ncell>=1000 && ncell<2000){dbrate = 0.8/100}
+	if(ncell>=2000 && ncell<3000){dbrate = 1.6/100}
+	if(ncell>=3000 && ncell<4000){dbrate = 2.3/100}
+	if(ncell>=4000 && ncell<5000){dbrate = 3.1/100}
+	if(ncell>=5000 && ncell<6000){dbrate = 3.9/100}
+	if(ncell>=6000 && ncell<7000){dbrate = 4.6/100}
+	if(ncell>=7000 && ncell<8000){dbrate = 5.4/100}
+	if(ncell>=8000 && ncell<9000){dbrate = 6.1/100}
+	if(ncell>=9000 && ncell<10000){dbrate = 6.9/100}
+	if(ncell>=10000){dbrate = 7.6/100}
+
+	#remove doublet
+	homotypic.prop = DoubletFinder::modelHomotypic(Idents(data))  
+	nExp_poi = round(dbrate*ncell) 
+	nExp_poi.adj = round(nExp_poi*(1-homotypic.prop))
+	data = DoubletFinder::doubletFinder_v3(data, PCs = 1:10, pN = 0.25, pK = 0.09, nExp = nExp_poi, reuse.pANN = FALSE, sct = FALSE)
+	
+	#save the data
+	out = paste(path,paste0(id,'.rds'),sep='/')
+	saveRDS(data,out)
+}
+
+
 ```
 
 ### 3. Annotate the cell-state trajectory 
 ```R
+
 ```
 
 

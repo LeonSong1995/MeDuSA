@@ -200,7 +200,8 @@ In this section, we will walk through the steps involved in preparing the refere
 
 ### 1. Download the raw scRNA-seq data 
 - download the raw data from the GEO database.
-- rename the data based on the sample name. 
+- rename the data based on the sample name.
+
 ```bash
 #!/bin/bash
 ##1) download the data from the GEO database
@@ -289,10 +290,11 @@ data = sapply(file,function(id){
 data.merge = Reduce(function(x, y) merge(x, y), data)
 saveRDS(data.merge,'../Human_BoneMarrow_JCI_Insight.rds')
 ```
-Users can obtain the merged scRNA-seq data by either following the above pipeline or directly downloading it from the following [link].(https://github.com/LeonSong1995/MeDuSA).  
+Users can obtain the merged scRNA-seq data by either following the above pipeline or directly downloading it from the following [link](https://github.com/LeonSong1995/MeDuSA).  
 
 ### 3. Annotate cell types
 - cluster cells and annotate their cell types
+In this sect
 ```R
 bl = read.csv('../Gene_BlackList_2022Nature_LiverCancer_ZZM.csv',fill=T)
 

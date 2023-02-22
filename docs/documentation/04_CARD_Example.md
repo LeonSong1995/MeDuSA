@@ -237,7 +237,7 @@ for(id in file){
 	data = FindNeighbors(data, reduction = "pca", dims = 1:15)
 	data = FindClusters(data)
 	
-	#the doublet
+	#define the doublet rate (follow the possible doublet rate provided by 10x)
 	ncell = ncol(data)
 	if(ncell<500){dbrate = 0.4/100}
 	if(ncell>=500 && ncell<1000){dbrate = 0.4/100}
@@ -260,10 +260,25 @@ for(id in file){
 	
 	#save the data
 	out = paste(path,paste0(id,'.rds'),sep='/')
-	saveRDS(data,out)
+	saveRDS(data,out)		
 }
 
-
+##2) merge the data
+setwd("../JCI")
+file = list.files()
+data = sapply(file,function(id){
+  print(id)
+  path = paste(id,paste0(id,'.rds'),sep='/')	
+  dat = readRDS(path)
+  db = c(table(dat@meta.data[,grep('DF',colnames(dat@meta.data))])[1])
+  dat.qc = dat[,dat@meta.data[,grep('DF',colnames(dat@meta.data))]=='Singlet']
+  dat.qc = dat.qc[,dat.qc$percent.mt<20]
+  dat.qc = RenameCells(dat.qc,new.names=paste(path,colnames(dat.qc),sep='_'))
+  dat.qc$sample = id
+  dat.qc 
+})
+data.merge = Reduce(function(x, y) merge(x, y), data)
+saveRDS(data.merge,'../Human_BoneMarrow_JCI_Insight.rds')
 ```
 
 ### 3. Annotate the cell-state trajectory 

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Example Analysis (hPSC)
+title: Example (hPSC)
 description: ~
 ---
 

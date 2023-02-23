@@ -407,6 +407,9 @@ In this dataset, both bulk RNA-seq data and scRNA-seq data are generated from th
 
 First, we need to measure the cell-state abundance of each sample in the scRNA-seq data.
 ```r
+bulk = readRDS("../Monocytes_bulk.rds")
+sce = readRDS("./Monocytes_sce.rds")
+
 #extract pseudo time data
 pseudotime = sce$cell_trajectory
 #define bins based on pseudo time values

@@ -381,7 +381,7 @@ pseudo_time = pseudo_time/max(pseudo_time)
 sce$cell_type = 'mon'
 sce$cell_trajectory = pseudo_time[colnames(sce)]
 
-##visualize the cell-state trajectory
+#visualize the cell-state trajectory
 colors = c("#9e0142", "#d53e4f", "#f46d43", "#fdae61", "#fee08b", "#ffffbf", "#e6f598", "#abdda4", "#66c2a5", "#3288bd", "#5e4fa2")
 colors = colors[seq(length(colors),1,-1)]
 p1 = ggplot(umap,aes(x=UMAP_1,y=UMAP_2))+
@@ -394,7 +394,7 @@ p1 = ggplot(umap,aes(x=UMAP_1,y=UMAP_2))+
   annotate('text',x=-2,y=-9,label='GMPs',size=5)+
   annotate('text',x=3,y=-3,label='Non-classical monocytes',size=5)+
   scale_color_gradientn(colours = colors,name='Pseudotime',labels = scales::number_format(accuracy = 0.1))
-print(p1)
+p1
 
 #save the reference scRNA-seq data
 saveRDS(sce,'../Monocytes_sce.rds')
@@ -403,9 +403,34 @@ Here is an example output:
 ![Example_Pie](Monocytes_pseudotime.png)
 
 ## Compare the estimated cell-state abundance to the expected truth
-In this dataset, both bulk RNA-seq data and scRNA-seq data are generated from the same sample. It is anticipated that the abundance of cell states along a linear trajectory would exhibit a strong correlation between the two types of data, even in the presence of variations in the sequenced specimens.
+In this dataset, both bulk RNA-seq data and scRNA-seq data are generated from the same sample. It is anticipated that the abundance of cell-states along the trajectory would exhibit a strong correlation between the two types of data, even in the presence of variations in the sequenced specimens. In this section, we will validate the MeDuSA method by comparing the estimated cell-state abundance from bulk data to that measured from scRNA-seq data. 
 
+First, we need to measure the cell-state abundance of each sample in the scRNA-seq data.
+```r
+#extract pseudo time data
+pseudotime = sce$cell_trajectory
+#define bins based on pseudo time values
+bin = paste0('bin', cut(pseudotime, 50))
+breaks = sort(aggregate(pseudotime, by = list(bin), FUN = min)[,-1])
+breaks[1] = -Inf; breaks = c(breaks, Inf)
 
+#measure the abundance for each sample
+abundance_expect = sapply(unique(sce$sample),function(id){
+  pseudotime_temp = sort(pseudotime[which(sce$sample == id)])
+  #count the cell number for each cell-state bin
+  count_temp = sapply(2:length(breaks), function(currBreakIndex) {
+    length(which(pseudotime_temp >= breaks[currBreakIndex-1] & pseudotime_temp < breaks[currBreakIndex]))
+  })
+  #normalize to the fractional abundance
+  abundance_temp  =  count_temp/sum(count_temp)
+
+  return(abundance_temp)
+})
+
+#subset the columns of the data frame to match the bulk data
+abundance_expect = abundance_expect[, colnames(abundance_expect) %in% colnames(bulk)]
+rownames(abundance_expect) = seq(1,nrow(abundance_expect))
+```
 
 
 

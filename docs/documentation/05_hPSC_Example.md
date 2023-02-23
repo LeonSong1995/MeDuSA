@@ -4,7 +4,14 @@ title: Example (hPSC)
 description: ~
 ---
 
-This tutorial provides an illustrative analysis of the hPSC dataset from [Chu et al., 2016](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1033-x) using MeDuSA. The dataset was obtained from the hPSC cell line, which was cultured for varying durations. In this tutorial, we will utilize MeDuSA to estimate the cell-state abundance along the hPSC differentiation trajectory in bulk RNA-seq data. Subsequently, we will compare the estimated cell-state abundance to that measured from scRNA-seq data to validate the performance of MeDuSA.
+This tutorial provides an illustrative analysis of the hPSC dataset from [Chu et al., 2016](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1033-x) using MeDuSA. 
+
+
+In this tutorial, we will use a dataset obtained from the hPSC cell line, which was cultured for different durations, to estimate cell-state abundance along the hPSC differentiation trajectory in bulk RNA-seq data using MeDuSA. Furthermore, we will validate the performance of MeDuSA by comparing the estimated cell-state abundance with that measured from scRNA-seq data. Finally, we will employ the MANOVA method to identify any differences in cell-state abundance among the different cultured time points.
+
+A more detailed tutorial about using the data from the real tissue with multiple cell-types is avaliable at the the following [link](https://leonsong1995.github.io/MeDuSA/documentation/04_Mon_Example.html), which includes the discussion about selecting marker genes, incorporating other cell types as covariates, and the mode of conditional autoregresssive. 
+
+For a more comprehensive tutorial on using data from real tissue that consists of multiple cell types, please refer to the following [link](https://leonsong1995.github.io/MeDuSA/documentation/04_Mon_Example.html). This tutorial includes a detailed discussion on how to select marker genes, how to incorporate other cell types as covariates, and the mode of conditional autoregressive (CAR).
 
 Prior to running the analysis, it is important to ensure that the MeDuSA package has been installed. For installation instructions, please refer to the following [link](https://github.com/LeonSong1995/MeDuSA).
 

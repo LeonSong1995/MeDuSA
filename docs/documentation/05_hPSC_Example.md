@@ -84,7 +84,7 @@ MeDuSA_obj = MeDuSA(bulk,sce,
                   select.ct = 'hPSC',markerGene = NULL,span = 0.35,
 		  resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)		 
 ```
-The results are stored in MeDuSA_obj@Estimation.
+The results are stored in `MeDuSA_obj@Estimation`.
 - The estimated cell-state abundance: `MeDuSA_obj@Estimation$cell_state_abundance`
 - The median state (pseudo-time) of cell-state bins: `MeDuSA_obj@Estimation$TimeBin`
 - The used marker genes: `MeDuSA_obj@Estimation$markerGene`

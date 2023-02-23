@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Example Analysis (monocytes)
+title: Example (monocytes)
 description: ~
 ---
 This tutorial offers an illustrative analysis of the human monocytes data from [Oetjen et al., 2018](https://insight.jci.org/articles/view/124928) using MeDuSA. Prior to running the analysis, it is important to ensure that the MeDuSA package has been installed. For installation instructions, please refer to the following [link](https://github.com/LeonSong1995/MeDuSA).

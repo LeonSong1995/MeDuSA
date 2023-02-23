@@ -160,7 +160,7 @@ p1
 Here is an example output: 
 ![Example_Pie](hPSC_pseudotime.png)
 
-For user convenience, we have provided the processed scRNA-seq data with the estimated differentation pseudo-time at the following [link](https://github.com/LeonSong1995/MeDuSA).  
+For the convenience of users, we have provided the processed scRNA-seq data with the estimated differentiation pseudo-time at the following [link](https://github.com/LeonSong1995/MeDuSA).  
 
 
 ## Compare the estimated cell-state abundance to the expected truth

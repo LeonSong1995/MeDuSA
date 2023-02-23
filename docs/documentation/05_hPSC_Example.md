@@ -1,9 +1,12 @@
 ---
 layout: page
-title: Example Analysis (monocytes)
+title: Example Analysis (hPSC)
 description: ~
 ---
-This tutorial offers an illustrative analysis of the human monocytes data from [Oetjen et al., 2018](https://insight.jci.org/articles/view/124928) using MeDuSA. Prior to running the analysis, it is important to ensure that the MeDuSA package has been installed. For installation instructions, please refer to the following [link](https://github.com/LeonSong1995/MeDuSA).
+
+This tutorial provides an illustrative analysis of the hPSC dataset from [Chu et al., 2016](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1033-x) using MeDuSA. The dataset was obtained from the hPSC cell line, which was cultured for varying durations. In this tutorial, we will utilize MeDuSA to estimate the cell-state abundance along the hPSC differentiation trajectory in bulk RNA-seq data. Subsequently, we will compare the estimated cell-state abundance to that measured from scRNA-seq data to validate the performance of MeDuSA.
+
+Prior to running the analysis, it is important to ensure that the MeDuSA package has been installed. For installation instructions, please refer to the following [link](https://github.com/LeonSong1995/MeDuSA).
 
 
 ## Input data
@@ -19,7 +22,7 @@ Detailed information regarding the input data is provided as follows.
 ### 1. Bulk RNA-seq data
 ```r
 #### load the example bulk RNA-seq data, 
-bulk = readRDS("../Monocytes_bulk.rds")
+bulk = readRDS("../hPSC_bulk.rds")
 class(bulk)
 "matrix" "array" 
 ```
@@ -28,7 +31,7 @@ The bulk RNA-seq data is represented in a matrix format, where each row correspo
 ### 2. Reference scRNA-seq data
 ```r
 #### load the example scRNA-seq data, 
-sce = readRDS("./Monocytes_sce.rds")
+sce = readRDS("./hPSC_sce.rds")
 class(sce)
 [1] "Seurat"
 attr(,"package")
@@ -110,38 +113,6 @@ marker = MeDuSA_marker(sce[,which(sce$cell_type=='mon')],bulk,
                                family ="gaussian",k = 10,ncpu = 4,method = "wilcox")
 ##Documentations			       
 help(MeDuSA_marker)			       
-```
-### 3. How to include other cell types as covariates
-To address the possibility of confounding factors arising from other cell types, MeDuSA allows (suggests) that users include these cell types as covariates. MeDuSA provides two ways to incorporate the other cell types in the model. 
-
-We recommend that users build the covariates matrix before running the deconvolution analysis, as this can help to save memory during the analysis. 
-
-```r
-#1.1 load the data
-sce_otherCT = readRDS("../Monocytes_OtherCell.rds")
-cov_otherCT = Seurat::AverageExpression(object = sce_otherCT,group.by = 'cell_type',assays ='RNA',slot='counts')$RNA
-remove(sce_otherCT)
-
-#1.2 To input the covariates matrix into MeDuSA, users can specify the parameter of fixCov. 
-MeDuSA_obj = MeDuSA(bulk,sce,fixCov = cov_otherCT,
-		    select.ct = 'mon',markerGene = NULL,span = 0.35,method = "wilcox",
-		    resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	
-```
-
-Alternatively, users can also choose to merge the data of the focal cell-type and other cell-types into a single Seurat object.
-
-```r
-#2.1 load the data
-sce_otherCT = readRDS("../Monocytes_OtherCell.rds")
-sce_big = merge(sce,sce_otherCT)
-cell_type = c(sce$cell_type,sce_otherCT$cell_type)
-sce_big$cell_type = cell_type[colnames(sce_big)]
-remove(sce_otherCT); remove(sce)
-
-#2.2 MeDuSA will automatically construct the covariates matrix based on the cell-type labels stored in sce_big$cell_type.
-MeDuSA_obj = MeDuSA(bulk,sce = sce_big,
-		    select.ct = 'mon',markerGene = NULL,span = 0.35,method = "wilcox",
-		    resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	
 ```
 
 ### 4. How to use the mode of conditional autoregressive (CAR)

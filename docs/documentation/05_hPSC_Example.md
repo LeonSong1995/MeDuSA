@@ -89,7 +89,7 @@ The results are stored in `MeDuSA_obj@Estimation`.
 - The median state (pseudo-time) of cell-state bins: `MeDuSA_obj@Estimation$TimeBin`
 - The used marker genes: `MeDuSA_obj@Estimation$markerGene`
 
-### 2. Get the p-value of the random effects component
+### 2. P values of the random effects component
 After completing the deconvolution analysis using MeDuSA, users can utilize the MeDuSA_VarExplain function to obtain the explained variance of the bulk data by the reference scRNA-seq data, as well as the corresponding p-values.
 ```R
 MeDuSA_obj = MeDuSA_VarExplain(MeDuSA_obj)

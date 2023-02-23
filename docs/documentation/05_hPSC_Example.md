@@ -4,7 +4,7 @@ title: Example (hPSC)
 description: ~
 ---
 
-This tutorial provides an illustrative analysis of the hPSC dataset from [Chu et al., 2016](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1033-x) using MeDuSA. 
+This tutorial provides an illustrative analysis of the hPSC dataset from [Chu et al.](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1033-x) using MeDuSA. 
 
 
 In this tutorial, we will use a dataset obtained from the hPSC cell line, which was cultured for different durations, to estimate cell-state abundance along the hPSC differentiation trajectory in bulk RNA-seq data using MeDuSA. Furthermore, we will validate the performance of MeDuSA by comparing the estimated cell-state abundance with that measured from scRNA-seq data. Finally, we will employ the `MANOVA` method to identify any differences in cell-state abundance among the different cultured time points.
@@ -43,18 +43,18 @@ attr(,"package")
 [1] "SeuratObject"
 
 sce@assays$RNA@counts[1:3,1:3]
-              A/A.rds_AAACCTGCAGCGAACA-1 A/A.rds_AAACCTGGTCGACTGC-1 A/A.rds_AAACCTGGTCGCTTCT-1
-FO538757.2                             .                          .                          .
-AP006222.2                             .                          .                          .
-RP4-669L17.10                          .                          .                          .
+     H9.00hb4s_001 H9.00hb4s_002 H9.00hb4s_003
+A1BG    0.003922580   .             0.001974782
+A1CF    0.001407226   0.001114947   .          
+A2LD1   .             .             .          
 
 sce$cell_trajectory[1:3]
-A/A.rds_AAACCTGCAGCGAACA-1 A/A.rds_AAACCTGGTCGACTGC-1 A/A.rds_AAACCTGGTCGCTTCT-1 
-                 0.9220488                  0.5167408                  0.4567616 
+H9.00hb4s_001 H9.00hb4s_002 H9.00hb4s_003 
+   0.09366755    0.02506596    0.02638522 
 		 
 sce$cell_type[1:3]
-A/A.rds_AAACCTGCAGCGAACA-1 A/A.rds_AAACCTGGTCGACTGC-1 A/A.rds_AAACCTGGTCGCTTCT-1 
-                     "mon"                      "mon"                      "mon" 
+H9.00hb4s_001 H9.00hb4s_002 H9.00hb4s_003 
+      "embry"       "embry"       "embry" 
 ```
 For compatibility with MeDuSA, the reference scRNA-seq data must be in the Seurat object format. Specifically, the reference data should be stored in `sce@assays$RNA@counts`, the cell-state trajectory in `sce$cell_trajectory`, and the cell-type in `sce$cell_type`. For more information about Seurat, please refer to the following [resource](https://satijalab.org/seurat/).
 

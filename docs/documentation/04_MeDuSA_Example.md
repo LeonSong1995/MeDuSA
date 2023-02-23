@@ -405,7 +405,7 @@ Here is an example output:
 ## Compare the estimated cell-state abundance to the expected truth
 In this dataset, both bulk RNA-seq data and scRNA-seq data are generated from the same sample. It is anticipated that the abundance of cell-states along the trajectory would exhibit a strong correlation between the two types of data, even in the presence of variations in the sequenced specimens. In this section, we will validate the MeDuSA method by comparing the estimated cell-state abundance from bulk data to that measured from scRNA-seq data. 
 
-First, we need to measure the cell-state abundance of each sample in the scRNA-seq data.
+To begin with, it is necessary to quantify the cell-state abundance of each sample in the scRNA-seq data.
 ```r
 bulk = readRDS("../Monocytes_bulk.rds")
 sce = readRDS("./Monocytes_sce.rds")
@@ -432,11 +432,40 @@ abundance_expect = sapply(unique(sce$sample),function(id){
 
 #subset the columns of the data frame to match the bulk data
 abundance_expect = abundance_expect[, colnames(abundance_expect) %in% colnames(bulk)]
-rownames(abundance_expect) = seq(1,nrow(abundance_expect))
 ```
+Next, we compare the estimated cell-state abundance obtained from bulk data to that measured from scRNA-seq data.
+```r
+library(ggplot2)
+library(reshape2)
 
+abundance_estimate = MeDuSA_obj@Estimation$cell_state_abundance
+state = MeDuSA_obj@Estimation$TimeBin
+rownames(abundance_estimate) = state
+rownames(abundance_expect) = state
 
+dat_estimate = melt(abundance_estimate)
+dat_expect = melt(abundance_expect)
+colnames(dat_estimate) = colnames(dat_expect) = c('state','sample','abundance')
+dat_estimate$type = 'MeDuSA'
+dat_expect$type = 'Expected truth'
+dat = rbind(dat_estimate,dat_expect)
 
+p2 = ggplot(dat,aes(x=state,y=abundance))+
+  scale_x_continuous(breaks = seq(0,1,0.25))+
+  scale_y_continuous(labels = scales::number_format(accuracy = 0.01))+
+  geom_line(aes(col=type),size=0.8)+
+  facet_wrap(~sample,ncol=4,scales = 'free_y')+
+  theme(legend.position = 'bottom',
+        legend.justification = "left",
+        axis.text.x = element_text(angle = 45,hjust = 1),
+        legend.title = element_blank(),
+        strip.background = element_rect(size=0.5),
+        panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"))+
+  xlab('Cell trajectory')+
+  ylab('Cell state abundance')+
+  scale_color_manual(values = c('#9ecae1','#fd8d3c'))
+p2
+```
 
 
 

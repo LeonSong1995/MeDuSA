@@ -8,7 +8,7 @@ description: ~
 
 ### Dependencies 
 * R version >= 3.5.0
-* R packages: Rcpp, foreach, Seurat,doSNOW,mgcv,RcppEigen,parallel,stats,BiocParallel
+* R packages: Rcpp, foreach, Seurat, doSNOW, mgcv, RcppEigen, parallel, stats, BiocParallel
 
 #### 1. Installing Dependent Packages
 ```r

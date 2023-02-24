@@ -26,7 +26,7 @@ Detailed information regarding the input data is provided as follows.
 
 ### 1. Bulk RNA-seq Data
 ```r
-#### load the example bulk RNA-seq data, 
+# Load the example bulk RNA-seq data
 bulk = readRDS("../hPSC_bulk.rds")
 class(bulk)
 "matrix" "array" 
@@ -35,7 +35,7 @@ The bulk RNA-seq data is represented in a matrix format, where each row correspo
 
 ### 2. Reference scRNA-seq Data
 ```r
-#### load the example scRNA-seq data, 
+# Load the example scRNA-seq data
 sce = readRDS("./hPSC_sce.rds")
 class(sce)
 [1] "Seurat"
@@ -63,7 +63,7 @@ For compatibility with MeDuSA, the reference scRNA-seq data must be in the Seura
 ```r
 library(MeDuSA)
 
-#Documentations
+# Documentations
 help(MeDuSA)
 ``` 
 ### 1. Basic Usage of MeDuSA
@@ -123,19 +123,19 @@ library(WaveCrest)
 library(data.table)
 library(ggplot2)
 
-##1) read the data
+#1. Read the data
 sce = fread('/Users/songliyang/Documents/MeDuSA_new/revision/embry/GSE75748_sc_time_course_ec.csv.gz')
 sce = as.data.frame(sce)
 rownames(sce) = sce[,1];sce = sce[,-1]
 
-##2) Infer the cell-state trajectory
+#2. Infer the cell-state trajectory
 size = MedianNorm(sce)
 DataNorm = GetNormalizedMat(sce,size)
 condition = sapply(colnames(sce),function(i){strsplit(i,split = '_')[[1]][1]})
 #! Please note that running WaveCrestENI is a time-consuming process, and it took us 28 hours to complete the estimation.
 pseudo_time = WaveCrestENI(GeneList = VariableFeatures(sce),N = 5, Data = DataNorm,Conditions = condition)
 
-##3) Visualize the result
+#3. Visualize the result
 sce = CreateSeuratObject(DataNorm)
 sce = NormalizeData(sce) %>%
       FindVariableFeatures(selection.method = "vst",nfeatures = 1000) %>%
@@ -172,27 +172,27 @@ To begin with, it is necessary to quantify the cell-state abundance of each samp
 bulk = readRDS("../hPSC_bulk.rds")
 sce = readRDS("./hPSC_sce.rds")
 
-#extract pseudo time data
+# Extract pseudo time data
 pseudotime = sce$cell_trajectory
 #define bins based on pseudo time values
 bin = paste0('bin', cut(pseudotime, 50))
 breaks = sort(aggregate(pseudotime, by = list(bin), FUN = min)[,-1])
 breaks[1] = -Inf; breaks = c(breaks, Inf)
 
-#measure the abundance for each sample
+# Measure the abundance for each sample
 abundance_expect = sapply(unique(sce$sample),function(id){
   pseudotime_temp = sort(pseudotime[which(sce$sample == id)])
   #count the cell number for each cell-state bin
   count_temp = sapply(2:length(breaks), function(currBreakIndex) {
     length(which(pseudotime_temp >= breaks[currBreakIndex-1] & pseudotime_temp < breaks[currBreakIndex]))
   })
-  #normalize to the fractional abundance
+# Normalize to the fractional abundance
   abundance_temp  =  count_temp/sum(count_temp)
 
   return(abundance_temp)
 })
 
-#subset the columns of the data frame to match the bulk data
+# Subset the columns of the data frame to match the bulk data
 abundance_expect = abundance_expect[, colnames(abundance_expect) %in% colnames(bulk)]
 ```
 Next, we compare the estimated cell-state abundance obtained from bulk data to that measured from scRNA-seq data.
@@ -242,18 +242,18 @@ The bulk data used in this tutorial was collected from three replicates. However
 
 ```R
 library(data.table)
-#The bulk RNA-seq data
+# Load bulk RNA-seq data
 bulk = fread('/Users/songliyang/Documents/MeDuSA_new/revision/embry/GSE75748_bulk_time_course_ec.csv.gz')
 bulk = as.data.frame(bulk)
 rownames(bulk) = bulk[,1]
 bulk = bulk[,-1]
-#The averaged bulk data used above
+# The averaged bulk data used above
 bulk_time = data.frame("H9.12h" = rowMeans(bulk[,grep('12h',colnames(bulk))]),
                   	"H9.24h"= rowMeans(bulk[,grep('24h',colnames(bulk))]),
                   	"H9.36h"= rowMeans(bulk[,grep('36h',colnames(bulk))]),
                  	"H9.72h" = rowMeans(bulk[,grep('72h',colnames(bulk))]),
                   	"H9.96h" = rowMeans(bulk[,grep('96h',colnames(bulk))]))
-#The raw bulk data
+# The raw bulk data
 bulk_all = bulk			
 ```
 Next, we will use the `MANOVA-Pro` to quantify the differences in cell-state abundance at various cultivation times of hPSCs.
@@ -263,17 +263,17 @@ Input of `MANOVA-Pro`:
 - condition: A character vector containing the biological condition for each bulk sample.
 
 ```R
-#run MeDuSA for all samples
+# Run MeDuSA for all samples
 MeDuSA_obj = MeDuSA(bulk_all,sce,
                   select.ct = 'hPSC',markerGene = NULL,span = 0.35,
 		  resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)
 		  
-#get the cultivation stage for ecah sample
+# Get the cultivation stage for ecah sample
 cultivation_stage = sapply(colnames(bulk_all),function(i){
   paste(strsplit(i,split = '_')[[1]][1:2],collapse ="_")
 })
 
-#run MANOVA-Pro
+# Run MANOVA-Pro
 MANOVA_Pro(MeDuSA_obj,degree = 2,condition = cultivation_stage)
 
           Df       Pillai     approx F       num Df       den Df       Pr(>F) 

@@ -7,7 +7,7 @@ description: ~
 This tutorial provides an illustrative analysis of the hPSC dataset from [Chu et al.](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1033-x) using MeDuSA. 
 
 
-In this tutorial, we will use a dataset obtained from the hPSC cell line, which was cultured for different durations, to estimate cell-state abundance along the hPSC differentiation trajectory in bulk RNA-seq data using MeDuSA. Furthermore, we will validate the performance of MeDuSA by comparing the estimated cell-state abundance with that measured from scRNA-seq data. Finally, we will employ the `MANOVA` method to identify any differences in cell-state abundance among the different cultured time points.
+In this tutorial, we will use a dataset obtained from the hPSC cell line, which was cultured for different durations, to estimate cell-state abundance along the hPSC differentiation trajectory in bulk RNA-seq data using MeDuSA. Furthermore, we will validate the performance of MeDuSA by comparing the estimated cell-state abundance with that measured from scRNA-seq data. Finally, we will employ the `MANOVA-Pro` method to identify any differences in cell-state abundance among the different cultured time points.
 
 For a more comprehensive tutorial on using data from real tissue that consists of multiple cell types, please visit the following [link](https://leonsong1995.github.io/MeDuSA/documentation/04_Mon_Example.html). This tutorial provides a detailed discussion on several important aspects, including how to select marker genes, how to incorporate other cell types as covariates, how to use the mode of conditional autoregressive (CAR), and how to normalize data.
 
@@ -136,7 +136,7 @@ condition = sapply(colnames(sce),function(i){strsplit(i,split = '_')[[1]][1]})
 pseudo_time = WaveCrestENI(GeneList = VariableFeatures(sce),N = 5, Data = DataNorm,Conditions = condition)
 
 ##3) Visualize the result
-sce = CreateSeuratObject(sce)
+sce = CreateSeuratObject(DataNorm)
 sce = NormalizeData(sce) %>%
       FindVariableFeatures(selection.method = "vst",nfeatures = 1000) %>%
       ScaleData() %>%
@@ -160,16 +160,16 @@ p1
 Here is an example output: 
 ![Example_Pie](hPSC_pseudotime.png)
 
-For the convenience of users, we have provided the processed scRNA-seq data with the estimated differentiation pseudo-time at the following [link](https://github.com/LeonSong1995/MeDuSA).  
+Please note that running WaveCrestENI is a time-consuming process, and it took us 28 hours to complete the estimation. For the convenience of users, we have provided the processed scRNA-seq data with the estimated differentiation pseudo-time at the following [link](https://github.com/LeonSong1995/MeDuSA).  
 
 
 ## Compare the estimated cell-state abundance to the expected truth
-In this dataset, both bulk RNA-seq data and scRNA-seq data are generated from the same sample. It is anticipated that the abundance of cell-states along the trajectory would exhibit a strong correlation between the two types of data, even in the presence of variations in the sequenced specimens. In this section, we will validate the MeDuSA method by comparing the estimated cell-state abundance from bulk data to that measured from scRNA-seq data. 
+The dataset includes both bulk RNA-seq data and scRNA-seq data from the same cell lines. It is expected that the cell-state abundance along the trajectory would strongly correlate between the two types of data, despite potential variations in the sequenced specimens. To validate the MeDuSA method, we will compare the estimated cell-state abundance from the bulk data to that measured from the scRNA-seq data.
 
 To begin with, it is necessary to quantify the cell-state abundance of each sample in the scRNA-seq data.
 ```r
-bulk = readRDS("../Monocytes_bulk.rds")
-sce = readRDS("./Monocytes_sce.rds")
+bulk = readRDS("../hPSC_bulk.rds")
+sce = readRDS("./hPSC_sce.rds")
 
 #extract pseudo time data
 pseudotime = sce$cell_trajectory
@@ -203,6 +203,9 @@ abundance_estimate = MeDuSA_obj@Estimation$cell_state_abundance
 state = MeDuSA_obj@Estimation$TimeBin
 rownames(abundance_estimate) = state
 rownames(abundance_expect) = state
+commonId = intersect(colnames(abundance_expect),colnames(abundance_estimate))
+abundance_expect = abundance_expect[,commonId]
+abundance_estimate = abundance_estimate[,commonId]
 
 dat_estimate = melt(abundance_estimate)
 dat_expect = melt(abundance_expect)
@@ -228,4 +231,4 @@ p2 = ggplot(dat,aes(x=state,y=abundance))+
 p2
 ```
 Here is an example output: 
-![Example_Pie](Monocytes_estimation.png)
+![Example_Pie](hPSC_estimation.png)

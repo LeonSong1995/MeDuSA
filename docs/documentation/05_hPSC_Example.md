@@ -239,6 +239,12 @@ Here is an example output:
 We propose an approach called MANOVA-Pro that combines multiple analysis of variance (MANOVA) with polynomial regression to detect differences in cell-state abundance among groups (e.g. case group vs. control group). In this tutorial, we will employ `MANOVA-Pro` to quantify the differences in cell-state abundance at various cultivation times of hPSCs.
 
 The bulk data used in this tutorial was collected from three replicates. However, to increase the precision of our analysis, we took the average of the bulk data in the previous section. In the upcoming analysis, we will utilize the raw data instead of the averaged data to quantify the differences in cell-state abundance at various cultivation times of human pluripotent stem cells (hPSCs).
+
+Input of `MANOVA-Pro`
+-  MeDuSA_obj: The MeDuSA object. 
+- degree:  A numeric variable used to specify the polynomial degrees.
+- condition: A character vector containing the biological condition for each bulk sample.
+
 ```R
 library(data.table)
 #The bulk RNA-seq data
@@ -258,7 +264,7 @@ bulk_all = bulk
 Next, we will use the `MANOVA-Pro` to quantify the differences in cell-state abundance at various cultivation times of hPSCs.
 ```R
 #run MeDuSA for all samples
-MeDuSA_obj = MeDuSA(bulk,sce,
+MeDuSA_obj = MeDuSA(bulk_all,sce,
                   select.ct = 'hPSC',markerGene = NULL,span = 0.35,
 		  resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)
 		  

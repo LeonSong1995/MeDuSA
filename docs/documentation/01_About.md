@@ -35,7 +35,7 @@ Parameters of `MeDuSA`
 - `phi`: A numeric vector for searching the optimal cell correlations. The default value is c(0.2,0.4,0.6,0.9).
 - `fixCov`: A matrix (vector) of fixed covariates in the model (i.e., covariates for estimating cell-state abundance). The default value is NULL.
 - `markerGene`: A character vector of marker genes over the cell-state trajectory. The default value is NULL. With the default, MeDuSA selects genes using the GAM-Wald or Wilcoxon rank-sum test.
-- `method`: A character variable to specify the method used in selecting marker genes (Wilcoxon or GAM). The default value is Wilcoxon.
+- `method`: A character variable to specify the method used in selecting marker genes (wilcox or gam). The default value is wilcox.
 - `GeneNumber`: A numeric variable to determine the number of signature genes. The default value is 200.
 - `span`: A numeric variable to control the degree of smoothing for loess.
 - `neighbor`: A numeric variable to determine the number of neighboring cells used in smoothing (do not use when the smooth method is loess).

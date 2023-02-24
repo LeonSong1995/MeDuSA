@@ -6,7 +6,7 @@ description: ~
 This tutorial offers an illustrative analysis of the human monocytes data from [Oetjen et al., 2018](https://insight.jci.org/articles/view/124928) using MeDuSA. Prior to running the analysis, it is important to ensure that the MeDuSA package has been installed. For installation instructions, please refer to the following [link](https://github.com/LeonSong1995/MeDuSA).
 
 
-## Input data
+## Input Data
 `MeDuSA` requires two types of input data:
 - Bulk RNA-seq data. 
 - Single cell RNA-seq (scRNA-seq) data, which should be provided in the form of a Seurat object that includes the annotated cell-state trajectory and cell types. 
@@ -16,7 +16,7 @@ For how to prepare the cell-state trajectory data, please read the section of `P
 The input data required for running this tutorial can be downloaded from the following [link](https://github.com/LeonSong1995/MeDuSA). 
 Detailed information regarding the input data is provided as follows.
 
-### 1. Bulk RNA-seq data
+### 1. Bulk RNA-seq Data
 ```r
 #### load the example bulk RNA-seq data, 
 bulk = readRDS("../Monocytes_bulk.rds")
@@ -25,7 +25,7 @@ class(bulk)
 ```
 The bulk RNA-seq data is represented in a matrix format, where each row corresponds to a specific gene and each column corresponds to a particular sample.
 
-### 2. Reference scRNA-seq data
+### 2. Reference scRNA-seq Data
 ```r
 #### load the example scRNA-seq data, 
 sce = readRDS("./Monocytes_sce.rds")
@@ -52,14 +52,14 @@ For compatibility with MeDuSA, the reference scRNA-seq data must be in the Seura
 
 
 
-## Cell-state deconvolution analysis
+## Cell-State Deconvolution Analysis
 ```r
 library(MeDuSA)
 
 #Documentations
 help(MeDuSA)
 ``` 
-### 1. Basic usage of MeDuSA
+### 1. Basic Usage of MeDuSA
 This section provides an introduction to the basic usage of MeDuSA.
 - bulk: A matrix of bulk RNA-seq data. 
 - sce: A Seurat object of scRNA-seq data.  
@@ -83,7 +83,7 @@ The results are stored in MeDuSA_obj@Estimation.
 - The used marker genes: MeDuSA_obj@Estimation$markerGene
 
 
-### 2. How to select marker genes
+### 2. How to Select Marker Genes
 MeDuSA offers users the flexibility to input their own cultivated marker genes. In addition, MeDuSA provides two methods for selecting marker genes that are representative of the cell-state trajectory.
 
 - wilcox test: MeDuSA divides the cells in the trajectory into a specified number of bins and applies the wilcox test, which is implemented in the `Seurat::FindMarkers` function, to each bin. The wilcox test is used to compare gene expression levels between the cells in the current bin and all other cells in the trajectory. Genes with significant differential expression are identified as marker genes for that particular bin. By performing the wilcox test for each gene at every bin along the cell-state trajectory, MeduSA can identify marker genes that are specific to each stage of the trajectory.
@@ -111,7 +111,7 @@ marker = MeDuSA_marker(sce[,which(sce$cell_type=='mon')],bulk,
 ##Documentations			       
 help(MeDuSA_marker)			       
 ```
-### 3. How to include other cell types as covariates
+### 3. How to Include Other Cell Types as Covariates
 To address the possibility of confounding factors arising from other cell types, MeDuSA allows (suggests) that users include these cell types as covariates. MeDuSA provides two ways to incorporate the other cell types in the model. 
 
 We recommend that users build the covariates matrix before running the deconvolution analysis, as this can help to save memory during the analysis. 
@@ -144,7 +144,7 @@ MeDuSA_obj = MeDuSA(bulk,sce = sce_big,
 		    resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	
 ```
 
-### 4. How to use the mode of conditional autoregressive (CAR)
+### 4. How to Use the Mode of Conditional Autoregressive (CAR)
 In many LMM applications, random effects are assumed to be independent and identically distributed. However, the abundances of cells at adjacent states are likely to be correlated. MeDuSA incorporates the CAR model in the LMM to accommodate such correlations. Users can set the parameter of `CAR` as TRUE to use the CAR mode. Further, MeDuSA provides users with the ability to set the range of possible correlation strengths through the `phi` parameter.  Based on this range, MeDuSA then automatically searches for the optimal correlation strength that maximizes the likelihood function. 
 ```R
 #The default phi is c(0.2,0.4,0.6,0.9)
@@ -160,7 +160,7 @@ MeDuSA_obj = MeDuSA(bulk,sce, CAR = TRUE, phi = phi,
 ``` 
 It is important to note that when using the CAR mode, the computational speed can become slow. This is primarily due to the computational burden of inverting the covariance matrix between cells, which can become especially significant when using large reference datasets.
 
-### 5. How to normalize the data 
+### 5. How to Normalize the Data
 Before running the deconvolution analysis, we recommend that users normalize the reference data and the bulk data to the same scale. It is important to note that MeDuSA <big>does not</big> perform any normalization for the input reference and bulk data due to the variety in data scale, which may include raw counts, counts per million (CPM), transcripts per million (TPM), fragments per kilobase of transcript per million (FPKM), or log-transformed data.  While MeDuSA is generally robust to different scales, the heterogeneity in data scale between the bulk and reference data may negatively impact the performance. Therefore, users must carefully check and perform the appropriate normalization of their data before running MeDuSA to ensure accurate and reliable results. For example, in this tutorial, we have normalized the data into CPM scale.
 ```r
 ###To prevent exceeding the largest upper limit in R during REML iteration, we normalized the data to 1e+3 instead of 1e+6. 
@@ -169,7 +169,7 @@ sce@assays$RNA@counts = sweep(sce@assays$RNA@counts,2,colSums(sce@assays$RNA@cou
 ```
 Users can try normalizing data to other scales as well, such as the count or log-transformed scale. 
 
-### 6. How to get the p-value of the random effects component
+### 6. How to Obtain the P-Value of the Random Effects Component
 After completing the deconvolution analysis using MeDuSA, users can utilize the MeDuSA_VarExplain function to obtain the explained variance of the bulk data by the reference scRNA-seq data, as well as the corresponding p-values.
 ```R
 MeDuSA_obj = MeDuSA_VarExplain(MeDuSA_obj)
@@ -177,7 +177,7 @@ MeDuSA_obj = MeDuSA_VarExplain(MeDuSA_obj)
 The results is stored in `MeDuSA_obj@VarianceExplain`. 
 
 
-## Prepare reference data
+## Preparing Reference Data
 It is important to note that in real-world applications, users should annotate the cell-state trajectory based on their own data and research interests. There are many methods to infer the cell trajectory in scRNA-seq data, such as: 
 
 - [Slingshot](https://bioconductor.org/packages/devel/bioc/vignettes/slingshot/inst/doc/vignette.html)
@@ -187,7 +187,7 @@ It is important to note that in real-world applications, users should annotate t
 
 In this section, we will walk through the steps involved in preparing the reference scRNA-seq data used in this tutorial, starting with the raw count data generated by [CellRanger](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/what-is-cell-ranger).
 
-### 1. Download the raw scRNA-seq data 
+### 1. Downloading Raw scRNA-seq Data
 We will download the raw data from the GEO database and subsequently rename them based on their respective sample names
 ```bash
 #!/bin/bash
@@ -207,7 +207,7 @@ do
   mv *matrix_${id}.mtx.gz `pwd`/${id}/matrix.mtx.gz 
 done
 ```
-### 2. Process the raw scRNA-seq data 
+### 2. Processing Raw scRNA-seq Data
 We will use [DoubletFinder](https://github.com/chris-mcginnis-ucsf/DoubletFinder) to detect possible doublets in each scRNA-seq data. After filtering out the identified doublets, the data will be merged into a single Seurat object.
 
 ```R
@@ -279,7 +279,7 @@ saveRDS(data.merge,'../Human_BoneMarrow_JCI_Insight.rds')
 ```
 The merged scRNA-seq data can be obtained either by following the above pipeline or by downloading it directly from the following [link](https://github.com/LeonSong1995/MeDuSA).  
 
-### 3. Annotate cell types
+### 3. Cell Type Annotation
 We will perform cell clustering and assign cell-types based on expression pattern of marker genes. To account for potential confounding factors during single-cell RNA sequencing, the black gene list, provided by [Xue et al.](https://www.nature.com/articles/s41586-022-05400-x) will be utilized. This list can be downloaded from the following [link](https://github.com/LeonSong1995/MeDuSA).
 
 ```R
@@ -342,7 +342,7 @@ saveRDS(OtherCell,'../OtherCell.rds')
 ```
 For user convenience, we have provided the processed scRNA-seq data of monocytes in the following [link](https://github.com/LeonSong1995/MeDuSA).
 
-### 4. Infer the cell-state trajectory 
+### 4. Infering the Cell-State Trajectory
 In this tutorial analysis, we will use [Slingshot](https://bioconductor.org/packages/devel/bioc/vignettes/slingshot/inst/doc/vignette.html) to infer the development trajectory of monocytes. 
 
 ```R
@@ -402,7 +402,7 @@ saveRDS(sce,'../Monocytes_sce.rds')
 Here is an example output: 
 ![Example_Pie](Monocytes_pseudotime.png)
 
-## Compare the estimated cell-state abundance to the expected truth
+## Comparing Estimated Cell-State Abundance to Expected Truth
 In this dataset, both bulk RNA-seq data and scRNA-seq data are generated from the same sample. It is anticipated that the abundance of cell-states along the trajectory would exhibit a strong correlation between the two types of data, even in the presence of variations in the sequenced specimens. In this section, we will validate the MeDuSA method by comparing the estimated cell-state abundance from bulk data to that measured from scRNA-seq data. 
 
 To begin with, it is necessary to quantify the cell-state abundance of each sample in the scRNA-seq data.

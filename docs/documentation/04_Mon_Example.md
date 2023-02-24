@@ -11,7 +11,7 @@ This tutorial offers an illustrative analysis of the human monocytes data from [
 - Bulk RNA-seq data. 
 - Single cell RNA-seq (scRNA-seq) data, which should be provided in the form of a Seurat object that includes the annotated cell-state trajectory and cell types. 
 
-For how to prepare the cell-state trajectory data, please read the section of `Prepare reference data` in this tutorial. 
+For how to prepare the cell-state trajectory data, please read the section of `Preparing Reference Data` in this tutorial. 
 
 The input data required for running this tutorial can be downloaded from the following [link](https://github.com/LeonSong1995/MeDuSA). 
 Detailed information regarding the input data is provided as follows.
@@ -71,7 +71,7 @@ This section provides an introduction to the basic usage of MeDuSA.
 - fractional: A boolean variable to determine whether to normalize the estimated cell-state abundance to the fractional abundance (0-1).
 - ncpu: The number of CPU cores to be used. 
 
-For further details about the parameters, please refer to this [link](https://github.com/LeonSong1995/MeDuSA).
+For further details about the parameters, please refer to this [link](https://leonsong1995.github.io/MeDuSA/documentation/01_About.html).
 ```r
 MeDuSA_obj = MeDuSA(bulk,sce,
                   select.ct = 'mon',markerGene = NULL,span = 0.35,

@@ -257,7 +257,7 @@ bulk_time = data.frame("H9.12h" = rowMeans(bulk[,grep('12h',colnames(bulk))]),
 bulk_all = bulk			
 ```
 Next, we will use the `MANOVA-Pro` to quantify the differences in cell-state abundance at various cultivation times of hPSCs.
-Input of `MANOVA-Pro`
+Input of `MANOVA-Pro`:
 -  MeDuSA_obj: The MeDuSA object. 
 - degree:  A numeric variable used to specify the polynomial degrees.
 - condition: A character vector containing the biological condition for each bulk sample.

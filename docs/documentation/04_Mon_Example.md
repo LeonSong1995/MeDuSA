@@ -104,7 +104,7 @@ MeDuSA_obj = MeDuSA(bulk,sce,
 		    
 # Select marker genes using MeDuSA_marker before running deconvolution analysis
 marker = MeDuSA_marker(sce[,which(sce$cell_type=='mon')],bulk,
-                               GeneNumber = 200,nbins = 10,
+                               geneNumber = 200,nbins = 10,
                                family ="gaussian",k = 10,ncpu = 4,method = "wilcox")
 # Documentations			       
 help(MeDuSA_marker)			       

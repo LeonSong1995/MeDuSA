@@ -18,8 +18,8 @@ Our group
 
 Parameters of `MeDuSA`
 -------------------
-- bulk: A matrix of bulk RNA-seq data. Each row corresponds to a specific gene, and each column corresponds to a particular sample.
-- sce: A `Seurat` object of the reference scRNA-seq data. Meta-data of the seurat object (sce@meta.data) needs to include two columns named as cell_type and cell_trajectory.
+- `bulk`: A matrix of bulk RNA-seq data. Each row corresponds to a specific gene, and each column corresponds to a particular sample.
+- `sce`: A `Seurat` object of the reference scRNA-seq data. Meta-data of the seurat object (sce@meta.data) needs to include two columns named as cell_type and cell_trajectory.
 - select.ct: A character variable of the target cell type.
 - ncpu: The number of CPU cores to be used.
 - smooth: A Boolean variable to determine whether to smooth the estimated cell-state abundance or not. The default value is TRUE.

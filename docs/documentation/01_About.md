@@ -28,7 +28,7 @@ Parameters of `MeDuSA`
 - `resolution`: A numeric variable to determine the number of cell bins along the cell trajectory (i.e., the resolution of the deconvolution analysis). The default value is 50.
 - `knots`: A numeric variable to specify the number of knots. The default value is 10.
 - `start`: A numeric vector for the initial value of the restricted maximum likelihood (REML). The default value is c(1e-5,1e-2).
-- `family`: A character variable to specify the distribution of GAM. See family.mgcv for a full list of what is available.
+- `family`: A character variable to specify the distribution of GAM.
 - `maxiter`: The iteration number of REML. The default value is 1e+4.
 - `adj`: A Boolean variable to determine whether to include covariates when estimating the cell-state abundance.
 - `CAR`: A Boolean variable to determine whether to model abundance correlations among cells.

@@ -14,17 +14,17 @@ For a more comprehensive tutorial on using data from real tissue that consists o
 Prior to running the analysis, it is important to ensure that the MeDuSA package has been installed. For installation instructions, please refer to the following [link](https://github.com/LeonSong1995/MeDuSA).
 
 
-## Input data
+## Input Data
 `MeDuSA` requires two types of input data:
 - Bulk RNA-seq data. 
 - Single cell RNA-seq (scRNA-seq) data, which should be provided in the form of a Seurat object that includes the annotated cell-state trajectory and cell types. 
 
-For how to prepare the cell-state trajectory data, please read the section of `Prepare reference data` in this tutorial. 
+For how to prepare the cell-state trajectory data, please read the section of `Preparing Reference Data` in this tutorial. 
 
 The input data required for running this tutorial can be downloaded from the following [link](https://github.com/LeonSong1995/MeDuSA). 
 Detailed information regarding the input data is provided as follows.
 
-### 1. Bulk RNA-seq data
+### 1. Bulk RNA-seq Data
 ```r
 #### load the example bulk RNA-seq data, 
 bulk = readRDS("../hPSC_bulk.rds")
@@ -33,7 +33,7 @@ class(bulk)
 ```
 The bulk RNA-seq data is represented in a matrix format, where each row corresponds to a specific gene and each column corresponds to a particular sample.
 
-### 2. Reference scRNA-seq data
+### 2. Reference scRNA-seq Data
 ```r
 #### load the example scRNA-seq data, 
 sce = readRDS("./hPSC_sce.rds")
@@ -59,14 +59,14 @@ H9.00hb4s_001 H9.00hb4s_002 H9.00hb4s_003
 For compatibility with MeDuSA, the reference scRNA-seq data must be in the Seurat object format. Specifically, the reference data should be stored in `sce@assays$RNA@counts`, the cell-state trajectory in `sce$cell_trajectory`, and the cell-type in `sce$cell_type`. For more information about Seurat, please refer to the following [resource](https://satijalab.org/seurat/).
 
 
-## Cell-state deconvolution analysis
+## Cell-State Deconvolution Analysis
 ```r
 library(MeDuSA)
 
 #Documentations
 help(MeDuSA)
 ``` 
-### 1. Basic usage of MeDuSA
+### 1. Basic Usage of MeDuSA
 This section provides an introduction to the basic usage of MeDuSA.
 - bulk: A matrix of bulk RNA-seq data. 
 - sce: A Seurat object of scRNA-seq data.  
@@ -89,7 +89,7 @@ The results are stored in `MeDuSA_obj@Estimation`.
 - The median state (pseudo-time) of cell-state bins: `MeDuSA_obj@Estimation$TimeBin`
 - The used marker genes: `MeDuSA_obj@Estimation$markerGene`
 
-### 2. P values of the random effects component
+### 2. P-Values of the Random Effects Component
 After completing the deconvolution analysis using MeDuSA, users can utilize the MeDuSA_VarExplain function to obtain the explained variance of the bulk data by the reference scRNA-seq data, as well as the corresponding p-values.
 ```R
 MeDuSA_obj = MeDuSA_VarExplain(MeDuSA_obj)
@@ -97,7 +97,7 @@ MeDuSA_obj = MeDuSA_VarExplain(MeDuSA_obj)
 The results is stored in `MeDuSA_obj@VarianceExplain`. 
 
 
-## Prepare reference data
+## Preparing Reference Data
 It is important to note that in real-world applications, users should annotate the cell-state trajectory based on their own data and research interests. There are many methods to infer the cell trajectory in scRNA-seq data, such as: 
 
 - [Slingshot](https://bioconductor.org/packages/devel/bioc/vignettes/slingshot/inst/doc/vignette.html)
@@ -107,7 +107,7 @@ It is important to note that in real-world applications, users should annotate t
 
 In this tutorial, we will follow the pipeline provided by the author of the dataset and use [WaveCrest](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1033-x) to infer the differentiation trajectory of hPSCs.
 
-### 1. Download the raw scRNA-seq data 
+### 1. Download Raw scRNA-seq Data
 We will download the raw data from the GEO database. 
 ```bash
 #the bulk RNA-seq data 
@@ -116,7 +116,7 @@ wget https://ftp.ncbi.nlm.nih.gov/geo/series/GSE75nnn/GSE75748/suppl/GSE75748_bu
 #the scRNA-seq data
 wget https://ftp.ncbi.nlm.nih.gov/geo/series/GSE75nnn/GSE75748/suppl/GSE75748_sc_time_course_ec.csv.gz
 ```
-### 2. Process the raw scRNA-seq data 
+### 2.Processing Raw scRNA-seq Data
 ```R
 library(Seurat)
 library(WaveCrest)
@@ -163,10 +163,10 @@ Here is an example output:
 Please note that running WaveCrestENI is a time-consuming process, and it took us 28 hours to complete the estimation. For the convenience of users, we have provided the processed scRNA-seq data with the estimated differentiation pseudo-time at the following [link](https://github.com/LeonSong1995/MeDuSA).  
 
 
-## Compare the estimated cell-state abundance to the expected truth
+## Comparison of Estimated Cell-State Abundance to Expected Truth
 The dataset includes both bulk RNA-seq data and scRNA-seq data from the same cell lines. It is expected that the cell-state abundance along the trajectory would strongly correlate between the two types of data, despite potential variations in the sequenced specimens. To validate the MeDuSA method, we will compare the estimated cell-state abundance from the bulk data to that measured from the scRNA-seq data.
 
-### 1. Validate MeDuSA method
+### 1. Validation of the MeDuSA Method
 To begin with, it is necessary to quantify the cell-state abundance of each sample in the scRNA-seq data.
 ```r
 bulk = readRDS("../hPSC_bulk.rds")
@@ -235,7 +235,7 @@ Here is an example output:
 ![Example_Pie](hPSC_estimation.png)
 
 
-### 2. Detection of differences in cell-state abundance using MANOVA-Pro.
+### 2. Detection of Differences in Cell-State Abundance using MANOVA-Pro
 We propose an approach called MANOVA-Pro that combines multiple analysis of variance (MANOVA) with polynomial regression to detect differences in cell-state abundance among groups (e.g. case group vs. control group). In this tutorial, we will employ `MANOVA-Pro` to quantify the differences in cell-state abundance at various cultivation times of hPSCs.
 
 The bulk data used in this tutorial was collected from three replicates. However, to increase the precision of our analysis, we took the average of the bulk data in the previous section. In the upcoming analysis, we will utilize the raw data instead of the averaged data to quantify the differences in cell-state abundance at various cultivation times of human pluripotent stem cells (hPSCs).

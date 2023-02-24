@@ -84,20 +84,20 @@ The results are stored in MeDuSA_obj@Estimation.
 ### 2. How to Select Marker Genes
 MeDuSA offers users the flexibility to input their own cultivated marker genes. In addition, MeDuSA provides two methods for selecting marker genes that are representative of the cell-state trajectory.
 
-- wilcox test: MeDuSA divides the cells in the trajectory into a specified number of bins and applies the Wilcoxon rank sum test, which is implemented in the `Seurat::FindMarkers` function, to each bin. The wilcox test is used to compare gene expression levels between the cells in the current bin and all other cells in the trajectory. Genes with significant differential expression are identified as marker genes for that particular bin. By performing the wilcox test for each gene at every bin along the cell-state trajectory, MeduSA can identify marker genes that are specific to each stage of the trajectory.
+- wilcox test: MeDuSA divides the cells in the trajectory into a specified number of bins and applies the Wilcoxon rank sum test (wilcox), which is implemented in the `Seurat::FindMarkers` function, to each bin. The wilcox test is used to compare gene expression levels between the cells in the current bin and all other cells in the trajectory. Genes with significant differential expression are identified as marker genes for that particular bin. By performing the wilcox test for each gene at every bin along the cell-state trajectory, MeduSA can identify marker genes that are specific to each stage of the trajectory.
 
-- gam-wald test: MeduSA uses the generalized additive model (GAM) to associate genes along the cell-state trajectory, and considers only genes with an FDR-adjusted p-value less than 0.01. These significant genes are ranked based on their association strength, allowing for the identification of the most relevant genes that are associated with the cell-state trajectory. To prevent certain cell-states from being overrepresented, MeduSA divides the cell-state trajectory into a specified number of intervals and assigns each gene to the interval in which it has the highest mean expression. For each interval, a set of top informative genes is selected as signature genes.
+- gam-wald test: MeduSA uses the generalized additive model (gam) to associate genes along the cell-state trajectory, and considers only genes with an FDR-adjusted p-value less than 0.01. These significant genes are ranked based on their association strength, allowing for the identification of the most relevant genes that are associated with the cell-state trajectory. To prevent certain cell-states from being overrepresented, MeduSA divides the cell-state trajectory into a specified number of intervals and assigns each gene to the interval in which it has the highest mean expression. For each interval, a set of top informative genes is selected as signature genes.
 
 Users can specify the `method` in the `MeDuSA` function as either `wilcox` or `gam` to utilize these two methods. Alternatively, users can select the marker genes using the `MeDuSA_marker` function before running the deconvolution analysis. 
 
 ```r
 # Set the gene selection method in MeDuSA function 
 library(MeDuSA)
-# The Wilcoxon rank sum test
+# The wilcox test
 MeDuSA_obj = MeDuSA(bulk,sce,
 		    select.ct = 'mon',markerGene = NULL,span = 0.35,method = "wilcox",
 		    resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	
-# The GAM-Wald
+# The gam-wald test
 MeDuSA_obj = MeDuSA(bulk,sce,
 		    select.ct = 'mon',markerGene = NULL,span = 0.35,method = "gam",
 		    resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)

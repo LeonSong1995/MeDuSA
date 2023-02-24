@@ -22,7 +22,7 @@ Parameters of `MeDuSA`
 - sce: A `Seurat` object of the reference scRNA-seq data. Meta-data of the seurat object (sce@meta.data) needs to include two columns named as cell_type and cell_trajectory.
 - select.ct: A character variable of the target cell type.
 - ncpu: The number of CPU cores to be used.
-- smooth: A Boolean variable to determine whether to smooth the predicted cell-state abundance or not. The default value is TRUE.
+- smooth: A Boolean variable to determine whether to smooth the estimated cell-state abundance or not. The default value is TRUE.
 - smoothMethod: A character variable to determine the smoothing method. The default method is loess.
 - nbins: A numeric variable to determine the number of bins along the cell trajectory, which is used to ensure the selected genes are uniformly scattered along the given trajectory. The default value is 10.
 - resolution: A numeric variable to determine the number of cell bins along the cell trajectory (i.e., the resolution of the deconvolution analysis). The default value is 50.
@@ -30,7 +30,7 @@ Parameters of `MeDuSA`
 - start: A numeric vector for the initial value of the restricted maximum likelihood (REML). The default value is c(1e-5,1e-2).
 - family: A character variable to specify the distribution of GAM. See family.mgcv for a full list of what is available.
 - maxiter: The iteration number of REML. The default value is 1e+4.
-- adj: A Boolean variable to determine whether to include covariates when predicting the cell-state abundance.
+- adj: A Boolean variable to determine whether to include covariates when estimating the cell-state abundance.
 - CAR: A Boolean variable to determine whether to model abundance correlations among cells.
 - phi: A numeric vector for searching the optimal cell correlations. The default value is c(0.2,0.4,0.6,0.9).
 - fixCov: A matrix (vector) of fixed covariates in the model (i.e., covariates for estimating cell-state abundance). The default value is NULL.

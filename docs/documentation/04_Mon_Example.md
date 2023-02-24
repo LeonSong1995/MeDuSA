@@ -84,20 +84,20 @@ The results are stored in MeDuSA_obj@Estimation.
 ### 2. How to Select Marker Genes
 MeDuSA offers users the flexibility to input their own cultivated marker genes. In addition, MeDuSA provides two methods for selecting marker genes that are representative of the cell-state trajectory.
 
-- wilcox test: MeDuSA divides the cells in the trajectory into a specified number of bins and applies the wilcox test, which is implemented in the `Seurat::FindMarkers` function, to each bin. The wilcox test is used to compare gene expression levels between the cells in the current bin and all other cells in the trajectory. Genes with significant differential expression are identified as marker genes for that particular bin. By performing the wilcox test for each gene at every bin along the cell-state trajectory, MeduSA can identify marker genes that are specific to each stage of the trajectory.
+- wilcox test: MeDuSA divides the cells in the trajectory into a specified number of bins and applies the Wilcoxon rank sum test, which is implemented in the `Seurat::FindMarkers` function, to each bin. The wilcox test is used to compare gene expression levels between the cells in the current bin and all other cells in the trajectory. Genes with significant differential expression are identified as marker genes for that particular bin. By performing the wilcox test for each gene at every bin along the cell-state trajectory, MeduSA can identify marker genes that are specific to each stage of the trajectory.
 
-- gam-wald test: MeduSA uses the generalized additive model (gam) to associate genes along the cell-state trajectory, and considers only genes with an FDR-adjusted p-value less than 0.01. These significant genes are ranked based on their association strength, allowing for the identification of the most relevant genes that are associated with the cell-state trajectory. To prevent certain cell-states from being overrepresented, MeduSA divides the cell-state trajectory into a specified number of intervals and assigns each gene to the interval in which it has the highest mean expression. For each interval, a set of top informative genes is selected as signature genes.
+- gam-wald test: MeduSA uses the generalized additive model (GAM) to associate genes along the cell-state trajectory, and considers only genes with an FDR-adjusted p-value less than 0.01. These significant genes are ranked based on their association strength, allowing for the identification of the most relevant genes that are associated with the cell-state trajectory. To prevent certain cell-states from being overrepresented, MeduSA divides the cell-state trajectory into a specified number of intervals and assigns each gene to the interval in which it has the highest mean expression. For each interval, a set of top informative genes is selected as signature genes.
 
 Users can specify the `method` in the `MeDuSA` function as either `wilcox` or `gam` to utilize these two methods. Alternatively, users can select the marker genes using the `MeDuSA_marker` function before running the deconvolution analysis. 
 
 ```r
 ##Set the gene selection method in MeDuSA function 
 library(MeDuSA)
-#wilcox
+#The Wilcoxon rank sum test
 MeDuSA_obj = MeDuSA(bulk,sce,
 		    select.ct = 'mon',markerGene = NULL,span = 0.35,method = "wilcox",
 		    resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	
-#gam-wald
+#The GAM-Wald
 MeDuSA_obj = MeDuSA(bulk,sce,
 		    select.ct = 'mon',markerGene = NULL,span = 0.35,method = "gam",
 		    resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)
@@ -115,7 +115,7 @@ To address the possibility of confounding factors arising from other cell types,
 We recommend that users build the covariates matrix before running the deconvolution analysis, as this can help to save memory during the analysis. 
 
 ```r
-#1.1 load the data
+#1.1 Load the data
 sce_otherCT = readRDS("../Monocytes_OtherCell.rds")
 cov_otherCT = Seurat::AverageExpression(object = sce_otherCT,group.by = 'cell_type',assays ='RNA',slot='counts')$RNA
 remove(sce_otherCT)
@@ -129,7 +129,7 @@ MeDuSA_obj = MeDuSA(bulk,sce,fixCov = cov_otherCT,
 Alternatively, users can also choose to merge the data of the focal cell-type and other cell-types into a single Seurat object.
 
 ```r
-#2.1 load the data
+#2.1 Load the data
 sce_otherCT = readRDS("../Monocytes_OtherCell.rds")
 sce_big = merge(sce,sce_otherCT)
 cell_type = c(sce$cell_type,sce_otherCT$cell_type)
@@ -189,13 +189,13 @@ In this section, we will walk through the steps involved in preparing the refere
 We will download the raw data from the GEO database and subsequently rename them based on their respective sample names
 ```bash
 #!/bin/bash
-##1) download the data from the GEO database
+##1) Download the data from the GEO database
 mkdir JCI
 cd JCI
 wget https://ftp.ncbi.nlm.nih.gov/geo/series/GSE120nnn/GSE120221/suppl/GSE120221_RAW.tar
 tar -xvf GSE120221_RAW.tar
 
-##2) rename the data based on sample id 
+##2) Rename the data based on sample id 
 ls *mtx.gz | while read file
 do
   id=$(echo $file | cut -d "_" -f 3 | cut -d "." -f 1)
@@ -212,18 +212,18 @@ We will use [DoubletFinder](https://github.com/chris-mcginnis-ucsf/DoubletFinder
 library(Seurat)
 library(DoubletFinder)
 
-##1) read the data and do quality control
+##1) Read the data and do quality control
 setwd("../JCI")
 file = list.files()
 for(id in file){
 	print(id)
-	#read the data
+	#Read the data
 	path = paste0("../JCI/",id)
 	data = Read10X(data.dir = path)
 	data = CreateSeuratObject(counts = data,min.cells = 3, min.features = 200)
 	data[["percent.mt"]] = PercentageFeatureSet(data, pattern = "^MT-")
 	
-	#standard process
+	#Standard process
 	data = NormalizeData(data)
 	data = FindVariableFeatures(data, selection.method = "vst", nfeatures = 2000)
 	data = ScaleData(data)
@@ -232,7 +232,7 @@ for(id in file){
 	data = FindNeighbors(data, reduction = "pca", dims = 1:15)
 	data = FindClusters(data)
 	
-	#define the doublet rate (follow the possible doublet rate provided by 10x)
+	#Define the doublet rate (follow the possible doublet rate provided by 10x)
 	ncell = ncol(data)
 	if(ncell<500){dbrate = 0.4/100}
 	if(ncell>=500 && ncell<1000){dbrate = 0.4/100}
@@ -247,18 +247,18 @@ for(id in file){
 	if(ncell>=9000 && ncell<10000){dbrate = 6.9/100}
 	if(ncell>=10000){dbrate = 7.6/100}
 
-	#remove doublet
+	#Remove doublet
 	homotypic.prop = DoubletFinder::modelHomotypic(Idents(data))  
 	nExp_poi = round(dbrate*ncell) 
 	nExp_poi.adj = round(nExp_poi*(1-homotypic.prop))
 	data = DoubletFinder::doubletFinder_v3(data, PCs = 1:10, pN = 0.25, pK = 0.09, nExp = nExp_poi, reuse.pANN = FALSE, sct = FALSE)
 	
-	#save the data
+	#Save the data
 	out = paste(path,paste0(id,'.rds'),sep='/')
 	saveRDS(data,out)		
 }
 
-##2) merge the data
+##2) Merge the data
 setwd("../JCI")
 file = list.files()
 data = sapply(file,function(id){
@@ -290,7 +290,7 @@ BlackGene = read.csv('../Gene_BlackList.csv',fill=T)
 BM = readRDS('../Human_BoneMarrow_JCI_Insight.rds')
 BM$sample[which(BM$sample=='C1')]='C'
 
-#construct the confounding score
+#Construct the confounding score
 mt_gene = intersect(unique(BlackGene[,'Mitochondria']),rownames(BM))
 hsp_gene = intersect(unique(BlackGene[,'Heat.shock.protein']),rownames(BM))
 rib_gene = intersect(unique(BlackGene[,'Ribosome']),rownames(BM))
@@ -301,7 +301,7 @@ BM = AddModuleScore(BM,features=list(hsp_gene),name = 'hsp_score',nbin=10)
 BM = AddModuleScore(BM,features=list(rib_gene),name = 'rib_score',nbin=10)
 BM = AddModuleScore(BM,features=list(disso_gene),name = 'disso_score',nbin=10)
 
-#regress out the confounding score
+#Regress out the confounding score
 out = c('mt_score1','hsp_score1','rib_score1','disso_score1')
 BM = BM[!rownames(BM) %in% noisy_gene,]
 BM = NormalizeData(BM) %>% 
@@ -314,7 +314,7 @@ BM = NormalizeData(BM) %>%
 
 mk_gene = c('HBD','AVP','CD3E','CD3G','CD3D','CD79B','CD79A','NKG7','GATA1','SPI1','CD4','CD8A','FOXP3','CCR7','CD74','TMSB10')
 
-#check the expression level of marker genes
+#Check the expression level of marker genes
 figure.dim = DimPlot(BM,pt.size=0.05,label=T,label.size = 6,repel = TRUE)+ 
                theme(legend.position='none') +
                ggtitle(NULL) +
@@ -324,7 +324,7 @@ p = FeaturePlot(BM,features = mk_gene,combine = FALSE)
 for(i in 1:length(p)) {p[[i]] = p[[i]] + NoLegend() + NoAxes()}
 figure.feature  = cowplot::plot_grid(plotlist = p,ncol = 4)
 
-#annotate cell types
+#Annotate cell types
 HSPC = c('21')
 HSPCtoMon = c('22','23','26','30','1','16')
 ct = as.vector(Idents(BM))
@@ -332,7 +332,7 @@ ct[ct %in% HSPC] = 'HSPC'
 ct[ct %in% HSPCtoMon] = 'HSPCtoMon'
 BM$ct = ct
 
-#splict the data based on cell types and save the data. 
+#Splict the data based on cell types and save the data. 
 Mon = BM[,BM$ct %in% c('HSPC','HSPCtoMon')]
 OtherCell = BM[,BM$ct %in% setdiff(cell_type_annotated,c('HSPC','HSPCtoMon'))]
 saveRDS(Mon,'../Mon.rds')
@@ -349,10 +349,10 @@ library(dplyr)
 library(slingshot)
 library(ggplot2)
 
-#load the data
+#Load the data
 Mon = readRDS('../Mon.rds')
 
-#regress out the confounding factors and use the SCT transformation. 
+#Regress out the confounding factors and use the SCT transformation. 
 confounding = c("mt_score1","hsp_score1","rib_score1","disso_score1","nCount_RNA","sample")
 Mon = NormalizeData(Mon) %>%
       SCTransform(vars.to.regress = confounding,return.only.var.genes = T) %>%
@@ -361,12 +361,12 @@ Mon = NormalizeData(Mon) %>%
       FindNeighbors(Mon, reduction = "pca", dims = 1:15)  %>%
       FindClusters(Mon,resolution = 2)
 	
-#remove clusters that are not connect to the main trajectory.    
+#Remove clusters that are not connect to the main trajectory.    
 sce = Mon[,!Idents(Mon) %in% c('18','12','27','2','25')]
 FeaturePlot(Mon,features=c('CD34','FGL2'))
 remove(Mon)
 
-#annotate cell trajectory using the slingshot
+#Annotate cell trajectory using the slingshot
 umap = as.data.frame(Embeddings(sce,'umap'))
 umap$ct = as.vector(Idents(Mon))
 sds = getLineages(umap[,1:2], umap$ct, start.clus = '21')
@@ -375,11 +375,11 @@ path = as.data.frame(sds@metadata$curves$Lineage1$s)
 pseudo_time = sds@metadata$curves$Lineage1$lambda
 pseudo_time = pseudo_time/max(pseudo_time)
 
-#add the cell-type and cell-state trajectory into the meta data. 
+#Add the cell-type and cell-state trajectory into the meta data. 
 sce$cell_type = 'mon'
 sce$cell_trajectory = pseudo_time[colnames(sce)]
 
-#visualize the cell-state trajectory
+#Visualize the cell-state trajectory
 colors = c("#9e0142", "#d53e4f", "#f46d43", "#fdae61", "#fee08b", "#ffffbf", "#e6f598", "#abdda4", "#66c2a5", "#3288bd", "#5e4fa2")
 colors = colors[seq(length(colors),1,-1)]
 p1 = ggplot(umap,aes(x=UMAP_1,y=UMAP_2))+
@@ -394,7 +394,7 @@ p1 = ggplot(umap,aes(x=UMAP_1,y=UMAP_2))+
   scale_color_gradientn(colours = colors,name='Pseudotime',labels = scales::number_format(accuracy = 0.1))
 p1
 
-#save the reference scRNA-seq data
+#Save the reference scRNA-seq data
 saveRDS(sce,'../Monocytes_sce.rds')
 ```
 Here is an example output: 
@@ -408,14 +408,14 @@ To begin with, it is necessary to quantify the cell-state abundance of each samp
 bulk = readRDS("../Monocytes_bulk.rds")
 sce = readRDS("./Monocytes_sce.rds")
 
-#extract pseudo time data
+#Extract pseudo time data
 pseudotime = sce$cell_trajectory
 #define bins based on pseudo time values
 bin = paste0('bin', cut(pseudotime, 50))
 breaks = sort(aggregate(pseudotime, by = list(bin), FUN = min)[,-1])
 breaks[1] = -Inf; breaks = c(breaks, Inf)
 
-#measure the abundance for each sample
+#Measure the abundance for each sample
 abundance_expect = sapply(unique(sce$sample),function(id){
   pseudotime_temp = sort(pseudotime[which(sce$sample == id)])
   #count the cell number for each cell-state bin
@@ -428,7 +428,7 @@ abundance_expect = sapply(unique(sce$sample),function(id){
   return(abundance_temp)
 })
 
-#subset the columns of the data frame to match the bulk data
+#Subset the columns of the data frame to match the bulk data
 abundance_expect = abundance_expect[, colnames(abundance_expect) %in% colnames(bulk)]
 ```
 Next, we compare the estimated cell-state abundance obtained from bulk data to that measured from scRNA-seq data.

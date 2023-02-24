@@ -14,6 +14,7 @@ If you have any questions about MeDuSA, please feel free to leave messages on th
 Our group
 -------------------
 [Yang lab website](https://yanglab.westlake.edu.cn/)
+![Example_Pie](YangLab.png)
 
 
 Parameters of `MeDuSA`

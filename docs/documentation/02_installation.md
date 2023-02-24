@@ -21,12 +21,13 @@ BiocManager::install("BiocParallel")
 ```r
 devtools::install_github("LeonSong1995/MeDuSA", build_vignettes=F)
 ```
+
 #### 3. Loading package
 ```r
 library(MeDuSA)
 ```
 
-This package is supported for Windows 10, MAC and Linux. The package has been tested on the following systems:
-- Windows 10: Home (1903)
-- MAC: OSX (11.2)
-- Linux: CentOS-8
+#### 4. Documentations
+```r
+help(MeDuSA)
+```

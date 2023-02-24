@@ -4,16 +4,17 @@ title: Installation
 description: ~
 ---
 
-`CARD` is implemented as an R package, which can be installed from GitHub by:
+`MeDuSA` is implemented as an R package, which can be installed from GitHub by:
 
 ### Dependencies 
-* R version >= 4.0.0.
-* R packages: SingleCellExperiment, SummarizedExperiment, concaveman, sp, Matrix, methods, ggplot2, ggcorrplot, MuSiC, fields, MCMCpack, dplyr, sf, RANN, stats, reshape2, RColorBrewe, scatterpie, grDevices, stats, nnls, pbmcapply, spatstat, gtools, RcppML, NMF
+* R version >= 3.5.0
+* R packages: Rcpp, foreach, Seurat,doSNOW,mgcv,RcppEigen,parallel,stats,BiocParallel
 
-
-#### 1. Install `devtools` if necessary
+#### 1. Install Depedent pacakgages if necessary
 ```r
-install.packages('devtools')
+install.packages("devtools")
+install.packages("Seurat")
+BiocManager::install("BiocParallel")
 ```
 
 #### 2. Install `MeDuSA`
@@ -27,5 +28,5 @@ library(MeDuSA)
 
 This package is supported for Windows 10, MAC and Linux. The package has been tested on the following systems:
 - Windows 10: Home (1903)
-- MAC: OSX (10.14.1)
-- Linux: Ubuntu (16.04.6)
+- MAC: OSX (11.2)
+- Linux: CentOS-8

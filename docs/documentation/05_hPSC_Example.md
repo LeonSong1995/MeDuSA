@@ -78,7 +78,7 @@ This section provides an introduction to the basic usage of MeDuSA.
 - fractional: A boolean variable to determine whether to normalize the estimated cell-state abundance to the fractional abundance (0-1).
 - ncpu: The number of CPU cores to be used. 
 
-For further details about the parameters, please refer to this [link](https://github.com/LeonSong1995/MeDuSA).
+For further details about the parameters, please refer to this [link](https://leonsong1995.github.io/MeDuSA/documentation/01_About.html).
 ```r
 MeDuSA_obj = MeDuSA(bulk,sce,
                   select.ct = 'hPSC',markerGene = NULL,span = 0.35,

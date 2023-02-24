@@ -18,7 +18,7 @@ Detailed information regarding the input data is provided as follows.
 
 ### 1. Bulk RNA-seq Data
 ```r
-#### Load the example bulk RNA-seq data, 
+# Load the example bulk RNA-seq data, 
 bulk = readRDS("../Monocytes_bulk.rds")
 class(bulk)
 "matrix" "array" 
@@ -27,7 +27,7 @@ The bulk RNA-seq data is represented in a matrix format, where each row correspo
 
 ### 2. Reference scRNA-seq Data
 ```r
-#### Load the example scRNA-seq data, 
+# Load the example scRNA-seq data, 
 sce = readRDS("./Monocytes_sce.rds")
 class(sce)
 [1] "Seurat"
@@ -54,7 +54,7 @@ For compatibility with MeDuSA, the reference scRNA-seq data must be in the Seura
 ```r
 library(MeDuSA)
 
-#Documentations
+# Documentations
 help(MeDuSA)
 ``` 
 ### 1. Basic Usage of MeDuSA
@@ -91,22 +91,22 @@ MeDuSA offers users the flexibility to input their own cultivated marker genes. 
 Users can specify the `method` in the `MeDuSA` function as either `wilcox` or `gam` to utilize these two methods. Alternatively, users can select the marker genes using the `MeDuSA_marker` function before running the deconvolution analysis. 
 
 ```r
-##Set the gene selection method in MeDuSA function 
+# Set the gene selection method in MeDuSA function 
 library(MeDuSA)
-#The Wilcoxon rank sum test
+# The Wilcoxon rank sum test
 MeDuSA_obj = MeDuSA(bulk,sce,
 		    select.ct = 'mon',markerGene = NULL,span = 0.35,method = "wilcox",
 		    resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	
-#The GAM-Wald
+# The GAM-Wald
 MeDuSA_obj = MeDuSA(bulk,sce,
 		    select.ct = 'mon',markerGene = NULL,span = 0.35,method = "gam",
 		    resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)
 		    
-##Select marker genes using MeDuSA_marker before running deconvolution analysis
+# Select marker genes using MeDuSA_marker before running deconvolution analysis
 marker = MeDuSA_marker(sce[,which(sce$cell_type=='mon')],bulk,
                                GeneNumber = 200,nbins = 10,
                                family ="gaussian",k = 10,ncpu = 4,method = "wilcox")
-##Documentations			       
+# Documentations			       
 help(MeDuSA_marker)			       
 ```
 ### 3. How to Include Other Cell Types as Covariates
@@ -115,12 +115,12 @@ To address the possibility of confounding factors arising from other cell types,
 We recommend that users build the covariates matrix before running the deconvolution analysis, as this can help to save memory during the analysis. 
 
 ```r
-#1.1 Load the data
+# 1.1 Load the data
 sce_otherCT = readRDS("../Monocytes_OtherCell.rds")
 cov_otherCT = Seurat::AverageExpression(object = sce_otherCT,group.by = 'cell_type',assays ='RNA',slot='counts')$RNA
 remove(sce_otherCT)
 
-#1.2 To input the covariates matrix into MeDuSA, users can specify the parameter of fixCov. 
+# 1.2 To input the covariates matrix into MeDuSA, users can specify the parameter of fixCov. 
 MeDuSA_obj = MeDuSA(bulk,sce,fixCov = cov_otherCT,
 		    select.ct = 'mon',markerGene = NULL,span = 0.35,method = "wilcox",
 		    resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	
@@ -129,14 +129,14 @@ MeDuSA_obj = MeDuSA(bulk,sce,fixCov = cov_otherCT,
 Alternatively, users can also choose to merge the data of the focal cell-type and other cell-types into a single Seurat object.
 
 ```r
-#2.1 Load the data
+# 2.1 Load the data
 sce_otherCT = readRDS("../Monocytes_OtherCell.rds")
 sce_big = merge(sce,sce_otherCT)
 cell_type = c(sce$cell_type,sce_otherCT$cell_type)
 sce_big$cell_type = cell_type[colnames(sce_big)]
 remove(sce_otherCT); remove(sce)
 
-#2.2 MeDuSA will automatically construct the covariates matrix based on the cell-type labels stored in sce_big$cell_type.
+# 2.2 MeDuSA will automatically construct the covariates matrix based on the cell-type labels stored in sce_big$cell_type.
 MeDuSA_obj = MeDuSA(bulk,sce = sce_big,
 		    select.ct = 'mon',markerGene = NULL,span = 0.35,method = "wilcox",
 		    resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	
@@ -145,12 +145,12 @@ MeDuSA_obj = MeDuSA(bulk,sce = sce_big,
 ### 4. How to Use the Mode of Conditional Autoregressive (CAR)
 In many LMM applications, random effects are assumed to be independent and identically distributed. However, the abundances of cells at adjacent states are likely to be correlated. MeDuSA incorporates the CAR model in the LMM to accommodate such correlations. Users can set the parameter of `CAR` as TRUE to use the CAR mode. Further, MeDuSA provides users with the ability to set the range of possible correlation strengths through the `phi` parameter.  Based on this range, MeDuSA then automatically searches for the optimal correlation strength that maximizes the likelihood function. 
 ```R
-#The default phi is c(0.2,0.4,0.6,0.9)
+# The default phi is c(0.2,0.4,0.6,0.9)
 MeDuSA_obj = MeDuSA(bulk,sce, CAR = TRUE,
                    select.ct = 'mon',markerGene = NULL,span = 0.35,
 		   resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	
 
-#Change the parameter space of phi
+# Change the parameter space of phi
 phi = c(0,0.1,0.99)
 MeDuSA_obj = MeDuSA(bulk,sce, CAR = TRUE, phi = phi,
                    select.ct = 'mon',markerGene = NULL,span = 0.35,
@@ -161,7 +161,7 @@ It is important to note that when using the CAR mode, the computational speed ca
 ### 5. How to Normalize the Data
 Before running the deconvolution analysis, we recommend that users normalize the reference data and the bulk data to the same scale. It is important to note that MeDuSA <big>does not</big> perform any normalization for the input reference and bulk data due to the variety in data scale, which may include raw counts, counts per million (CPM), transcripts per million (TPM), fragments per kilobase of transcript per million (FPKM), or log-transformed data.  While MeDuSA is generally robust to different scales, the heterogeneity in data scale between the bulk and reference data may negatively impact the performance. Therefore, users must carefully check and perform the appropriate normalization of their data before running MeDuSA to ensure accurate and reliable results. For example, in this tutorial, we have normalized the data into CPM scale.
 ```r
-#To prevent exceeding the largest upper limit in R during REML iteration, we normalized the data to 1e+3 instead of 1e+6. 
+# To prevent exceeding the largest upper limit in R during REML iteration, we normalized the data to 1e+3 instead of 1e+6. 
 bulk = sweep(bulk,2,colSums(bulk),'/')*1000
 sce@assays$RNA@counts = sweep(sce@assays$RNA@counts,2,colSums(sce@assays$RNA@counts),'/')*1000
 ```
@@ -189,13 +189,13 @@ In this section, we will walk through the steps involved in preparing the refere
 We will download the raw data from the GEO database and subsequently rename them based on their respective sample names
 ```bash
 #!/bin/bash
-##1) Download the data from the GEO database
+#1. Download the data from the GEO database
 mkdir JCI
 cd JCI
 wget https://ftp.ncbi.nlm.nih.gov/geo/series/GSE120nnn/GSE120221/suppl/GSE120221_RAW.tar
 tar -xvf GSE120221_RAW.tar
 
-##2) Rename the data based on sample id 
+#2. Rename the data based on sample id 
 ls *mtx.gz | while read file
 do
   id=$(echo $file | cut -d "_" -f 3 | cut -d "." -f 1)
@@ -212,18 +212,18 @@ We will use [DoubletFinder](https://github.com/chris-mcginnis-ucsf/DoubletFinder
 library(Seurat)
 library(DoubletFinder)
 
-##1) Read the data and do quality control
+#1. Read the data and do quality control
 setwd("../JCI")
 file = list.files()
 for(id in file){
 	print(id)
-	#Read the data
+# Read the data
 	path = paste0("../JCI/",id)
 	data = Read10X(data.dir = path)
 	data = CreateSeuratObject(counts = data,min.cells = 3, min.features = 200)
 	data[["percent.mt"]] = PercentageFeatureSet(data, pattern = "^MT-")
 	
-	#Standard process
+# Standard process
 	data = NormalizeData(data)
 	data = FindVariableFeatures(data, selection.method = "vst", nfeatures = 2000)
 	data = ScaleData(data)
@@ -232,7 +232,7 @@ for(id in file){
 	data = FindNeighbors(data, reduction = "pca", dims = 1:15)
 	data = FindClusters(data)
 	
-	#Define the doublet rate (follow the possible doublet rate provided by 10x)
+# Define the doublet rate (follow the possible doublet rate provided by 10x)
 	ncell = ncol(data)
 	if(ncell<500){dbrate = 0.4/100}
 	if(ncell>=500 && ncell<1000){dbrate = 0.4/100}
@@ -247,18 +247,18 @@ for(id in file){
 	if(ncell>=9000 && ncell<10000){dbrate = 6.9/100}
 	if(ncell>=10000){dbrate = 7.6/100}
 
-	#Remove doublet
+# Remove doublet
 	homotypic.prop = DoubletFinder::modelHomotypic(Idents(data))  
 	nExp_poi = round(dbrate*ncell) 
 	nExp_poi.adj = round(nExp_poi*(1-homotypic.prop))
 	data = DoubletFinder::doubletFinder_v3(data, PCs = 1:10, pN = 0.25, pK = 0.09, nExp = nExp_poi, reuse.pANN = FALSE, sct = FALSE)
 	
-	#Save the data
+# Save the data
 	out = paste(path,paste0(id,'.rds'),sep='/')
 	saveRDS(data,out)		
 }
 
-##2) Merge the data
+#2. Merge the data
 setwd("../JCI")
 file = list.files()
 data = sapply(file,function(id){
@@ -286,11 +286,12 @@ library(DoubletFinder)
 library(dplyr)
 library(ggplot2)
 
+# Load the data
 BlackGene = read.csv('../Gene_BlackList.csv',fill=T)
 BM = readRDS('../Human_BoneMarrow_JCI_Insight.rds')
 BM$sample[which(BM$sample=='C1')]='C'
 
-#Construct the confounding score
+# Construct the confounding score
 mt_gene = intersect(unique(BlackGene[,'Mitochondria']),rownames(BM))
 hsp_gene = intersect(unique(BlackGene[,'Heat.shock.protein']),rownames(BM))
 rib_gene = intersect(unique(BlackGene[,'Ribosome']),rownames(BM))
@@ -301,7 +302,7 @@ BM = AddModuleScore(BM,features=list(hsp_gene),name = 'hsp_score',nbin=10)
 BM = AddModuleScore(BM,features=list(rib_gene),name = 'rib_score',nbin=10)
 BM = AddModuleScore(BM,features=list(disso_gene),name = 'disso_score',nbin=10)
 
-#Regress out the confounding score
+# Regress out the confounding score
 out = c('mt_score1','hsp_score1','rib_score1','disso_score1')
 BM = BM[!rownames(BM) %in% noisy_gene,]
 BM = NormalizeData(BM) %>% 
@@ -314,7 +315,7 @@ BM = NormalizeData(BM) %>%
 
 mk_gene = c('HBD','AVP','CD3E','CD3G','CD3D','CD79B','CD79A','NKG7','GATA1','SPI1','CD4','CD8A','FOXP3','CCR7','CD74','TMSB10')
 
-#Check the expression level of marker genes
+# Check the expression level of marker genes
 figure.dim = DimPlot(BM,pt.size=0.05,label=T,label.size = 6,repel = TRUE)+ 
                theme(legend.position='none') +
                ggtitle(NULL) +
@@ -324,7 +325,7 @@ p = FeaturePlot(BM,features = mk_gene,combine = FALSE)
 for(i in 1:length(p)) {p[[i]] = p[[i]] + NoLegend() + NoAxes()}
 figure.feature  = cowplot::plot_grid(plotlist = p,ncol = 4)
 
-#Annotate cell types
+# Annotate cell types
 HSPC = c('21')
 HSPCtoMon = c('22','23','26','30','1','16')
 ct = as.vector(Idents(BM))
@@ -332,7 +333,7 @@ ct[ct %in% HSPC] = 'HSPC'
 ct[ct %in% HSPCtoMon] = 'HSPCtoMon'
 BM$ct = ct
 
-#Splict the data based on cell types and save the data. 
+# Splict the data based on cell types and save the data. 
 Mon = BM[,BM$ct %in% c('HSPC','HSPCtoMon')]
 OtherCell = BM[,BM$ct %in% setdiff(cell_type_annotated,c('HSPC','HSPCtoMon'))]
 saveRDS(Mon,'../Mon.rds')
@@ -349,10 +350,10 @@ library(dplyr)
 library(slingshot)
 library(ggplot2)
 
-#Load the data
+# Load the data
 Mon = readRDS('../Mon.rds')
 
-#Regress out the confounding factors and use the SCT transformation. 
+# Regress out the confounding factors and use the SCT transformation. 
 confounding = c("mt_score1","hsp_score1","rib_score1","disso_score1","nCount_RNA","sample")
 Mon = NormalizeData(Mon) %>%
       SCTransform(vars.to.regress = confounding,return.only.var.genes = T) %>%
@@ -361,12 +362,12 @@ Mon = NormalizeData(Mon) %>%
       FindNeighbors(Mon, reduction = "pca", dims = 1:15)  %>%
       FindClusters(Mon,resolution = 2)
 	
-#Remove clusters that are not connect to the main trajectory.    
+# Remove clusters that are not connect to the main trajectory.    
 sce = Mon[,!Idents(Mon) %in% c('18','12','27','2','25')]
 FeaturePlot(Mon,features=c('CD34','FGL2'))
 remove(Mon)
 
-#Annotate cell trajectory using the slingshot
+# Annotate cell trajectory using the slingshot
 umap = as.data.frame(Embeddings(sce,'umap'))
 umap$ct = as.vector(Idents(Mon))
 sds = getLineages(umap[,1:2], umap$ct, start.clus = '21')
@@ -375,11 +376,11 @@ path = as.data.frame(sds@metadata$curves$Lineage1$s)
 pseudo_time = sds@metadata$curves$Lineage1$lambda
 pseudo_time = pseudo_time/max(pseudo_time)
 
-#Add the cell-type and cell-state trajectory into the meta data. 
+# Add the cell-type and cell-state trajectory into the meta data. 
 sce$cell_type = 'mon'
 sce$cell_trajectory = pseudo_time[colnames(sce)]
 
-#Visualize the cell-state trajectory
+# Visualize the cell-state trajectory
 colors = c("#9e0142", "#d53e4f", "#f46d43", "#fdae61", "#fee08b", "#ffffbf", "#e6f598", "#abdda4", "#66c2a5", "#3288bd", "#5e4fa2")
 colors = colors[seq(length(colors),1,-1)]
 p1 = ggplot(umap,aes(x=UMAP_1,y=UMAP_2))+
@@ -394,7 +395,7 @@ p1 = ggplot(umap,aes(x=UMAP_1,y=UMAP_2))+
   scale_color_gradientn(colours = colors,name='Pseudotime',labels = scales::number_format(accuracy = 0.1))
 p1
 
-#Save the reference scRNA-seq data
+# Save the reference scRNA-seq data
 saveRDS(sce,'../Monocytes_sce.rds')
 ```
 Here is an example output: 
@@ -408,14 +409,14 @@ To begin with, it is necessary to quantify the cell-state abundance of each samp
 bulk = readRDS("../Monocytes_bulk.rds")
 sce = readRDS("./Monocytes_sce.rds")
 
-#Extract pseudo time data
+# Extract pseudo time data
 pseudotime = sce$cell_trajectory
 #define bins based on pseudo time values
 bin = paste0('bin', cut(pseudotime, 50))
 breaks = sort(aggregate(pseudotime, by = list(bin), FUN = min)[,-1])
 breaks[1] = -Inf; breaks = c(breaks, Inf)
 
-#Measure the abundance for each sample
+# Measure the abundance for each sample
 abundance_expect = sapply(unique(sce$sample),function(id){
   pseudotime_temp = sort(pseudotime[which(sce$sample == id)])
   #count the cell number for each cell-state bin
@@ -428,7 +429,7 @@ abundance_expect = sapply(unique(sce$sample),function(id){
   return(abundance_temp)
 })
 
-#Subset the columns of the data frame to match the bulk data
+# Subset the columns of the data frame to match the bulk data
 abundance_expect = abundance_expect[, colnames(abundance_expect) %in% colnames(bulk)]
 ```
 Next, we compare the estimated cell-state abundance obtained from bulk data to that measured from scRNA-seq data.

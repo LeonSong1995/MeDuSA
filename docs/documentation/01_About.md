@@ -3,10 +3,23 @@ layout: page
 title: About
 ---
 
+Cite `MeDuSA`
+-------------------
+Liyang Song, Xiwei Sun, Ting Qi, Jian Yang
+
+Contact
+-------------------
+If you have any questions about MeDuSA, please feel free to leave messages on the github [issues](https://github.com/LeonSong1995/MeDuSA/issues) or contact me: songliyang@westlake.edu.cn.
+
+Our group
+-------------------
+[Yang lab website](https://yanglab.westlake.edu.cn/)
+
+
 Parameters of `MeDuSA`
 -------------------
 - bulk: A matrix of bulk RNA-seq data. Each row corresponds to a specific gene, and each column corresponds to a particular sample.
-- sce: A Seurat object of the reference scRNA-seq data. Meta-data of the seurat object (sce@meta.data) needs to include two columns named as cell_type and cell_trajectory.
+- sce: A `Seurat` object of the reference scRNA-seq data. Meta-data of the seurat object (sce@meta.data) needs to include two columns named as cell_type and cell_trajectory.
 - select.ct: A character variable of the target cell type.
 - ncpu: The number of CPU cores to be used.
 - smooth: A Boolean variable to determine whether to smooth the predicted cell-state abundance or not. The default value is TRUE.
@@ -27,15 +40,3 @@ Parameters of `MeDuSA`
 - span: A numeric variable to control the degree of smoothing for loess.
 - neighbor: A numeric variable to determine the number of neighboring cells used in smoothing (do not use when the smooth method is loess).
 - fractional: A Boolean variable to determine whether to normalize the estimated cell-state abundance to the fractional abundance (0,1).
-
-Cite `MeDuSA`
--------------------
-Liyang Song, Xiwei Sun, Ting Qi, Jian Yang
-
-Contact
--------------------
-If you have any questions about MeDuSA, please feel free to leave messages on the github [issues](https://github.com/LeonSong1995/MeDuSA/issues) or contact me: songliyang@westlake.edu.cn.
-
-Our group
--------------------
-[Yang lab website](https://yanglab.westlake.edu.cn/)

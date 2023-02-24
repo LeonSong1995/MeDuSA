@@ -166,6 +166,7 @@ Please note that running WaveCrestENI is a time-consuming process, and it took u
 ## Compare the estimated cell-state abundance to the expected truth
 The dataset includes both bulk RNA-seq data and scRNA-seq data from the same cell lines. It is expected that the cell-state abundance along the trajectory would strongly correlate between the two types of data, despite potential variations in the sequenced specimens. To validate the MeDuSA method, we will compare the estimated cell-state abundance from the bulk data to that measured from the scRNA-seq data.
 
+### 1. Validate MeDuSA method
 To begin with, it is necessary to quantify the cell-state abundance of each sample in the scRNA-seq data.
 ```r
 bulk = readRDS("../hPSC_bulk.rds")
@@ -232,3 +233,44 @@ p2
 ```
 Here is an example output: 
 ![Example_Pie](hPSC_estimation.png)
+
+
+### 2. Detection of differences in cell-state abundance using MANOVA-Pro.
+We propose an approach called MANOVA-Pro that combines multiple analysis of variance (MANOVA) with polynomial regression to detect differences in cell-state abundance among groups (e.g. case group vs. control group). In this tutorial, we will employ `MANOVA-Pro` to quantify the differences in cell-state abundance at various cultivation times of hPSCs.
+
+The bulk data used in this tutorial was collected from three replicates. However, to increase the precision of our analysis, we took the average of the bulk data in the previous section. In the upcoming analysis, we will utilize the raw data instead of the averaged data to quantify the differences in cell-state abundance at various cultivation times of human pluripotent stem cells (hPSCs).
+```R
+library(data.table)
+#The bulk RNA-seq data
+bulk = fread('/Users/songliyang/Documents/MeDuSA_new/revision/embry/GSE75748_bulk_time_course_ec.csv.gz')
+bulk = as.data.frame(bulk)
+rownames(bulk) = bulk[,1]
+bulk = bulk[,-1]
+#The averaged bulk data used above
+bulk_time = data.frame("H9.12h" = rowMeans(bulk[,grep('12h',colnames(bulk))]),
+                  	"H9.24h"= rowMeans(bulk[,grep('24h',colnames(bulk))]),
+                  	"H9.36h"= rowMeans(bulk[,grep('36h',colnames(bulk))]),
+                 	"H9.72h" = rowMeans(bulk[,grep('72h',colnames(bulk))]),
+                  	"H9.96h" = rowMeans(bulk[,grep('96h',colnames(bulk))]))
+#The raw bulk data
+bulk_all = bulk			
+```
+Next, we will use the `MANOVA-Pro` to quantify the differences in cell-state abundance at various cultivation times of hPSCs.
+```R
+MeDuSA_obj = MeDuSA(bulk_all,sce,select.ct='embry',resolution=50,fixCov=NULL,adj=TRUE,
+                       markerGene=NULL,nbins=10,knots=10,method="wilcox",family='gaussian',GeneNumber=200,
+                       CAR=FALSE,phi=c(0.2,0.4,0.6,0.9),
+                       ncpu=4,start=c(1e-5,1e-2),maxiter=1e+4,
+                       smooth=TRUE,smoothMethod='loess',span=0.35,neighbor=5,fractional=TRUE)
+
+#get the cultivation_stage
+cultivation_stage = sapply(colnames(bulk_all),function(i){
+  paste(strsplit(i,split = '_')[[1]][1:2],collapse ="_")
+})
+
+#run MANOVA-Pro
+MANOVA_Pro(MeDuSA_obj,degree = 2,condition = cultivation_stage)
+
+          Df       Pillai     approx F       num Df       den Df       Pr(>F) 
+4.000000e+00 2.071109e+00 5.574141e+00 1.200000e+01 3.000000e+01 6.478946e-05
+```

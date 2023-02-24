@@ -22,7 +22,7 @@ BiocManager::install("BiocParallel")
 devtools::install_github("LeonSong1995/MeDuSA", build_vignettes=F)
 ```
 
-#### 3. Loading package
+#### 3. Loading Package
 ```r
 library(MeDuSA)
 ```

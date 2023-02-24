@@ -211,6 +211,7 @@ We will use [DoubletFinder](https://github.com/chris-mcginnis-ucsf/DoubletFinder
 ```R
 library(Seurat)
 library(DoubletFinder)
+library(dplyr)
 
 #1. Read the data and do quality control
 setwd("../JCI")
@@ -224,13 +225,13 @@ for(id in file){
 	data[["percent.mt"]] = PercentageFeatureSet(data, pattern = "^MT-")
 	
 # Standard process
-	data = NormalizeData(data)
-	data = FindVariableFeatures(data, selection.method = "vst", nfeatures = 2000)
-	data = ScaleData(data)
-	data = RunPCA(data)
-	data = RunUMAP(data, dims = 1:15)
-	data = FindNeighbors(data, reduction = "pca", dims = 1:15)
-	data = FindClusters(data)
+	data = NormalizeData(data) %>%
+	       FindVariableFeatures(selection.method = "vst", nfeatures = 2000) %>%
+	       ScaleData() %>%
+	       RunPCA() %>%
+	       RunUMAP(dims = 1:15) %>%
+	       FindNeighbors(reduction = "pca", dims = 1:15) %>%
+	       FindClusters() %>%
 	
 # Define the doublet rate (follow the possible doublet rate provided by 10x)
 	ncell = ncol(data)
@@ -289,6 +290,8 @@ library(ggplot2)
 # Load the data
 BlackGene = read.csv('../Gene_BlackList.csv',fill=T)
 BM = readRDS('../Human_BoneMarrow_JCI_Insight.rds')
+
+# Rename the sample C1 as C
 BM$sample[which(BM$sample=='C1')]='C'
 
 # Construct the confounding score

@@ -21,7 +21,7 @@ Prior to running the analysis, it is important to ensure that the MeDuSA package
 
 For how to prepare the cell-state trajectory data, please read the section of `Preparing Reference Data` in this tutorial. 
 
-The input data required for running this tutorial can be downloaded from the following [link](https://github.com/LeonSong1995/MeDuSA). 
+The input data required for running this tutorial can be downloaded from the following [link](https://yanglab.westlake.edu.cn/data/MeDuSA_data/hPSC.tar). 
 Detailed information regarding the input data is provided as follows.
 
 ### 1. Bulk RNA-seq Data
@@ -160,7 +160,7 @@ p1
 Here is an example output: 
 ![Example_Pie](hPSC_pseudotime.png)
 
-Please note that running WaveCrestENI is a time-consuming process, and it took us 28 hours to complete the estimation. For the convenience of users, we have provided the processed scRNA-seq data with the estimated differentiation pseudo-time at the following [link](https://github.com/LeonSong1995/MeDuSA).  
+Please note that running WaveCrestENI is a time-consuming process, and it took us 28 hours to complete the estimation. For the convenience of users, we have provided the processed scRNA-seq data with the estimated differentiation pseudo-time at the following [link](https://yanglab.westlake.edu.cn/data/MeDuSA_data/hPSC.tar).  
 
 
 ## Comparison of Estimated Cell-State Abundance to Expected Truth

@@ -257,13 +257,12 @@ bulk_all = bulk
 ```
 Next, we will use the `MANOVA-Pro` to quantify the differences in cell-state abundance at various cultivation times of hPSCs.
 ```R
-MeDuSA_obj = MeDuSA(bulk_all,sce,select.ct='embry',resolution=50,fixCov=NULL,adj=TRUE,
-                       markerGene=NULL,nbins=10,knots=10,method="wilcox",family='gaussian',GeneNumber=200,
-                       CAR=FALSE,phi=c(0.2,0.4,0.6,0.9),
-                       ncpu=4,start=c(1e-5,1e-2),maxiter=1e+4,
-                       smooth=TRUE,smoothMethod='loess',span=0.35,neighbor=5,fractional=TRUE)
-
-#get the cultivation_stage
+#run MeDuSA for all samples
+MeDuSA_obj = MeDuSA(bulk,sce,
+                  select.ct = 'hPSC',markerGene = NULL,span = 0.35,
+		  resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)
+		  
+#get the cultivation stage for ecah sample
 cultivation_stage = sapply(colnames(bulk_all),function(i){
   paste(strsplit(i,split = '_')[[1]][1:2],collapse ="_")
 })

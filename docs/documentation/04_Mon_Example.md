@@ -18,7 +18,7 @@ Detailed information regarding the input data is provided as follows.
 
 ### 1. Bulk RNA-seq Data
 ```r
-# Load the example bulk RNA-seq data, 
+# Load the example bulk RNA-seq data
 bulk = readRDS("../Monocytes_bulk.rds")
 class(bulk)
 "matrix" "array" 
@@ -27,7 +27,7 @@ The bulk RNA-seq data is represented in a matrix format, where each row correspo
 
 ### 2. Reference scRNA-seq Data
 ```r
-# Load the example scRNA-seq data, 
+# Load the example scRNA-seq data
 sce = readRDS("./Monocytes_sce.rds")
 class(sce)
 [1] "Seurat"

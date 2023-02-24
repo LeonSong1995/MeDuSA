@@ -11,7 +11,7 @@ In this tutorial, we will use a dataset obtained from the hPSC cell line, which 
 
 For a more comprehensive tutorial on using data from real tissue that consists of multiple cell types, please visit the following [link](https://leonsong1995.github.io/MeDuSA/documentation/04_Mon_Example.html). This tutorial provides a detailed discussion on several important aspects, including how to select marker genes, how to incorporate other cell types as covariates, how to use the mode of conditional autoregressive (CAR), and how to normalize data.
 
-Prior to running the analysis, it is important to ensure that the MeDuSA package has been installed. For installation instructions, please refer to the following [link](https://github.com/LeonSong1995/MeDuSA).
+Prior to running the analysis, it is important to ensure that the MeDuSA package has been installed. For installation instructions, please refer to the following [link](https://leonsong1995.github.io/MeDuSA/documentation/02_installation.html).
 
 
 ## Input Data

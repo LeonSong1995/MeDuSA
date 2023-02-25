@@ -13,7 +13,7 @@ MeDuSA is a cellular deconvolution method that utilizes scRNA-seq data as a refe
 
 ### Installations: [here](https://leonsong1995.github.io/MeDuSA/documentation/02_installation.html)
 
-### Example analysis: [hPSCs](https://leonsong1995.github.io/MeDuSA/documentation/05_hPSC_Example.html)
-
-### Example analysis: [monocytes](https://leonsong1995.github.io/MeDuSA/documentation/04_Mon_Example.html)
+### Example analysis
+* [hPSCs](https://leonsong1995.github.io/MeDuSA/documentation/05_hPSC_Example.html)
+* [monocytes](https://leonsong1995.github.io/MeDuSA/documentation/04_Mon_Example.html)
 

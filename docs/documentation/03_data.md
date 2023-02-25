@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Data Input
+title: Data
 description: Link to download the example dataset
 ---
 The following are the links for the example dataset used in the MeDuSA tutorial. 

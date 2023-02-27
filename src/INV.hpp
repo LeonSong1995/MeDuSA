@@ -1,3 +1,9 @@
+//READEME
+//---------------------------------------------------------------------------------------------------
+//The function to compute the inverse of square matrix (defalut by LLT method)
+//---------------------------------------------------------------------------------------------------
+
+
 #include <Rcpp.h>
 #include <RcppEigen.h>
 #include <iostream>
@@ -10,7 +16,6 @@ enum INVmethod {
 	INV_SVD = 5,
 	INV_ERR = 100
 };
-
 
 
 template<typename MatrixType>
@@ -28,12 +33,6 @@ bool SquareMatrixInverse(MatrixType &A, double &logdet, int &rank, INVmethod &me
 			ret = true;
 			break;
 		}
-
-		/*if (_LLT(A, logdet)) {
-			method = INV_LLT;
-			ret = true;
-			break;
-		}*/
 	}
 	case INV_LU:
 	{

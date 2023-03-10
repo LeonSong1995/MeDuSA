@@ -7,7 +7,7 @@ description: ~
 This tutorial provides an illustrative analysis of the hPSC dataset from [Chu et al.](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1033-x) using MeDuSA. 
 
 
-In this tutorial, we will use a dataset obtained from the hPSC cell line, which was cultured for different durations, to estimate cell-state abundance along the hPSC differentiation trajectory in bulk RNA-seq data using MeDuSA. Furthermore, we will validate the performance of MeDuSA by comparing the estimated cell-state abundance with that measured from scRNA-seq data. Finally, we will employ the `MANOVA-Pro` method to identify any differences in cell-state abundance among the different cultured time points.
+In this tutorial, we will use a dataset obtained from the hPSC cell line, which was cultured for different durations, to estimate cell-state abundance along the hPSC differentiation trajectory in bulk RNA-seq data using MeDuSA. Furthermore, we will validate the performance of MeDuSA by comparing the estimated cell-state abundance with that measured from scRNA-seq data. 
 
 For a more comprehensive tutorial on using data from real tissue that consists of multiple cell types, please visit the following [link](https://leonsong1995.github.io/MeDuSA/documentation/04_Mon_Example.html). This tutorial provides a detailed discussion on several important aspects, including how to select marker genes, how to incorporate other cell types as covariates, how to use the mode of conditional autoregressive (CAR), and how to normalize data.
 
@@ -43,18 +43,18 @@ attr(,"package")
 [1] "SeuratObject"
 
 sce@assays$RNA@counts[1:3,1:3]
-     H9.00hb4s_001 H9.00hb4s_002 H9.00hb4s_003
-A1BG    0.003922580   .             0.001974782
-A1CF    0.001407226   0.001114947   .          
-A2LD1   .             .             .          
+      H1_Exp1.001 H1_Exp1.002 H1_Exp1.003
+MKL2  0.006680284 0.074591629 0.001734291
+CD109 0.004262021 0.001206358 0.096426585
+ABTB1 0.000000000 0.012892380 0.000000000       
 
 sce$cell_trajectory[1:3]
-H9.00hb4s_001 H9.00hb4s_002 H9.00hb4s_003 
-   0.09366755    0.02506596    0.02638522 
+H1_Exp1.001 H1_Exp1.002 H1_Exp1.003 
+  0.8623402   0.7571288   0.6784661
 		 
 sce$cell_type[1:3]
-H9.00hb4s_001 H9.00hb4s_002 H9.00hb4s_003 
-       "hPSC"        "hPSC"        "hPSC"
+H1_Exp1.001 H1_Exp1.002 H1_Exp1.003 
+     "hPSC"      "hPSC"      "hPSC"
 ```
 For compatibility with MeDuSA, the reference scRNA-seq data must be in the Seurat object format. Specifically, the reference data should be stored in `sce@assays$RNA@counts`, the cell-state trajectory in `sce$cell_trajectory`, and the cell-type in `sce$cell_type`. For more information about Seurat, please refer to the following [resource](https://satijalab.org/seurat/).
 
@@ -105,16 +105,16 @@ It is important to note that in real-world applications, users should annotate t
 - [Monocle3](https://cole-trapnell-lab.github.io/monocle3/)
 - [scVelo](https://github.com/theislab/scvelo)
 
-In this tutorial, we will follow the pipeline provided by the author of the dataset and use [WaveCrest](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-1033-x) to infer the differentiation trajectory of hPSCs.
+In this tutorial, we use the CytoTRACE to infer the differentiation trajectory of hPSCs.
 
 ### 1. Download Raw scRNA-seq Data
 We will download the raw data from the GEO database. 
 ```bash
 #the bulk RNA-seq data 
-wget https://ftp.ncbi.nlm.nih.gov/geo/series/GSE75nnn/GSE75748/suppl/GSE75748_bulk_time_course_ec.csv.gz
+wget https://ftp.ncbi.nlm.nih.gov/geo/series/GSE75nnn/GSE75748/suppl/GSE75748_bulk_cell_type_ec.csv.gz
 
 #the scRNA-seq data
-wget https://ftp.ncbi.nlm.nih.gov/geo/series/GSE75nnn/GSE75748/suppl/GSE75748_sc_time_course_ec.csv.gz
+wget https://ftp.ncbi.nlm.nih.gov/geo/series/GSE75nnn/GSE75748/suppl/GSE75748_sc_cell_type_ec.csv.gz
 ```
 ### 2.Processing Raw scRNA-seq Data
 ```R
@@ -124,73 +124,50 @@ library(data.table)
 library(ggplot2)
 
 #1. Read the data
-sce = fread('/Users/songliyang/Documents/MeDuSA_new/revision/embry/GSE75748_sc_time_course_ec.csv.gz')
+sce = fread('/Users/songliyang/Documents/MeDuSA_new/revision/embry/GSE75748_sc_cell_type_ec.csv.gz')
 sce = as.data.frame(sce)
 rownames(sce) = sce[,1];sce = sce[,-1]
 
 #2. Infer the cell-state trajectory
-size = MedianNorm(sce)
-DataNorm = GetNormalizedMat(sce,size)
-condition = sapply(colnames(sce),function(i){strsplit(i,split = '_')[[1]][1]})
-#! Please note that running WaveCrestENI is a time-consuming process, and it took us 28 hours to complete the estimation.
-pseudo_time = WaveCrestENI(GeneList = VariableFeatures(sce),N = 5, Data = DataNorm,Conditions = condition)
+cyto = CytoTRACE(sce,enableFast = F,ncores = 4)
+pseudotime = cyto$CytoTRACE
 
-#3. Visualize the result
-sce = CreateSeuratObject(DataNorm)
-sce = NormalizeData(sce) %>%
-      FindVariableFeatures(selection.method = "vst",nfeatures = 1000) %>%
-      ScaleData() %>%
-      RunPCA(verbose = FALSE)
-space = as.data.frame(Embeddings(sce[['pca']]))
-space$pseudo_time = pseudo_time[colnames(sce)]
-
-colors = c("#9e0142", "#d53e4f", "#f46d43", "#fdae61", "#fee08b","#ffffbf", "#e6f598", "#abdda4", "#66c2a5", "#3288bd", "#5e4fa2")
-colors = colors[seq(length(colors),1,-1)]
-p1 = ggplot(space,aes(x=PC_1,y=PC_2))+
-  geom_point(aes(col=pseudo_time),size=0.5)+
-  xlab('PATH-1')+
-  ylab('PATH-2')+
-  theme(legend.position = 'right',
-        legend.justification = "left",
-        panel.border = element_blank(), axis.line = element_line(size = 0.8))+
-  scale_color_gradientn(colours = colors,name='WaveCrest score',labels = scales::number_format(accuracy = 0.1))
-p1
-
+#3. Build the reference scRNA-seq data
+sce = CreateSeuratObject(sce)
+sce$cell_type = 'hPSC'
+sce$cell_trajectory = pseudotime
+sce$sample = as.vector(Idents(sce))
 ```
-Here is an example output: 
-![Example_Pie](hPSC_pseudotime.png)
 
-Please note that running WaveCrestENI is a time-consuming process, and it took us 28 hours to complete the estimation. For the convenience of users, we have provided the processed scRNA-seq data with the estimated differentiation pseudo-time at the following [link](https://yanglab.westlake.edu.cn/data/MeDuSA_data/hPSC.tar).  
+## Validation of the MeDuSA Method
+This hPSC dataset includes both bulk RNA-seq data and scRNA-seq data from the same sample. It is expected that the cell-state abundance would strongly correlate between the two types of data, despite potential variations in the sequenced specimens. To validate the MeDuSA method, we will compare the estimated cell-state abundance from the bulk data to that measured from the scRNA-seq data.
 
-
-## Comparison of Estimated Cell-State Abundance to Expected Truth
-The dataset includes both bulk RNA-seq data and scRNA-seq data from the same cell lines. It is expected that the cell-state abundance along the trajectory would strongly correlate between the two types of data, despite potential variations in the sequenced specimens. To validate the MeDuSA method, we will compare the estimated cell-state abundance from the bulk data to that measured from the scRNA-seq data.
-
-### 1. Validation of the MeDuSA Method
-To begin with, it is necessary to quantify the cell-state abundance of each sample in the scRNA-seq data.
+To begin with, it is necessary to meaaure the cell-state abundance of each sample in the scRNA-seq data.
 ```r
 bulk = readRDS("../hPSC_bulk.rds")
 sce = readRDS("./hPSC_sce.rds")
 
-# Extract pseudo time data
+# Estimate cell-state abundance from the scRNA-seq data 
 pseudotime = sce$cell_trajectory
-#define bins based on pseudo time values
-bin = paste0('bin', cut(pseudotime, 50))
-breaks = sort(aggregate(pseudotime, by = list(bin), FUN = min)[,-1])
-breaks[1] = -Inf; breaks = c(breaks, Inf)
-
-# Measure the abundance for each sample
-abundance_expect = sapply(unique(sce$sample),function(id){
-  pseudotime_temp = sort(pseudotime[which(sce$sample == id)])
-  #count the cell number for each cell-state bin
-  count_temp = sapply(2:length(breaks), function(currBreakIndex) {
-    length(which(pseudotime_temp >= breaks[currBreakIndex-1] & pseudotime_temp < breaks[currBreakIndex]))
-  })
-# Normalize to the fractional abundance
-  abundance_temp  =  count_temp/sum(count_temp)
-
-  return(abundance_temp)
+sampleID = sce$sample
+pseudotime = pseudotime[names(sampleID)]
+bin = paste0('bin',cut(pseudotime,50,labels = FALSE, include.lowest = TRUE))
+breaks = aggregate(pseudotime,by=list(bin),FUN=min)
+breaks = breaks[order(readr::parse_number(breaks[,1])),2]
+breaks[1]=-Inf;breaks[length(breaks)+1]=Inf
+abundance_expect = sapply(unique(sampleID),function(id){
+	pseudotime_temp = sort(pseudotime[which(sampleID == id)])
+	pseudotime_temp = pseudotime_temp
+	#count the cell number for each cell-state bin
+	count_temp = sapply(2:length(breaks), function(currBreakIndex) {
+		length(which(pseudotime_temp >= breaks[currBreakIndex-1] & pseudotime_temp < breaks[currBreakIndex]))
+	})
+	abundance_temp  =  count_temp/sum(count_temp)
+	return(abundance_temp)
 })
+rownames(abundance_expect) = unique(bin)[order(readr::parse_number(unique(bin)))]
+
+
 
 # Subset the columns of the data frame to match the bulk data
 abundance_expect = abundance_expect[, colnames(abundance_expect) %in% colnames(bulk)]
@@ -233,49 +210,3 @@ p2
 ```
 Here is an example output: 
 ![Example_Pie](hPSC_estimation.png)
-
-
-### 2. Detection of Differences in Cell-State Abundance using MANOVA-Pro
-We propose an approach called MANOVA-Pro that combines multiple analysis of variance (MANOVA) with polynomial regression to detect differences in cell-state abundance among groups (e.g. case group vs. control group). In this tutorial, we will employ `MANOVA-Pro` to quantify the differences in cell-state abundance at various cultivation times of hPSCs.
-
-The bulk data used in this tutorial was collected from three replicates. However, to increase the precision of our analysis, we took the average of the bulk data in the previous section. In the upcoming analysis, we will utilize the raw data instead of the averaged data to quantify the differences in cell-state abundance at various cultivation times of human pluripotent stem cells (hPSCs).
-
-```R
-library(data.table)
-# Load bulk RNA-seq data
-bulk = fread('/Users/songliyang/Documents/MeDuSA_new/revision/embry/GSE75748_bulk_time_course_ec.csv.gz')
-bulk = as.data.frame(bulk)
-rownames(bulk) = bulk[,1]
-bulk = bulk[,-1]
-# The averaged bulk data used above
-bulk_time = data.frame("H9.12h" = rowMeans(bulk[,grep('12h',colnames(bulk))]),
-                  	"H9.24h"= rowMeans(bulk[,grep('24h',colnames(bulk))]),
-                  	"H9.36h"= rowMeans(bulk[,grep('36h',colnames(bulk))]),
-                 	"H9.72h" = rowMeans(bulk[,grep('72h',colnames(bulk))]),
-                  	"H9.96h" = rowMeans(bulk[,grep('96h',colnames(bulk))]))
-# The raw bulk data
-bulk_all = bulk			
-```
-Next, we will use the `MANOVA-Pro` to quantify the differences in cell-state abundance at various cultivation times of hPSCs.
-Input of `MANOVA-Pro`:
--  MeDuSA_obj: The MeDuSA object. 
-- degree:  A numeric variable used to specify the polynomial degrees.
-- condition: A character vector containing the biological condition for each bulk sample.
-
-```R
-# Run MeDuSA for all samples
-MeDuSA_obj = MeDuSA(bulk_all,sce,
-                  select.ct = 'hPSC',markerGene = NULL,span = 0.35,
-		  resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)
-		  
-# Get the cultivation stage for ecah sample
-cultivation_stage = sapply(colnames(bulk_all),function(i){
-  paste(strsplit(i,split = '_')[[1]][1:2],collapse ="_")
-})
-
-# Run MANOVA-Pro
-MANOVA_Pro(MeDuSA_obj,degree = 2,condition = cultivation_stage)
-
-          Df       Pillai     approx F       num Df       den Df       Pr(>F) 
-4.000000e+00 2.071109e+00 5.574141e+00 1.200000e+01 3.000000e+01 6.478946e-05
-```

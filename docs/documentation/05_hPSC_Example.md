@@ -110,9 +110,6 @@ In this tutorial, we use the CytoTRACE to infer the differentiation trajectory o
 ### 1. Download Raw scRNA-seq Data
 We will download the raw data from the GEO database. 
 ```bash
-#the bulk RNA-seq data 
-wget https://ftp.ncbi.nlm.nih.gov/geo/series/GSE75nnn/GSE75748/suppl/GSE75748_bulk_cell_type_ec.csv.gz
-
 #the scRNA-seq data
 wget https://ftp.ncbi.nlm.nih.gov/geo/series/GSE75nnn/GSE75748/suppl/GSE75748_sc_cell_type_ec.csv.gz
 ```
@@ -123,7 +120,7 @@ library(WaveCrest)
 library(data.table)
 library(ggplot2)
 
-#1. Read the data
+#1. Load the count data
 sce = fread('/Users/songliyang/Documents/MeDuSA_new/revision/embry/GSE75748_sc_cell_type_ec.csv.gz')
 sce = as.data.frame(sce)
 rownames(sce) = sce[,1];sce = sce[,-1]
@@ -142,8 +139,9 @@ sce$sample = as.vector(Idents(sce))
 ## Validation of the MeDuSA Method
 This hPSC dataset includes both bulk RNA-seq data and scRNA-seq data from the same sample. It is expected that the cell-state abundance would strongly correlate between the two types of data, despite potential variations in the sequenced specimens. To validate the MeDuSA method, we will compare the estimated cell-state abundance from the bulk data to that measured from the scRNA-seq data.
 
-To begin with, it is necessary to meaaure the cell-state abundance of each sample in the scRNA-seq data.
+
 ```r
+# Load the data
 bulk = readRDS("../hPSC_bulk.rds")
 sce = readRDS("./hPSC_sce.rds")
 
@@ -151,62 +149,33 @@ sce = readRDS("./hPSC_sce.rds")
 pseudotime = sce$cell_trajectory
 sampleID = sce$sample
 pseudotime = pseudotime[names(sampleID)]
-bin = paste0('bin',cut(pseudotime,50,labels = FALSE, include.lowest = TRUE))
-breaks = aggregate(pseudotime,by=list(bin),FUN=min)
-breaks = breaks[order(readr::parse_number(breaks[,1])),2]
-breaks[1]=-Inf;breaks[length(breaks)+1]=Inf
 abundance_expect = sapply(unique(sampleID),function(id){
 	pseudotime_temp = sort(pseudotime[which(sampleID == id)])
 	pseudotime_temp = pseudotime_temp
-	#count the cell number for each cell-state bin
-	count_temp = sapply(2:length(breaks), function(currBreakIndex) {
-		length(which(pseudotime_temp >= breaks[currBreakIndex-1] & pseudotime_temp < breaks[currBreakIndex]))
-	})
+	count_temp = hist(pseudotime_temp,breaks = seq(0,1,(1/50)))$counts
 	abundance_temp  =  count_temp/sum(count_temp)
 	return(abundance_temp)
 })
-rownames(abundance_expect) = unique(bin)[order(readr::parse_number(unique(bin)))]
+rownames(abundance_expect) = paste0('bin',seq(1,nrow(abundance_expect)))
 
+# Run MeDuSA
+MeDuSA_obj = MeDuSA(bulk,sce,
+                  select.ct = 'hPSC',markerGene = NULL,span = 0.35,
+		  resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	
 
-
-# Subset the columns of the data frame to match the bulk data
-abundance_expect = abundance_expect[, colnames(abundance_expect) %in% colnames(bulk)]
-```
-Next, we compare the estimated cell-state abundance obtained from bulk data to that measured from scRNA-seq data.
-```r
-library(ggplot2)
-library(reshape2)
-
+markerGene = MeDuSA_obj@Estimation$markerGene
 abundance_estimate = MeDuSA_obj@Estimation$cell_state_abundance
-state = MeDuSA_obj@Estimation$TimeBin
-rownames(abundance_estimate) = state
-rownames(abundance_expect) = state
+TimeBin = MeDuSA_obj@Estimation$TimeBin
+
+# Visualize
 commonId = intersect(colnames(abundance_expect),colnames(abundance_estimate))
 abundance_expect = abundance_expect[,commonId]
 abundance_estimate = abundance_estimate[,commonId]
-
-dat_estimate = melt(abundance_estimate)
-dat_expect = melt(abundance_expect)
-colnames(dat_estimate) = colnames(dat_expect) = c('state','sample','abundance')
-dat_estimate$type = 'MeDuSA'
-dat_expect$type = 'Expected truth'
-dat = rbind(dat_estimate,dat_expect)
-
-p2 = ggplot(dat,aes(x=state,y=abundance))+
-  scale_x_continuous(breaks = seq(0,1,0.25))+
-  scale_y_continuous(labels = scales::number_format(accuracy = 0.01))+
-  geom_line(aes(col=type),size=0.8)+
-  facet_wrap(~sample,ncol=4,scales = 'free_y')+
-  theme(legend.position = 'bottom',
-        legend.justification = "left",
-        axis.text.x = element_text(angle = 45,hjust = 1),
-        legend.title = element_blank(),
-        strip.background = element_rect(size=0.5),
-        panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"))+
-  xlab('Cell trajectory')+
-  ylab('Cell state abundance')+
-  scale_color_manual(values = c('#9ecae1','#fd8d3c'))
-p2
+dat = data.frame('MeDuSA' = c(abundance_estimate),'CytoTRACE' = c(abundance_expect))
+p1 = ggplot(dat,aes(x=CytoTRACE,y=MeDuSA))+
+  geom_point(col='#feb24c')+
+  geom_smooth(method = 'lm',col='black',se=F)
+print(p1)
 ```
 Here is an example output: 
 ![Example_Pie](hPSC_estimation.png)

@@ -415,8 +415,6 @@ abundance_expect = sapply(unique(sampleID),function(id){
 	return(abundance_temp)
 })
 rownames(abundance_expect) = paste0('bin',seq(1,nrow(abundance_expect)))
-
-# Subset the columns of the data frame to match the bulk data
 abundance_expect = abundance_expect[, colnames(abundance_expect) %in% colnames(bulk)]
 ```
 Next, we compare the estimated cell-state abundance obtained from bulk data to that measured from scRNA-seq data.

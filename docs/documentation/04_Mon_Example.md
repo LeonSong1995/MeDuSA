@@ -398,7 +398,6 @@ Here is an example output:
 ## Validation of the MeDuSA Method
 This dataset includes both bulk RNA-seq data and scRNA-seq data from the same sample. It is expected that the cell-state abundance would strongly correlate between the two types of data, despite potential variations in the sequenced specimens. To validate the MeDuSA method, we will compare the estimated cell-state abundance from the bulk data to that measured from the scRNA-seq data.
 
-To begin with, it is necessary to quantify the cell-state abundance of each sample in the scRNA-seq data.
 ```r
 bulk = readRDS("../Monocytes_bulk.rds")
 sce = readRDS("./Monocytes_sce.rds")
@@ -416,12 +415,8 @@ abundance_expect = sapply(unique(sampleID),function(id){
 })
 rownames(abundance_expect) = paste0('bin',seq(1,nrow(abundance_expect)))
 abundance_expect = abundance_expect[, colnames(abundance_expect) %in% colnames(bulk)]
-```
-Next, we compare the estimated cell-state abundance obtained from bulk data to that measured from scRNA-seq data.
-```r
-library(ggplot2)
-library(reshape2)
 
+# Compare the cell-state abundance estimated from bulk data to that from scRNA-seq data
 abundance_estimate = MeDuSA_obj@Estimation$cell_state_abundance
 state = MeDuSA_obj@Estimation$TimeBin
 rownames(abundance_estimate) = state

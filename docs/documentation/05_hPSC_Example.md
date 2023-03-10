@@ -134,6 +134,9 @@ sce = CreateSeuratObject(sce)
 sce$cell_type = 'hPSC'
 sce$cell_trajectory = pseudotime
 sce$sample = as.vector(Idents(sce))
+
+# We suggest users to normalize cell-size in the reference data before running deconvolution analysis, although MeDuSA is generally robust to varying data scales
+sce@assays$RNA@counts = sweep(as.matrix(sce@assays$RNA@counts),2,colSums(sce@assays$RNA@counts),'/')*1e+3
 ```
 
 ## Validation of the MeDuSA Method

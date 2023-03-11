@@ -30,7 +30,7 @@ MeDuSA_marker <- function(sce,bulk,geneNumber,nbins,family,k,ncpu,method){
   #1)---divides cells to cell-state bins
   cellStateBin = Partition_cell_trajectory(sce$cell_trajectory, nbins)
   Idents(sce) = cellStateBin
-
+  
   #2)---Select common gene expressed in both scRNA-seq and bulk RNA-seq data
   commonGene = rownames(sce)[rownames(sce) %in% rownames(bulk)]
 
@@ -63,6 +63,18 @@ Partition_cell_trajectory <- function(XY,nbins){
 #' Select marker genes using wilcox
 MK_wilcox <- function(sce,cellStateBin,ncpu,geneNumber){
 
+  ### To get a robust result, we agrregate the cell-state bins with cell number <= 20
+  smallBin = names(which(table(cellStateBin) <= 20))
+  stateBin = aggregate(sce$cell_trajectory,by=list(cellStateBin),FUN=median)
+  binName = stateBin[,1];stateBin = stateBin[,-1]
+  names(stateBin) = binName
+  for(bin in smallBin){
+    mergeBin = names(which.min(abs(stateBin[bin] - stateBin[!names(stateBin) %in% smallBin])))
+    cellStateBin[which(cellStateBin==bin)] = mergeBin
+  }
+  Idents(sce) = cellStateBin
+  print(table(Idents(sce)))
+
   ### Register CPU cores
   ncpu = min(ncpu,parallel::detectCores())
   message('\n',paste0(paste0('Select genes using wilcox test with ',ncpu)),' cores.')
@@ -74,14 +86,14 @@ MK_wilcox <- function(sce,cellStateBin,ncpu,geneNumber){
   doSNOW::registerDoSNOW(cl)
 
   ### Show the process
-  pb = utils::txtProgressBar(min = 1, max = length(unique(cellStateBin)), style = 3)
+  binName = names(which(table(cellStateBin)>3))
+  binNum = length(binName)
+  pb = utils::txtProgressBar(min = 1, max = binNum, style = 3)
   progress = function(n) setTxtProgressBar(pb, n)
   opts = list(progress = progress)
   `%dopar2%` = foreach::`%dopar%`
 
   ### Select genes (Wilcox Test)
-  binName = names(which(table(cellStateBin)>30))
-  binNum = length(binName)
   mk = foreach::foreach(BinId = 1:binNum, .options.snow = opts) %dopar2% {
     mk_focal = Seurat::FindMarkers(sce,ident.1 = binName[BinId],verbose = F,only.pos = T,
                                    slot = "data",assay = sce@active.assay)
@@ -92,14 +104,31 @@ MK_wilcox <- function(sce,cellStateBin,ncpu,geneNumber){
     index = setdiff(seq_len(nrow(mk_focal)), index_p0)
     index = c(index_p0, index)
     mk_focal = mk_focal[index,]
-    mk_focal = rownames(mk_focal)[1:GeneNumberBin]
     return(mk_focal)
   }
   parallel::stopCluster(cl)
   names(mk) = binName
 
+  ### Compute the mean expression of cell-state bin
+  expMean = Seurat::AverageExpression(sce,slot = 'counts',assays = 'RNA')[[1]]
+  mk_filter = sapply(binName,function(bin){
+    gene = mk[[bin]]
+    gene = gene[which(colnames(expMean)[apply(expMean[rownames(gene),],1,which.max)]==bin),]
+    return(list(gene))
+  })
+
+  ### Select top genes
+  if(min(sapply(mk_filter,nrow)) <= 5){
+    warning(paste0(paste0('The number of signature genes in ',
+              paste(names(which(sapply(mk_filter,nrow)<5)),collapse =', ')),' is smaller than 5!'))
+    mk = sapply(mk_filter,function(gene){list(rownames(gene)[1:GeneNumberBin])})
+  }else{
+    mk = sapply(mk,function(gene){list(rownames(gene)[1:GeneNumberBin])})
+  }
+
   return(mk)
 }
+
 
 #' @keywords internal
 #' Select marker genes using gam
@@ -139,7 +168,7 @@ MK_gam <- function(sce,cellStateBin,ncpu,family,k,geneNumber){
   names(P_adj) = names(Chi) = rownames(sce)
 
   ### Compute the mean expression of cell-state bin
-  expMean = Seurat::AverageExpression(sce,slot = 'data',assays = sce@active.assay)[[1]]
+  expMean = Seurat::AverageExpression(sce,slot = 'counts',assays = 'RNA')[[1]]
   maxBin = colnames(expMean)[apply(expMean,1,which.max)]
   maxValue = apply(expMean,1,max)
   Info = data.frame('bin' = maxBin,'chi' = Chi,'p_val_adj' = P_adj,'avg_exp'=maxValue)

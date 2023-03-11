@@ -10,11 +10,5 @@ Here are the code for runing analysis in MeDuSA manuscript.
 * Data can be downloaded through the link listed in the manuscript
 
 #### Code for experiments
-* [Simulations]
-* Real data analysis
-  * [Esophagus Cancer Analysis with MeDuSA]
-  * [Covid-19 Analysis with MeDuSA]
-  * [Melanoma Analysis with MeDuSA]
-  * [Cell-state-dependent eQTL Analysis with MeDuSA]
-
+* [Here](https://github.com/LeonSong1995/MeDuSA_Analysis)
   

@@ -1,4 +1,4 @@
-# MeDuSA: mixed model-based deconvolution of cell-state abundance.
+# MeDuSA: MeDuSA: mixed model-based deconvolution of cell-state abundances along a one-dimensional trajectory
 
 ## Overview
 ![Image text](https://github.com/LeonSong1995/MeDuSA/blob/master/docs/Overview2.jpg)

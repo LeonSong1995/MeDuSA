@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Experiments
-description: Link to download the example dataset
+
 ---
 
 #### Data sets for experiments

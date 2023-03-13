@@ -443,9 +443,5 @@ p2 = ggplot(dat,aes(x=state,y=abundance))+
   xlab('Cell trajectory')+
   ylab('Cell state abundance')+
   scale_color_manual(values = c('#9ecae1','#fd8d3c'))
-p2
 ```
-Here is an example output: 
-![Example_Pie](Monocytes_estimation.png)
-
 

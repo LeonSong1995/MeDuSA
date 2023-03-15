@@ -19,15 +19,13 @@ Prior to running the analysis, it is important to ensure that the MeDuSA package
 
 For how to prepare the cell-state trajectory data, please read the section of `Preparing Reference Data` in this tutorial. 
 
-The input data required for running this tutorial can be downloaded from the following [link](https://yanglab.westlake.edu.cn/data/MeDuSA_data/hPSC.tar). 
+The input data required for running this tutorial can be downloaded from the following [link](https://yanglab.westlake.edu.cn/data/MeDuSA_data/hPSC.tar.gz). 
 Detailed information regarding the input data is provided as follows.
 
 ### 1. Bulk RNA-seq Data
 ```r
 # Load the example bulk RNA-seq data
 bulk = readRDS("../hPSC_bulk.rds")
-class(bulk)
-"matrix" "array" 
 ```
 The bulk RNA-seq data is represented in a matrix format, where each row corresponds to a specific gene and each column corresponds to a particular sample.
 

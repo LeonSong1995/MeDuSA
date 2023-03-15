@@ -391,8 +391,6 @@ p1
 # Save the reference scRNA-seq data
 saveRDS(sce,'../Monocytes_sce.rds')
 ```
-Here is an example output: 
-![Example_Pie](Monocytes_pseudotime.png)
 
 ## Validation of the MeDuSA Method
 This dataset includes both bulk RNA-seq data and scRNA-seq data from the same sample. It is expected that the cell-state abundance would strongly correlate between the two types of data, despite potential variations in the sequenced specimens. To validate the MeDuSA method, we will compare the estimated cell-state abundance from the bulk data to that measured from the scRNA-seq data.

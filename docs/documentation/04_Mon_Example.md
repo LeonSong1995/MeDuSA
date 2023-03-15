@@ -422,10 +422,12 @@ rownames(abundance_expect) = state
 commonId = intersect(colnames(abundance_expect),colnames(abundance_estimate))
 abundance_expect = abundance_expect[,commonId]
 abundance_estimate = abundance_estimate[,commonId]
-dat = data.frame('MeDuSA' = c(abundance_estimate),'scRNA' = c(abundance_expect))
-p1 = ggplot(dat,aes(x=scRNA,y=MeDuSA))+
+dat = data.frame('MeDuSA' = c(abundance_estimate),'Slingshot' = c(abundance_expect))
+p2 = ggplot(dat,aes(x=Slingshot,y=MeDuSA))+
   geom_point(col='#feb24c')+
-  geom_smooth(method = 'lm',col='black',se=F)
-print(p1)
+  geom_smooth(method = 'lm',col='black',se=F)+
+  xlab('scRNA-seq (slingshot)')
+  ylab('MeDuSA')
+print(p2)
 ```
 

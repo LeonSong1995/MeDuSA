@@ -20,8 +20,6 @@ Detailed information regarding the input data is provided as follows.
 ```r
 # Load the example bulk RNA-seq data
 bulk = readRDS("../Monocytes_bulk.rds")
-class(bulk)
-"matrix" "array" 
 ```
 The bulk RNA-seq data is represented in a matrix format, where each row corresponds to a specific gene and each column corresponds to a particular sample.
 

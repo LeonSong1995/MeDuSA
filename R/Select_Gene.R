@@ -73,7 +73,6 @@ MK_wilcox <- function(sce,cellStateBin,ncpu,geneNumber){
     cellStateBin[which(cellStateBin==bin)] = mergeBin
   }
   Idents(sce) = cellStateBin
-  print(table(Idents(sce)))
 
   ### Register CPU cores
   ncpu = min(ncpu,parallel::detectCores())

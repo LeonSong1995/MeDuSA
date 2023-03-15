@@ -3,13 +3,13 @@
 ##########################################################################################################################################################################################################################################################################################
 ### MeduSA provides two methods to select marker genes over the given cell-state trajectory.
 ### ----------------------------------------------------------------------------------------------------------------------
-### The first one is the wilcox test: 
+### The first one is the Wilcoxon test: 
 ### MeduSA first divides the cells in the trajectory into a specified number of bins (by default, 10 bins are used). 
-### For each bin, MeduSA applies the wilcox-test implemented in the Seurat::FindMarkers function.
-### The wilcox test is used to compare gene expression levels between two groups of cells and determine whether the difference in expression is statistically significant. 
+### For each bin, MeduSA applies the Wilcoxon-test implemented in the Seurat::FindMarkers function.
+### The Wilcoxon test is used to compare gene expression levels between two groups of cells and determine whether the difference in expression is statistically significant. 
 ### In this case, the two groups of cells are the cells in the current bin being tested and all the other cells in the trajectory. 
-### The wilcox test is performed for each gene, and genes with significant differential expression are identified as marker genes for that particular bin.
-### By applying the wilcox test to each bin along the cell-state trajectory, MeduSA can identify marker genes that are specific to each stage of the trajectory.
+### The Wilcoxon test is performed for each gene, and genes with significant differential expression are identified as marker genes for that particular bin.
+### By applying the Wilcoxon test to each bin along the cell-state trajectory, MeduSA can identify marker genes that are specific to each stage of the trajectory.
 ### ----------------------------------------------------------------------------------------------------------------------
 ### The second one is the gam-wald test: 
 ### MeduSA associates genes along the cell-state trajectory using the generalized additive model (gam). 
@@ -73,10 +73,11 @@ MK_wilcox <- function(sce,cellStateBin,ncpu,geneNumber){
     cellStateBin[which(cellStateBin==bin)] = mergeBin
   }
   Idents(sce) = cellStateBin
+  print(table(Idents(sce)))
 
   ### Register CPU cores
   ncpu = min(ncpu,parallel::detectCores())
-  message('\n',paste0(paste0('Select genes using wilcox test with ',ncpu)),' cores.')
+  message('\n',paste0(paste0('Select genes using Wilcoxon test with ',ncpu)),' cores.')
   cl = parallel::makeCluster(ncpu)
 
   ### Register environment
@@ -135,7 +136,7 @@ MK_gam <- function(sce,cellStateBin,ncpu,family,k,geneNumber){
 
   ### Register CPU cores
   ncpu = min(ncpu,parallel::detectCores())
-  message('\n',paste0(paste0('Select genes using gam-wald test with ',ncpu)),' cores.')
+  message('\n',paste0(paste0('Select genes using Gam-Wald test with ',ncpu)),' cores.')
   cl = parallel::makeCluster(ncpu)
 
   ### Register environment

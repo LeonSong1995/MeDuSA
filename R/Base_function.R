@@ -155,6 +155,8 @@ Measure_abundance <- function(pseudotime,sampleID,resolution){
 #' @keywords internal
 #' Evaluate the method performance
 evalualtion <- function(abundance_simu,abundance_est){
+
+  abundance_est[is.na(abundance_est)] = 0  
   abundance_get = abundance_simu*0
   common_bin = intersect(rownames(abundance_get),rownames(abundance_est))
   common_ID = intersect(colnames(abundance_get),colnames(abundance_est))

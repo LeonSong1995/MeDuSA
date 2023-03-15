@@ -59,7 +59,7 @@ MeDuSA <- function(bulk,sce,select.ct=NULL,resolution=50,fixCov=NULL,adj=FALSE,
   #2)---Select (Check) marker genes
   focal_cell_index = which(sce$cell_type == select.ct)
   if(is.null(markerGene)) {
-    message(paste0("\n",paste0('Marker genes are not provided. MeDuSA will select marker genes over the cell trajectory using ',paste0(method,'.'))))
+    message(paste0("\n",paste0('Marker genes are not provided. MeDuSA will select marker genes over the cell trajectory.')))
     markerGene = MeDuSA_marker(sce[,focal_cell_index],bulk,
                                geneNumber = geneNumber,nbins = nbins,
                                family = family,k = knots,ncpu = ncpu,method = method)

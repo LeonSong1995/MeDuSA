@@ -22,7 +22,7 @@ devtools::install_github("LeonSong1995/MeDuSA", build_vignettes=F)
 ```
 
 
-## Usage
+## How to Use
 See [tutorial.](https://leonsong1995.github.io/MeDuSA/)
 
 ## Contact

@@ -421,26 +421,13 @@ state = MeDuSA_obj@Estimation$TimeBin
 rownames(abundance_estimate) = state
 rownames(abundance_expect) = state
 
-dat_estimate = melt(abundance_estimate)
-dat_expect = melt(abundance_expect)
-colnames(dat_estimate) = colnames(dat_expect) = c('state','sample','abundance')
-dat_estimate$type = 'MeDuSA'
-dat_expect$type = 'Expected truth'
-dat = rbind(dat_estimate,dat_expect)
-
-p2 = ggplot(dat,aes(x=state,y=abundance))+
-  scale_x_continuous(breaks = seq(0,1,0.25))+
-  scale_y_continuous(labels = scales::number_format(accuracy = 0.01))+
-  geom_line(aes(col=type),size=0.8)+
-  facet_wrap(~sample,ncol=4,scales = 'free_y')+
-  theme(legend.position = 'bottom',
-        legend.justification = "left",
-        axis.text.x = element_text(angle = 45,hjust = 1),
-        legend.title = element_blank(),
-        strip.background = element_rect(size=0.5),
-        panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"))+
-  xlab('Cell trajectory')+
-  ylab('Cell state abundance')+
-  scale_color_manual(values = c('#9ecae1','#fd8d3c'))
+commonId = intersect(colnames(abundance_expect),colnames(abundance_estimate))
+abundance_expect = abundance_expect[,commonId]
+abundance_estimate = abundance_estimate[,commonId]
+dat = data.frame('MeDuSA' = c(abundance_estimate),'scRNA' = c(abundance_expect))
+p1 = ggplot(dat,aes(x=scRNA,y=MeDuSA))+
+  geom_point(col='#feb24c')+
+  geom_smooth(method = 'lm',col='black',se=F)
+print(p1)
 ```
 

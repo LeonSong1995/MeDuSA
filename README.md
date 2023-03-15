@@ -26,4 +26,4 @@ devtools::install_github("LeonSong1995/MeDuSA", build_vignettes=F)
 See [tutorial.](https://leonsong1995.github.io/MeDuSA/)
 
 ## Contact
-If you have any questions for MeDuSA, please contact the author <songliyang@westlake.edu.cn>.   
+If you have any questions for MeDuSA, please feel free to leave messages on the github issues or contact me <songliyang@westlake.edu.cn>.   

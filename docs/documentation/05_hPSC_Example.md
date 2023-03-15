@@ -77,7 +77,7 @@ This section provides an introduction to the basic usage of MeDuSA.
 For further details about the parameters, please refer to this [link](https://leonsong1995.github.io/MeDuSA/documentation/01_About.html).
 ```r
 MeDuSA_obj = MeDuSA(bulk,sce,
-                  select.ct = 'hPSC',markerGene = NULL,span = 0.35,
+                  select.ct = 'embry',markerGene = NULL,span = 0.35,
 		  resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)		 
 ```
 The results are stored in `MeDuSA_obj@Estimation`.
@@ -127,7 +127,7 @@ pseudotime = cyto$CytoTRACE
 
 #3. Build the reference scRNA-seq data
 sce = CreateSeuratObject(sce)
-sce$cell_type = 'hPSC'
+sce$cell_type = 'embry'
 sce$cell_trajectory = pseudotime
 sce$sample = as.vector(Idents(sce))
 
@@ -159,7 +159,7 @@ rownames(abundance_expect) = paste0('bin',seq(1,nrow(abundance_expect)))
 
 # Run MeDuSA
 MeDuSA_obj = MeDuSA(bulk,sce,
-                  select.ct = 'hPSC',markerGene = NULL,span = 0.35,
+                  select.ct = 'embry',markerGene = NULL,span = 0.35,
 		  resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	
 
 markerGene = MeDuSA_obj@Estimation$markerGene

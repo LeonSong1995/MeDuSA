@@ -267,7 +267,7 @@ data = sapply(file,function(id){
 data.merge = Reduce(function(x, y) merge(x, y), data)
 saveRDS(data.merge,'../Human_BoneMarrow_JCI_Insight.rds')
 ```
-The merged scRNA-seq data can be obtained either by following the above pipeline or by downloading it directly from the link (https://yanglab.westlake.edu.cn/data/MeDuSA_data/Monocytes.tar.gz)
+The merged scRNA-seq data can be obtained either by following the above pipeline or by downloading it directly from the [link] (https://yanglab.westlake.edu.cn/data/MeDuSA_data/Monocytes.tar.gz)
 
 ### 3. Cell Type Annotation
 We will perform cell clustering and assign cell-types based on expression pattern of marker genes. To account for potential confounding factors during single-cell RNA sequencing, the black gene list, provided by [Xue et al.](https://www.nature.com/articles/s41586-022-05400-x) will be utilized. 

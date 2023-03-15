@@ -13,7 +13,7 @@ This tutorial offers an illustrative analysis of the human monocytes data from [
 
 For how to prepare the cell-state trajectory data, please read the section of `Preparing Reference Data` in this tutorial. 
 
-The input data required for running this tutorial can be downloaded from the following [link](https://yanglab.westlake.edu.cn/data/MeDuSA_data/Monocytes.tar). 
+The input data required for running this tutorial can be downloaded from the following [link](https://yanglab.westlake.edu.cn/data/MeDuSA_data/Monocytes.tar.gz). 
 Detailed information regarding the input data is provided as follows.
 
 ### 1. Bulk RNA-seq Data
@@ -267,7 +267,7 @@ data = sapply(file,function(id){
 data.merge = Reduce(function(x, y) merge(x, y), data)
 saveRDS(data.merge,'../Human_BoneMarrow_JCI_Insight.rds')
 ```
-The merged scRNA-seq data can be obtained either by following the above pipeline or by downloading it directly from the following [link](https://yanglab.westlake.edu.cn/data/MeDuSA_data/hPSC.tar).  
+The merged scRNA-seq data can be obtained either by following the above pipeline or by downloading it directly from the link (https://yanglab.westlake.edu.cn/data/MeDuSA_data/Monocytes.tar.gz)
 
 ### 3. Cell Type Annotation
 We will perform cell clustering and assign cell-types based on expression pattern of marker genes. To account for potential confounding factors during single-cell RNA sequencing, the black gene list, provided by [Xue et al.](https://www.nature.com/articles/s41586-022-05400-x) will be utilized. 
@@ -332,7 +332,7 @@ OtherCell = BM[,BM$ct %in% setdiff(cell_type_annotated,c('HSPC','HSPCtoMon'))]
 saveRDS(Mon,'../Mon.rds')
 saveRDS(OtherCell,'../OtherCell.rds')
 ```
-For user convenience, we have provided the processed scRNA-seq data of monocytes in the following [link](https://yanglab.westlake.edu.cn/data/MeDuSA_data/Monocytes.tar).
+For user convenience, we have provided the processed scRNA-seq data in the link above.
 
 ### 4. Infering the Cell-State Trajectory
 In this analysis, we use [Slingshot](https://bioconductor.org/packages/devel/bioc/vignettes/slingshot/inst/doc/vignette.html) to infer the development trajectory of monocytes. 

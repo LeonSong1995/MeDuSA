@@ -7,23 +7,26 @@
 MeDuSA(
   bulk,
   sce,
-  select.ct,
+  select.ct = NULL,
+  resolution = 50,
+  fixCov = NULL,
+  adj = TRUE,
+  markerGene = NULL,
+  nbins = 10,
+  knots = 10,
+  method = "wilcox",
+  family = "gaussian",
+  geneNumber = 200,
+  CAR = FALSE,
+  phi = c(0.2, 0.4, 0.6, 0.9),
   ncpu = 1,
+  start = c(1e-05, 0.01),
+  maxiter = 10000,
   smooth = TRUE,
   smoothMethod = "loess",
-  gene = NULL,
-  nbins = 10,
-  resolution = 50,
-  knots = 10,
-  start = c(1e-05, 0.01),
-  maxgene = 200,
-  family = "gaussian",
-  gcov = NULL,
-  Xc = NULL,
-  maxiter = 10000,
-  adj = FALSE,
-  CAR = TRUE,
-  phi = c(0.2, 0.4, 0.6, 0.9)
+  span = 0.35,
+  neighbor = 5,
+  fractional = FALSE
 )
 }
 \arguments{
@@ -33,66 +36,57 @@ MeDuSA(
 
 \item{select.ct}{A character variable of the target cell type.}
 
-\item{ncpu}{The number of CPU(s) to be used.}
+\item{resolution}{A numeric variable to determine the number of cell bins along the cell trajectory (i.e., the resolution of the deconvolution analysis). The default value is 50.}
+
+\item{fixCov}{A matrix (vector) of fixed covariates in the model (i.e., covariates for estimating cell-state abundance). The default value is NULL.}
+
+\item{adj}{A Boolean variable to determine whether to include covariates when predicting the cell-state abundance.}
+
+\item{markerGene}{A character vector of marker genes over the cell-state trajectory. The default value is NULL. With default, \code{MeDuSA} selects  genes using the gam-wald or wilcox test.}
+
+\item{nbins}{A numeric variable to determine the number of bins along the cell trajectory, which is used to ensure the selected genes were uniformly scattered along the given trajectory. The default value is 10.}
+
+\item{knots}{A numeric variable to specify the number of knots. The default value is 10.}
+
+\item{method}{A character variable to specify the method used in selecting marker genes (wilcox or gam).Default by wilcox.}
+
+\item{family}{A character variable to specify the distribution of gam See \code{\link{family.mgcv}} for a full list of what is available.}
+
+\item{geneNumber}{A numeric variable to determine the number of signature genes. The default value is 200.}
+
+\item{CAR}{A Boolean variable to determine whether to model abundance correlations among cells.}
+
+\item{phi}{A numeric vector for searching the optimal cell correlations. The default value is c(0.2,0.4,0.6,0.9)}
+
+\item{ncpu}{The number of cpu cores to be used.}
+
+\item{start}{A numeric vector for the initial value of the REML. Default by c(1e-5,1e-2).}
+
+\item{maxiter}{The iteration number of REML. Default by 1e+4.}
 
 \item{smooth}{A Boolean variable to determine whether to smooth the predicted cell-state abundance or not. The default value is TRUE.}
 
 \item{smoothMethod}{A character variable to determine the smoothing method. The default method is \code{\link{loess}}.}
 
-\item{gene}{A character vector of signature genes. The default value is NULL. With default, \code{MeDuSA} selects signature genes using the generalized additive model (see \code{\link{mgcv}}).}
+\item{span}{A numeric variable to control the degree of smoothing \code{\link{loess}}.}
 
-\item{nbins}{A numeric variable to determine the number of bins along the cell trajectory, which is used to ensure the selected genes were uniformly scattered along the given trajectory. The default value is 10.}
+\item{neighbor}{A numeric variable to determine the number of neighboring cells used in smoothing (do not used when the smooth method is loess).}
 
-\item{resolution}{A numeric variable to determine the number of cell bins along the cell trajectory (i.e., the resolution of the deconvolution analysis). The default value is 50.}
-
-\item{knots}{A numeric variable to specify the number of knots. The default value is 10.}
-
-\item{start}{A numeric vector for the initial value of the REML. Default by c(1e-5,1e-2).}
-
-\item{maxgene}{A numeric variable to determine the number of signature genes. The default value is 200.}
-
-\item{family}{A character variable to specify the distribution of GAM. See \code{\link{family.mgcv}} for a full list of what is available.}
-
-\item{gcov}{A matrix (vector) of covariates in the GAM. The default value is NULL.}
-
-\item{Xc}{A matrix (vector) of fixed covariates in the linear mixed model (i.e., covariates for predicting cell-state abundance). The default value is NULL.}
-
-\item{maxiter}{The iteration number of REML. Default by 1e+4.}
-
-\item{adj}{A Boolean variable to determine whether to include covariates when predicting the cell-state abundance.}
-
-\item{CAR}{A Boolean variable to determine whether to model abundance correlations among cells.}
-
-\item{phi}{A numeric vector for searching the optimal cell correlations. The default value is c(0.2,0.4,0.6,0.9)}
+\item{fractional}{A Boolean variable to determine whether to normalize the estimated cell-state abundance to the fractional abundance (0-1).Default by FALSE.}
 }
 \value{
 \code{MeDuSA} returns: \itemize{
-\item\code{abundance}: A numeric matrix of cell-state abundance. Each row corresponds to a cell bin and each column corresponds to a sample.
-\item\code{gene}: A character vector of the selected signature genes.
-\item\code{PesudoTimeCellbin}: A numeric vector of the pseudo-time for each cell bin.
+\item\code{MeDuSA_Object}: The MeDuSA object.
+\item\code{MeDuSA_Object@Estimation$cell_state_abundance}: A matrix of cell-state abundance. Each row corresponds to a cell-state bin and each column corresponds to a bulk sample.
+\item\code{MeDuSA_Object@Estimation$markerGene}: A character vector of the used marker genes.
+\item\code{MeDuSA_Object@Estimation$TimeBin}: A numeric vector of the median pseudo-time for each cell-state bin.
 }
 }
 \description{
-\code{MeDuSA} is a fine-resolution cellular deconvolution method that leverages scRNA-seq data as a reference to estimate cell-state abundance in bulk RNA-seq data.
+\code{MeDuSA} is a cellular deconvolution method that leverages scRNA-seq data as a reference to estimate cell-state abundance in bulk RNA-seq data.
 }
 \examples{
-##Library the package
-library(MeDuSA)
-
-##Load the test data:
-data(ref)
-data(cellType)
-data(Trajectory)
-data(bulk)
-
-##Build the 'Seurat' obejct:
-sce = CreateSeuratObject(ref)
-sce$cell_type = cellType
-sce$cell_trajectory = rep(0,ncol(sce))
-sce$cell_trajectory[rownames(Trajectory)]=Trajectory
-
-##Run MeDuSA (run with 6 courses):
-csab = MeDuSA(bulk=bulk,sce=sce,select.ct='Epithelium',ncpu=6)
+see: https://github.com/LeonSong1995/MeDuSA
 }
 \author{
 Liyang Song <songliyang@westlake.edu.cn>

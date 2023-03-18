@@ -34,7 +34,7 @@ Parameters of `MeDuSA`
 - `maxiter`: The iteration number of REML. The default value is 1e+4.
 - `adj`: A Boolean variable to determine whether to include covariates when estimating the cell-state abundance.
 - `CAR`: A Boolean variable to determine whether to model abundance correlations among cells.
-- `phi`: A numeric vector for searching the optimal cell correlations. The default value is c(0.2,0.4,0.6,0.9).
+- `phi`: A numeric vector for searching the optimal cell correlations.
 - `fixCov`: A matrix (vector) of fixed covariates in the model (i.e., covariates for estimating cell-state abundance). The default value is NULL.
 - `markerGene`: A character vector of marker genes over the cell-state trajectory. The default value is NULL. With the default, MeDuSA selects genes using the GAM-Wald or Wilcoxon rank-sum test.
 - `method`: A character variable to specify the method used in selecting marker genes (wilcox or gam). The default value is wilcox.

@@ -40,7 +40,7 @@
 
 MeDuSA <- function(bulk,sce,select.ct=NULL,resolution=50,fixCov=NULL,adj=FALSE,
                    markerGene=NULL,nbins=10,knots=10,method="wilcox",family='gaussian',geneNumber=200,
-                   CAR=FALSE,phi=c(0.2,0.4,0.6,0.9),
+                   CAR=FALSE,phi=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.99),
                    ncpu=1,start=c(1e-5,1e-2),maxiter=1e+4,
                    smooth=TRUE,smoothMethod='loess',span=0.35,neighbor=5,fractional=FALSE){
 

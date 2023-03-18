@@ -61,8 +61,7 @@ Decov <- function(ncpu,bulk,ExpCell,ExpBin,start,covariates,maxiter = maxiter,ph
         s = S[[i]]
         parameter = reml(start = start,X = as.matrix(fixcmp),y = as.matrix(b),Z = rancmp ,maxiter = maxiter,S = s)
         start = parameter[[2]]
-
-        ###chose the CAR-covariance matrix leading to the heighest log likely-hood  
+        ### chose the CAR-covariance matrix leading to the heighest log likely-hood  
         if(parameter[[3]]>logL){vi = parameter[[1]];logL = parameter[[3]]}
       }
     }else{

@@ -18,7 +18,7 @@
 #' @param maxiter The iteration number of REML. Default by 1e+4.
 #' @param adj A Boolean variable to determine whether to include covariates when predicting the cell-state abundance.
 #' @param CAR A Boolean variable to determine whether to model abundance correlations among cells.
-#' @param phi A numeric vector for searching the optimal cell correlations. The default value is [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.99]. 
+#' @param phi A numeric vector for searching the optimal cell correlations. The default value is [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]. 
 #' @param fixCov A matrix (vector) of fixed covariates in the model (i.e., covariates for estimating cell-state abundance). The default value is NULL.
 #' @param markerGene A character vector of marker genes over the cell-state trajectory. The default value is NULL. With default, \code{MeDuSA} selects  genes using the gam-wald or wilcox test.
 #' @param method A character variable to specify the method used in selecting marker genes (wilcox or gam).Default by wilcox.
@@ -40,7 +40,7 @@
 
 MeDuSA <- function(bulk,sce,select.ct=NULL,resolution=50,fixCov=NULL,adj=FALSE,
                    markerGene=NULL,nbins=10,knots=10,method="wilcox",family='gaussian',geneNumber=200,
-                   CAR=FALSE,phi=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.99),
+                   CAR=FALSE,phi=c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9),
                    ncpu=1,start=c(1e-5,1e-2),maxiter=1e+4,
                    smooth=TRUE,smoothMethod='loess',span=0.35,neighbor=5,fractional=FALSE){
 

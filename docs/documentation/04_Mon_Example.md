@@ -143,7 +143,7 @@ MeDuSA_obj = MeDuSA(bulk,sce = sce_big,
 ### 4. How to Use the Mode of Conditional Autoregressive (CAR)
 In many LMM applications, random effects are assumed to be independent and identically distributed. However, the abundances of cells at adjacent states are likely to be correlated. MeDuSA incorporates the CAR to accommodate such correlations. Users can set the parameter of `CAR` as TRUE to use the CAR mode. Further, MeDuSA provides users with the ability to set the range of possible correlation strengths through the `phi` parameter.  Based on this range, MeDuSA then automatically searches for the optimal correlation strength that maximizes the likelihood function. 
 ```R
-# The default phi is c(0.2,0.4,0.6,0.9)
+# The default phi is [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
 MeDuSA_obj = MeDuSA(bulk,sce, CAR = TRUE,
                    select.ct = 'mon',markerGene = NULL,span = 0.35,
 		   resolution = 50,smooth = TRUE,fractional = TRUE,ncpu = 4)	

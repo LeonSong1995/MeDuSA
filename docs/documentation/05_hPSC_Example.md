@@ -176,5 +176,3 @@ p1 = ggplot(dat,aes(x=CytoTRACE,y=MeDuSA))+
   geom_smooth(method = 'lm',col='black',se=F)
 print(p1)
 ```
-Here is an example output: 
-![Example_Pie](hPSC_estimation.png)

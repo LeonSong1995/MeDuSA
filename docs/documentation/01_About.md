@@ -5,8 +5,7 @@ title: About
 
 Cite `MeDuSA`
 -------------------
-(Not published) MeDuSA: mixed model-based deconvolution of cell-state abundances along a one-dimensional trajectory. 
-Liyang Song, Xiwei Sun, Ting Qi, Jian Yang
+Song L.Y., Sun.X.W., Qi.T., Yang J.(2022)MeDuSA: mixed model-based deconvolution of cell-state abundances along a one-dimensional trajectory.Under review.
 
 Contact
 -------------------

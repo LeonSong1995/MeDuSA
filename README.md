@@ -10,7 +10,7 @@
 # Please install the Seurat. (https://satijalab.org/seurat/)
 install.packages("Seurat")
 
-# Please install the tradeSeq. ([https://bioconductor.org/packages/release/bioc/html/BiocParallel.html](https://github.com/statOmics/tradeSeq))
+# Please install the tradeSeq. (https://github.com/statOmics/tradeSeq)
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 BiocManager::install("tradeSeq")

@@ -34,7 +34,6 @@ MeDuSA_marker <- function(sce,bulk,geneNumber,nbins,family,k,ncpu,method){
   #2)---Select common gene expressed in both scRNA-seq and bulk RNA-seq data
   commonGene = rownames(sce)[rownames(sce) %in% rownames(bulk)]
 
-
   #2.a)---Select marker genes (method-1: using Wilcox test)
   if(method=='wilcox'){
     mk_list = MK_wilcox(sce[commonGene,],cellStateBin,ncpu=ncpu,geneNumber=geneNumber)
@@ -42,7 +41,7 @@ MeDuSA_marker <- function(sce,bulk,geneNumber,nbins,family,k,ncpu,method){
 
   #2.b)---Select marker genes (method-2: using Gam-Wald test)
   if (method=='gam'){
-    mk_list = MK_gam(sce[commonGene,],cellStateBin,ncpu=ncpu,family=family,k=k, geneNumber=geneNumber)
+    mk_list = MK_gam(sce[commonGene,],cellStateBin,family=family,k=k, geneNumber=geneNumber)
   }
 
   #3)---Along the cell trajectory, check the coverage of marker genes
@@ -63,6 +62,10 @@ Partition_cell_trajectory <- function(XY,nbins){
 #' Select marker genes using wilcox
 MK_wilcox <- function(sce,cellStateBin,ncpu,geneNumber){
 
+  mt_gene = grep(pattern = "MT-",rownames(sce),value = F)
+  rp_gene = grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA",rownames(sce),value = F)
+  sce = sce[-c(mt_gene,rp_gene),]
+
   ### To get a robust result, we agrregate the cell-state bins with cell number <= 20
   smallBin = names(which(table(cellStateBin) <= 20))
   stateBin = aggregate(sce$cell_trajectory,by=list(cellStateBin),FUN=median)
@@ -73,6 +76,7 @@ MK_wilcox <- function(sce,cellStateBin,ncpu,geneNumber){
     cellStateBin[which(cellStateBin==bin)] = mergeBin
   }
   Idents(sce) = cellStateBin
+  # print(table(Idents(sce)))
 
   ### Register CPU cores
   ncpu = min(ncpu,parallel::detectCores())
@@ -95,8 +99,9 @@ MK_wilcox <- function(sce,cellStateBin,ncpu,geneNumber){
   ### Select genes (Wilcox Test)
   mk = foreach::foreach(BinId = 1:binNum, .options.snow = opts) %dopar2% {
     mk_focal = Seurat::FindMarkers(sce,ident.1 = binName[BinId],verbose = F,only.pos = T,
-                                   slot = "data",assay = sce@active.assay)
+                                   slot = "data",assay = sce@active.assay,logfc.threshold = 0.3)
     mk_focal = mk_focal[mk_focal$p_val_adj < 0.01,]
+
     ## Order the gene with p_val=0 using fold changes
     index_p0 = which(mk_focal$p_val == 0)
     index_p0 = index_p0[order(mk_focal[index_p0, 'avg_log2FC'], decreasing = TRUE)]
@@ -109,7 +114,7 @@ MK_wilcox <- function(sce,cellStateBin,ncpu,geneNumber){
   names(mk) = binName
 
   ### Compute the mean expression of cell-state bin
-  expMean = Seurat::AverageExpression(sce,slot = 'counts',assays = 'RNA')[[1]]
+  expMean = Seurat::AverageExpression(sce,slot = 'data',assays = sce@active.assay)[[1]]
   mk_filter = sapply(binName,function(bin){
     gene = mk[[bin]]
     gene = gene[which(colnames(expMean)[apply(expMean[rownames(gene),],1,which.max)]==bin),]
@@ -131,40 +136,90 @@ MK_wilcox <- function(sce,cellStateBin,ncpu,geneNumber){
 
 #' @keywords internal
 #' Select marker genes using gam
-MK_gam <- function(sce,cellStateBin,ncpu,family,k,geneNumber){
+# MK_gam <- function(sce,cellStateBin,ncpu,family,k,geneNumber){
 
-  ### Register CPU cores
-  ncpu = min(ncpu,parallel::detectCores())
-  message('\n',paste0(paste0('Select genes using Gam-Wald test with ',ncpu)),' cores.')
-  cl = parallel::makeCluster(ncpu)
+#   mt_gene = grep(pattern = "MT-",rownames(sce),value = F)
+#   rp_gene = grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA",rownames(sce),value = F)
+#   sce = sce[-c(mt_gene,rp_gene),]
 
-  ### Register environment
+#   ### Register CPU cores
+#   ncpu = min(ncpu,parallel::detectCores())
+#   message('\n',paste0(paste0('Select genes using Gam-Wald test with ',ncpu)),' cores.')
+#   cl = parallel::makeCluster(ncpu)
+
+#   ### Register environment
+#   eligibleGene = names(which((Matrix::rowSums(sign(sce@assays$RNA@counts)) / ncol(sce)) > 0.1))
+#   sce = sce[eligibleGene,]
+#   exprsData = GetAssayData(object = sce, slot = "data",assay = sce@active.assay)
+#   space = sce$cell_trajectory
+#   parallel::clusterExport(cl=cl, varlist=c("exprsData","space","k"),envir=environment())
+#   doSNOW::registerDoSNOW(cl)
+
+#   ### Show the process
+#   pb = utils::txtProgressBar(min = 1, max = nrow(exprsData), style = 3)
+#   progress = function(n) setTxtProgressBar(pb, n)
+#   opts = list(progress = progress)
+#   `%dopar2%` = foreach::`%dopar%`
+
+#   ### Compute gene association strength (gam-wald Test)
+#   geneId = NULL
+#   Chi = foreach::foreach(geneId = 1:nrow(exprsData), .options.snow = opts) %dopar2% {
+#     gam_mod = mgcv::gam(exprsData[geneId,] ~ 1+s(space,k=k,bs='cr',fx=FALSE),
+#                         family = family,method='GCV.Cp')
+#     mgcv::anova.gam(gam_mod)$chi.sq
+#   }
+#   parallel::stopCluster(cl)
+#   Chi  = unlist(Chi)
+
+
+#   ### Compute FDR p-values
+#   P_adj = p.adjust(pchisq(Chi,df=1,lower.tail = F))
+#   names(P_adj) = names(Chi) = rownames(sce)
+
+#   ### Compute the mean expression of cell-state bin
+#   expMean = Seurat::AverageExpression(sce,slot = 'counts',assays = 'RNA')[[1]]
+#   maxBin = colnames(expMean)[apply(expMean,1,which.max)]
+#   maxValue = apply(expMean,1,max)
+#   Info = data.frame('bin' = maxBin,'chi' = Chi,'p_val_adj' = P_adj,'avg_exp'=maxValue)
+#   Info = Info[Info$p_val_adj < 0.01,]
+
+#   ### Select genes for each cell state bin
+#   GeneNumberBin = round(geneNumber/length(unique(cellStateBin)))
+#   mk = sapply(unique(cellStateBin),function(focalBin){
+#     Info_focal = Info[Info$bin==focalBin,]
+#     Info_focal = Info_focal[order(Info_focal$chi,decreasing = T),]
+#     mk_focal = rownames(Info_focal)[1:GeneNumberBin]
+#     list(mk_focal)
+#   })
+
+#   return(mk)
+# }
+
+#' @keywords internal
+#' Select marker genes using gam
+MK_gam <- function(sce,cellStateBin,family,k,geneNumber){
+
+  mt_gene = grep(pattern = "MT-",rownames(sce),value = F)
+  rp_gene = grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA",rownames(sce),value = F)
+  sce = sce[-c(mt_gene,rp_gene),]
+
+  message('\n',paste0('Select genes using Gam-Wald test with ',paste0(family,' distribution.')))
+
+  ### Run tradeSeq
   eligibleGene = names(which((Matrix::rowSums(sign(sce@assays$RNA@counts)) / ncol(sce)) > 0.1))
   sce = sce[eligibleGene,]
   exprsData = GetAssayData(object = sce, slot = "data",assay = sce@active.assay)
   space = sce$cell_trajectory
-  parallel::clusterExport(cl=cl, varlist=c("exprsData","space","k"),envir=environment())
-  doSNOW::registerDoSNOW(cl)
+  tradeSeq_obj = tradeSeq::fitGAM(counts = exprsData, pseudotime = space, cellWeights = (space-space+1),
+                nknots = k, verbose = TRUE,family = family)
 
-  ### Show the process
-  pb = utils::txtProgressBar(min = 1, max = nrow(exprsData), style = 3)
-  progress = function(n) setTxtProgressBar(pb, n)
-  opts = list(progress = progress)
-  `%dopar2%` = foreach::`%dopar%`
+  Stat = tradeSeq::associationTest(tradeSeq_obj)
+  Chi = Stat[,'waldStat']
 
-  ### Compute gene association strength (gam-wald Test)
-  geneId = NULL
-  Chi = foreach::foreach(geneId = 1:nrow(exprsData), .options.snow = opts) %dopar2% {
-    gam_mod = mgcv::gam(exprsData[geneId,] ~ 1+s(space,k=k,bs='cr',fx=FALSE),
-                        family = family,method='GCV.Cp')
-    mgcv::anova.gam(gam_mod)$chi.sq
-  }
-  parallel::stopCluster(cl)
-  Chi  = unlist(Chi)
 
   ### Compute FDR p-values
-  P_adj = p.adjust(pchisq(Chi,df=1,lower.tail = F))
-  names(P_adj) = names(Chi) = rownames(sce)
+  P_adj = p.adjust(Stat[,'pvalue'])
+  names(P_adj) = names(Chi) = rownames(Stat)
 
   ### Compute the mean expression of cell-state bin
   expMean = Seurat::AverageExpression(sce,slot = 'counts',assays = 'RNA')[[1]]
@@ -172,6 +227,7 @@ MK_gam <- function(sce,cellStateBin,ncpu,family,k,geneNumber){
   maxValue = apply(expMean,1,max)
   Info = data.frame('bin' = maxBin,'chi' = Chi,'p_val_adj' = P_adj,'avg_exp'=maxValue)
   Info = Info[Info$p_val_adj < 0.01,]
+  Info = Info[!is.na(Info$chi),]
 
   ### Select genes for each cell state bin
   GeneNumberBin = round(geneNumber/length(unique(cellStateBin)))
@@ -184,6 +240,7 @@ MK_gam <- function(sce,cellStateBin,ncpu,family,k,geneNumber){
 
   return(mk)
 }
+
 
 #' @keywords internal
 #' Check gene coverage

@@ -14,7 +14,7 @@ description: ~
 ```r
 install.packages("devtools")
 install.packages("Seurat")
-BiocManager::install("tradeSeq")
+BiocManager::install("BiocParallel")
 ```
 
 #### 2. Installing `MeDuSA`

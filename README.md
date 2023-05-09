@@ -10,10 +10,10 @@
 # Please install the Seurat. (https://satijalab.org/seurat/)
 install.packages("Seurat")
 
-# Please install the tradeSeq. (https://github.com/statOmics/tradeSeq)
+# Please install the BiocParallel.
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-BiocManager::install("tradeSeq")
+BiocManager::install("BiocParallel")
 
 # Install the MeDuSA (R version > 3.5.0)
 if (!requireNamespace("devtools", quietly = TRUE))

@@ -11,7 +11,7 @@
 ### The Wilcoxon test is performed for each gene, and genes with significant differential expression are identified as marker genes for that particular bin.
 ### By applying the Wilcoxon test to each bin along the cell-state trajectory, MeduSA can identify marker genes that are specific to each stage of the trajectory.
 ### ----------------------------------------------------------------------------------------------------------------------
-### The second one is the gam-wald test: 
+### The second one is the gam-wald (tradeSeq) test: 
 ### MeduSA associates genes along the cell-state trajectory using the generalized additive model (gam). 
 ### Only genes with a false discovery rate (FDR) adjusted p-value less than 0.01 are considered. 
 ### These significant genes are then ranked based on their association strength, which allows for the identification of the most relevant genes that are associated with the cell-state trajectory.
@@ -65,10 +65,6 @@ Partition_cell_trajectory <- function(XY,nbins){
 #' @keywords internal
 #' Select marker genes using wilcox
 MK_wilcox <- function(sce,cellStateBin,ncpu,geneNumber){
-
-  mt_gene = grep(pattern = "MT-",rownames(sce),value = F)
-  rp_gene = grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA",rownames(sce),value = F)
-  sce = sce[-c(mt_gene,rp_gene),]
 
   ### To get a robust result, we agrregate the cell-state bins with cell number <= 20
   smallBin = names(which(table(cellStateBin) <= 20))
@@ -142,10 +138,6 @@ MK_wilcox <- function(sce,cellStateBin,ncpu,geneNumber){
 #' Select marker genes using gam
 MK_gam <- function(sce,cellStateBin,ncpu,family,k,geneNumber){
 
-  mt_gene = grep(pattern = "MT-",rownames(sce),value = F)
-  rp_gene = grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA",rownames(sce),value = F)
-  sce = sce[-c(mt_gene,rp_gene),]
-
   ### Register CPU cores
   ncpu = min(ncpu,parallel::detectCores())
   message('\n',paste0(paste0('Select genes using Gam-Wald test with ',ncpu)),' cores.')
@@ -203,11 +195,6 @@ MK_gam <- function(sce,cellStateBin,ncpu,family,k,geneNumber){
 #' @keywords internal
 #' Select marker genes using tradeSeq
 MK_tradeSeq <- function (sce, cellStateBin, family, k, geneNumber) {
-  mt_gene = grep(pattern = "MT-", rownames(sce), value = F)
-  rp_gene = grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA", rownames(sce), value = F)
-  sce = sce[-c(mt_gene, rp_gene), ]
-
-
   message("\n", paste0("Select genes using tradeSeq with ", paste0(family, " distribution.")))
   eligibleGene = names(which((Matrix::rowSums(sign(sce@assays$RNA@counts))/ncol(sce)) > 0.1))
   sce = sce[eligibleGene, ]

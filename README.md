@@ -10,10 +10,10 @@
 # Please install the Seurat. (https://satijalab.org/seurat/)
 install.packages("Seurat")
 
-# Please install the BiocParallel. (https://bioconductor.org/packages/release/bioc/html/BiocParallel.html)
+# Please install the tradeSeq. ([https://bioconductor.org/packages/release/bioc/html/BiocParallel.html](https://github.com/statOmics/tradeSeq))
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-BiocManager::install("BiocParallel")
+BiocManager::install("tradeSeq")
 
 # Install the MeDuSA (R version > 3.5.0)
 if (!requireNamespace("devtools", quietly = TRUE))

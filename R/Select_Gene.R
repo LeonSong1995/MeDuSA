@@ -204,7 +204,6 @@ MK_tradeSeq <- function (sce, cellStateBin, family, k, geneNumber) {
   ###Run tradeSeq
   tradeSeq_obj = tradeSeq::fitGAM(counts = exprsData, pseudotime = space, cellWeights = (space - space + 1), nknots = k, verbose = TRUE, family = family)
   Stat = tradeSeq::associationTest(tradeSeq_obj)
-  Stat = Stat[!is.na(Info$chi), ]
 
   ### Compute the mean expression of cell-state bin
   Chi = Stat[, "waldStat"]

@@ -148,7 +148,7 @@ MK_gam <- function(sce,cellStateBin,ncpu,family,k,geneNumber){
   sce = sce[eligibleGene,]
   exprsData = GetAssayData(object = sce, slot = "data",assay = sce@active.assay)
   space = sce$cell_trajectory
-  parallel::clusterExport(cl=cl, varlist=c("exprsData","space","k","libSize"),envir=environment())
+  parallel::clusterExport(cl=cl, varlist=c("exprsData","space","k"),envir=environment())
   doSNOW::registerDoSNOW(cl)
 
   ### Show the process

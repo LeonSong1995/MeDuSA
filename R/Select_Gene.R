@@ -11,7 +11,7 @@
 ### The Wilcoxon test is performed for each gene, and genes with significant differential expression are identified as marker genes for that particular bin.
 ### By applying the Wilcoxon test to each bin along the cell-state trajectory, MeduSA can identify marker genes that are specific to each stage of the trajectory.
 ### ----------------------------------------------------------------------------------------------------------------------
-### The second one is the gam-wald (tradeSeq) test: 
+### The second one is the gam-wald test: 
 ### MeduSA associates genes along the cell-state trajectory using the generalized additive model (gam). 
 ### Only genes with a false discovery rate (FDR) adjusted p-value less than 0.01 are considered. 
 ### These significant genes are then ranked based on their association strength, which allows for the identification of the most relevant genes that are associated with the cell-state trajectory.
@@ -146,8 +146,7 @@ MK_gam <- function(sce,cellStateBin,ncpu,family,k,geneNumber){
   ### Register environment
   eligibleGene = names(which((Matrix::rowSums(sign(sce@assays$RNA@counts)) / ncol(sce)) > 0.1))
   sce = sce[eligibleGene,]
-  exprsData = GetAssayData(object = sce, slot = "counts",assay = sce@active.assay)
-  libSize = log10(colSums(exprsData)+1)
+  exprsData = GetAssayData(object = sce, slot = "data",assay = sce@active.assay)
   space = sce$cell_trajectory
   parallel::clusterExport(cl=cl, varlist=c("exprsData","space","k","libSize"),envir=environment())
   doSNOW::registerDoSNOW(cl)
@@ -162,7 +161,7 @@ MK_gam <- function(sce,cellStateBin,ncpu,family,k,geneNumber){
   geneId = NULL
   Chi = foreach::foreach(geneId = 1:nrow(exprsData), .options.snow = opts) %dopar2% {
     gam_mod = mgcv::gam(exprsData[geneId,] ~ 1+s(space,k=k,bs='cr',fx=FALSE),
-                        family = family,method='GCV.Cp',offset=offset(libSize))
+                        family = family,method='GCV.Cp')
     mgcv::anova.gam(gam_mod)$chi.sq
   }
   parallel::stopCluster(cl)
@@ -195,26 +194,28 @@ MK_gam <- function(sce,cellStateBin,ncpu,family,k,geneNumber){
 #' @keywords internal
 #' Select marker genes using tradeSeq
 MK_tradeSeq <- function (sce, cellStateBin, family, k, geneNumber) {
+
   message("\n", paste0("Select genes using tradeSeq with ", paste0(family, " distribution.")))
   eligibleGene = names(which((Matrix::rowSums(sign(sce@assays$RNA@counts))/ncol(sce)) > 0.1))
   sce = sce[eligibleGene, ]
-  exprsData = GetAssayData(object = sce, slot = "data", assay = sce@active.assay)
+  exprsData = GetAssayData(object = sce, slot = "counts", assay = sce@active.assay)
   space = sce$cell_trajectory
 
   ###Run tradeSeq
   tradeSeq_obj = tradeSeq::fitGAM(counts = exprsData, pseudotime = space, cellWeights = (space - space + 1), nknots = k, verbose = TRUE, family = family)
   Stat = tradeSeq::associationTest(tradeSeq_obj)
+  Stat = Stat[!is.na(Info$chi), ]
 
   ### Compute the mean expression of cell-state bin
   Chi = Stat[, "waldStat"]
   P_adj = p.adjust(Stat[, "pvalue"])
   names(P_adj) = names(Chi) = rownames(Stat)
-  expMean = Seurat::AverageExpression(sce, slot = "counts", assays = "RNA")[[1]]
+  expMean = Seurat::AverageExpression(sce[rownames(Stat),], slot = "counts", assays = "RNA")[[1]]
   maxBin = colnames(expMean)[apply(expMean, 1, which.max)]
   maxValue = apply(expMean, 1, max)
   Info = data.frame(bin = maxBin, chi = Chi, p_val_adj = P_adj, avg_exp = maxValue)
   Info = Info[Info$p_val_adj < 0.01, ]
-  Info = Info[!is.na(Info$chi), ]
+
 
   ### Select genes for each cell state bin
   GeneNumberBin = round(geneNumber/length(unique(cellStateBin)))

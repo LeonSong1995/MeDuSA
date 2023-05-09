@@ -44,6 +44,10 @@ MeDuSA_marker <- function(sce,bulk,geneNumber,nbins,family,k,ncpu,method){
     mk_list = MK_gam(sce[commonGene,],cellStateBin,ncpu=ncpu,family=family,k=k, geneNumber=geneNumber)
   }
 
+  if (method=='tradeSeq'){
+    mk_list = MK_tradeSeq(sce[commonGene,],cellStateBin,family=family,k=k, geneNumber=geneNumber)
+  }
+
   #3)---Along the cell trajectory, check the coverage of marker genes
   markerGene = MK_balance(sce,bulk,mk_list)
 
@@ -150,9 +154,10 @@ MK_gam <- function(sce,cellStateBin,ncpu,family,k,geneNumber){
   ### Register environment
   eligibleGene = names(which((Matrix::rowSums(sign(sce@assays$RNA@counts)) / ncol(sce)) > 0.1))
   sce = sce[eligibleGene,]
-  exprsData = GetAssayData(object = sce, slot = "data",assay = sce@active.assay)
+  exprsData = GetAssayData(object = sce, slot = "counts",assay = sce@active.assay)
+  libSize = log10(colSums(exprsData)+1)
   space = sce$cell_trajectory
-  parallel::clusterExport(cl=cl, varlist=c("exprsData","space","k"),envir=environment())
+  parallel::clusterExport(cl=cl, varlist=c("exprsData","space","k","libSize"),envir=environment())
   doSNOW::registerDoSNOW(cl)
 
   ### Show the process
@@ -165,7 +170,7 @@ MK_gam <- function(sce,cellStateBin,ncpu,family,k,geneNumber){
   geneId = NULL
   Chi = foreach::foreach(geneId = 1:nrow(exprsData), .options.snow = opts) %dopar2% {
     gam_mod = mgcv::gam(exprsData[geneId,] ~ 1+s(space,k=k,bs='cr',fx=FALSE),
-                        family = family,method='GCV.Cp')
+                        family = family,method='GCV.Cp',offset=offset(libSize))
     mgcv::anova.gam(gam_mod)$chi.sq
   }
   parallel::stopCluster(cl)
@@ -191,6 +196,48 @@ MK_gam <- function(sce,cellStateBin,ncpu,family,k,geneNumber){
     list(mk_focal)
   })
 
+  return(mk)
+}
+
+
+#' @keywords internal
+#' Select marker genes using tradeSeq
+MK_tradeSeq <- function (sce, cellStateBin, family, k, geneNumber) {
+  mt_gene = grep(pattern = "MT-", rownames(sce), value = F)
+  rp_gene = grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA", rownames(sce), value = F)
+  sce = sce[-c(mt_gene, rp_gene), ]
+
+
+  message("\n", paste0("Select genes using tradeSeq with ", paste0(family, " distribution.")))
+  eligibleGene = names(which((Matrix::rowSums(sign(sce@assays$RNA@counts))/ncol(sce)) > 0.1))
+  sce = sce[eligibleGene, ]
+  exprsData = GetAssayData(object = sce, slot = "data", assay = sce@active.assay)
+  space = sce$cell_trajectory
+
+  ###Run tradeSeq
+  tradeSeq_obj = tradeSeq::fitGAM(counts = exprsData, pseudotime = space, cellWeights = (space - space + 1), nknots = k, verbose = TRUE, family = family)
+  Stat = tradeSeq::associationTest(tradeSeq_obj)
+
+  ### Compute the mean expression of cell-state bin
+  Chi = Stat[, "waldStat"]
+  P_adj = p.adjust(Stat[, "pvalue"])
+  names(P_adj) = names(Chi) = rownames(Stat)
+  expMean = Seurat::AverageExpression(sce, slot = "counts", assays = "RNA")[[1]]
+  maxBin = colnames(expMean)[apply(expMean, 1, which.max)]
+  maxValue = apply(expMean, 1, max)
+  Info = data.frame(bin = maxBin, chi = Chi, p_val_adj = P_adj, avg_exp = maxValue)
+  Info = Info[Info$p_val_adj < 0.01, ]
+  Info = Info[!is.na(Info$chi), ]
+
+  ### Select genes for each cell state bin
+  GeneNumberBin = round(geneNumber/length(unique(cellStateBin)))
+  mk = sapply(unique(cellStateBin), function(focalBin) {
+      Info_focal = Info[Info$bin == focalBin, ]
+      Info_focal = Info_focal[order(Info_focal$chi, decreasing = T), 
+          ]
+      mk_focal = rownames(Info_focal)[1:GeneNumberBin]
+      list(mk_focal)
+  })
   return(mk)
 }
 

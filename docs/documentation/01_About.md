@@ -25,8 +25,8 @@ Parameters of `MeDuSA`
 - `ncpu`: The number of CPU cores to be used.
 - `smooth`: A Boolean variable to determine whether to smooth the estimated cell-state abundance or not. The default value is TRUE.
 - `smoothMethod`: A character variable to determine the smoothing method. The default method is loess.
-- `nbins`: A numeric variable to determine the number of bins along the cell trajectory, which is used to ensure the selected genes are uniformly scattered along the given trajectory. The default value is 10.
-- `resolution`: A numeric variable to determine the number of cell bins along the cell trajectory (i.e., the resolution of the deconvolution analysis). The default value is 50.
+- `nbins`: A numeric variable to determine the number of intervals along the cell trajectory, which is used to ensure the selected genes are uniformly scattered along the given trajectory. The default value is 10.
+- `resolution`: A numeric variable to determine the number of cell states along the cell trajectory (i.e., the resolution of the deconvolution analysis). The default value is 50.
 - `knots`: A numeric variable to specify the number of knots. The default value is 10.
 - `start`: A numeric vector for the initial value of the restricted maximum likelihood (REML). The default value is c(1e-5,1e-2).
 - `family`: A character variable to specify the distribution of GAM.

@@ -5,7 +5,7 @@ title: About
 
 Cite `MeDuSA`
 -------------------
-Song L.Y., Sun X.W., Qi T., Yang J.(2022)MeDuSA: mixed model-based deconvolution of cell-state abundances along a one-dimensional trajectory.(Under review)
+Song L.Y., Sun X.W., Qi T., Yang J.(2023), Mixed model-based deconvolution of cell-state abundances (MeDuSA) along a one-dimensional trajectory. Nature Computational Science (In Press)
 
 Contact
 -------------------

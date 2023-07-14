@@ -88,6 +88,8 @@ MeDuSA provides users with the option to input their own cultivated marker genes
 
 Users can specify the `method` in the `MeDuSA` function as either `wilcox` or `gam` to use these two methods. Alternatively, users can select the marker genes using the `MeDuSA_marker` function before running the deconvolution analysis. 
 
+Note that if your reference scRNA-seq data was collected from multiple batches, we recommend using the 'pseudo-bulk' method, adjusting for the batches as covariates, to identify marker genes. In this scenario, the pseudo-bulk method can enhance the robustness of the marker genes.
+
 ```r
 # Set the gene selection method in MeDuSA function 
 library(MeDuSA)

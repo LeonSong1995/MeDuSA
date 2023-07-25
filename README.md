@@ -25,5 +25,13 @@ devtools::install_github("LeonSong1995/MeDuSA", build_vignettes=F)
 ## How to Use
 See [tutorial.](https://leonsong1995.github.io/MeDuSA/)
 
+
 ## Contact
 If you have any questions for MeDuSA, please feel free to leave messages on the github issues or contact me <songliyang@westlake.edu.cn>.   
+
+
+## Citation
+Song, L., Sun, X., Qi, T. et al. Mixed model-based deconvolution of cell-state abundances (MeDuSA) along a one-dimensional trajectory. Nat Comput Sci (2023). https://doi.org/10.1038/s43588-023-00487-2
+
+
+

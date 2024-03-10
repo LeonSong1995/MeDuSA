@@ -21,6 +21,10 @@ if (!requireNamespace("devtools", quietly = TRUE))
 devtools::install_github("LeonSong1995/MeDuSA", build_vignettes=F)
 ```
 
+## Extension
+MeDuSA now also supports cell-state deconvolution for annotated cell states (cell types). Please check the link below: 
+https://github.com/LeonSong1995/MeDuSAJ. 
+Tutorial on how to use MeDuSAJ will be available later.
 
 ## How to Use
 See [tutorial.](https://leonsong1995.github.io/MeDuSA/)

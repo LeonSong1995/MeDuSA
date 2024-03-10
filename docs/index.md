@@ -18,3 +18,8 @@ MeDuSA is a cellular deconvolution method that utilizes scRNA-seq data as a refe
 * [hPSCs](https://leonsong1995.github.io/MeDuSA/documentation/05_hPSC_Example.html)
 * [monocytes](https://leonsong1995.github.io/MeDuSA/documentation/04_Mon_Example.html)
 
+### Extension
+MeDuSA now also supports cell-state deconvolution for annotated cell states (cell types). Please check the link below: 
+https://github.com/LeonSong1995/MeDuSAJ. 
+Tutorial on how to use MeDuSAJ will be available later.
+

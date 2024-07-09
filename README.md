@@ -7,8 +7,7 @@
 
 
 ## New version
-MeDuSA now also supports cell-state deconvolution for annotated `cell states (cell types)`. Please check the link below: 
-https://github.com/LeonSong1995/MeDuSAJ. 
+MeDuSA now also supports cell-state deconvolution for annotated `cell states (cell types)`. Please check the [MeDuSAJ](https://github.com/LeonSong1995/MeDuSAJ). 
 MeDuSAJ is more robust for estimating cell state (cell type) abundance for rare cells, albeit with a slightly increased computational burden. Tutorials can be found in the [README](https://github.com/LeonSong1995/MeDuSAJ) of MeDuSAJ.
 
 

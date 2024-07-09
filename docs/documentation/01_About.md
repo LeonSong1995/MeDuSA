@@ -3,9 +3,15 @@ layout: page
 title: About
 ---
 
+New version
+-------------------
+MeDuSA now also supports cell-state deconvolution for annotated cell states (cell types). Please check the [MeDuSAJ](https://github.com/LeonSong1995/MeDuSAJ). 
+
+
 Cite `MeDuSA`
 -------------------
 Song, L., Sun, X., Qi, T. et al. Mixed model-based deconvolution of cell-state abundances (MeDuSA) along a one-dimensional trajectory. Nat Comput Sci (2023). https://doi.org/10.1038/s43588-023-00487-2
+
 
 Contact
 -------------------
